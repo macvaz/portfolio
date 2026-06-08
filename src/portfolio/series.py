@@ -48,6 +48,8 @@ def download_series(api_key: str, fred_series: list, start_date="1998-01-01", en
     df.ffill(inplace=True)
     df.bfill(inplace=True) # Backward fill in case a series started slightly later
 
+    df["SP500"] = sp500
+
     return df
 
     
