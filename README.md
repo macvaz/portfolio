@@ -1,24 +1,74 @@
 # Portfolio
 
-A small Python library to download and process time series (fund prices) from Morningstar and other data sources.
+A small Python library to download and process time series (fund prices) from Morningstar and macroeconomic data from FRED, compute portfolio returns, and generate performance reports.
 
-**Project layout**
-- **src/portfolio/**: package source
-  - [src/portfolio/download.py](src/portfolio/download.py): helper to download Morningstar time series and parse into a `pandas.DataFrame`.
-  - [src/portfolio/series.py](src/portfolio/series.py): FRED download helpers and series composition.
-  - [src/portfolio/signals.py](src/portfolio/signals.py): signal calculations.
-- **tests/**: unit tests (run with `pytest`).
-- **pyproject.toml**: project metadata and dependencies.
+## Project structure
 
-**Technologies**
+```
+portfolio/
+├── run.py                          # Main entry point
+├── pyproject.toml
+├── uv.lock
+├── data/
+│   └── isin_mapping.json           # Cached ISIN → Morningstar fund ID mappings
+├── src/portfolio/
+│   ├── __init__.py                 # Package exports and process_macro_data()
+│   ├── analysis.py                 # QuantStats HTML performance reports
+│   ├── download.py                 # Morningstar price downloads
+│   ├── funds.py                    # ISIN lookup via Morningstar (Playwright)
+│   ├── isin_mapping.py             # Load/save ISIN mapping file
+│   ├── returns.py                  # Buy-and-hold portfolio return calculation
+│   ├── series.py                   # FRED series download
+│   └── signals.py                  # Macro and market signal calculations
+└── tests/
+    ├── test_isin_mapping.py
+    └── test_portfolio.py
+```
+
+## `run.py`
+
+`run.py` is the main script. It wires together macro analysis, fund price downloads, portfolio return calculation, and report generation.
+
+**Configuration** (inside `if __name__ == "__main__"`):
+
+- `fred_series` — FRED series to download, as `(series_id, column_name)` tuples
+- `portfolio` — dict of `{ISIN: weight}`; weights must sum to 1.0
+- `start_date` — start of the analysis window (e.g. `"2025-01-01"`)
+- `end_date` — end of the window; defaults to today's date
+
+**What `run()` does:**
+
+1. **Macro signals** — Downloads FRED data, computes macro and market signals, and prints the latest values via `print_signals()`.
+2. **Portfolio NAVs** — For each ISIN in `portfolio`, resolves the Morningstar fund ID (using `data/isin_mapping.json` when cached), downloads daily prices in EUR, and builds a DataFrame of NAVs indexed by date.
+3. **Returns** — Computes buy-and-hold portfolio evolution (no rebalancing) with `calculate_buy_and_hold_returns()`.
+4. **Report** — Generates an HTML performance report (`portfolio_performance.html`) benchmarked against SPY using QuantStats.
+
+**Environment**
+
+Create a `.env` file in the project root with your FRED API key:
+
+```
+FRED_API_KEY=your_key_here
+```
+
+**Run**
+
+```bash
+uv run run.py
+```
+
+## Technologies
+
 - Python 3.12+
 - pandas — dataframes and date handling
-- requests — HTTP client
-- fredapi — FRED API client (for macroeconomic series)
-- playwright — browser automation for invoking MorningStar public API calls skipping bot detection mechanicisms.
+- requests — HTTP client for Morningstar price API
+- fredapi — FRED API client (macroeconomic series)
+- playwright — browser automation for Morningstar ISIN search
+- quantstats — HTML performance reports
 
-**Install**
-Create and activate a virtualenv, then install the project (this will install dependencies from `pyproject.toml`):
+## Install
+
+Create and activate a virtualenv, then install the project:
 
 ```bash
 python -m venv .venv
@@ -26,27 +76,14 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-**Run examples with `uv`**
-This repository uses a simple runner that you can invoke with the `uv` command (as used in this workspace). Example:
+Or with `uv`:
 
 ```bash
-# run the download example (prints a DataFrame)
-uv run src/portfolio/download.py
-
-# run the main runner
-uv run src/portfolio/run.py
+uv sync
 ```
 
-`download.py` contains `download_price_data()` which is called when executed as `__main__`.
-
-**Tests**
-Run unit tests with:
+## Tests
 
 ```bash
-pytest -q
+uv run --extra dev pytest -q
 ```
-
-**Notes**
-- The Morningstar timeseries endpoint expects the fund `id` parameter to include a suffix (kept in this code as `ID_SUFFIX` in `src/portfolio/download.py`) — omitting it returns an empty result. The code documents this behavior.
-
-If you want, I can add a short example script showing how to call `download_price_data()` programmatically and save results to CSV.
