@@ -87,7 +87,7 @@ class PortfolioPositionResponse(BaseModel):
 
 class ReportRequest(BaseModel):
     positions: list[PortfolioPosition]
-    start_date: str = "2025-01-01"
+    start_date: str = "2000-01-01"
     end_date: str | None = None
     benchmark: str = "SPY"
 

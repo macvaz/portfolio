@@ -63,11 +63,10 @@ Create a `.env` file in the project root with your FRED API key:
 FRED_API_KEY=your_key_here
 ```
 
-**Run**
+**Run jobs**
 
 ```bash
-uv run run.py
-uv run portfolio-api #for running the api
+uv run get-data.py
 ```
 
 ## API and web UI
@@ -77,7 +76,7 @@ Fund ISINs are stored in `data/portfolio.db` (SQLite).
 **Start the server:**
 
 ```bash
-uv run portfolio-api
+uv run api
 ```
 
 Open http://localhost:8000 to register, log in, manage funds, save your portfolio, and generate QuantStats HTML reports.
