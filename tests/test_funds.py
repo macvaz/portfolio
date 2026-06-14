@@ -1,5 +1,5 @@
 from portfolio.api.database import get_fund, init_db, list_funds, save_fund
-from portfolio.funds import resolve_fund_by_isin
+from portfolio.finance.funds import resolve_fund_by_isin
 
 
 def test_list_funds_empty_when_db_empty(tmp_path):
@@ -33,7 +33,7 @@ def test_resolve_fund_by_isin_uses_cached_fund(tmp_path, monkeypatch):
     def fail_search(_isin):
         raise AssertionError("Morningstar search should not be called for cached ISIN")
 
-    monkeypatch.setattr("portfolio.funds.search_by_isin", fail_search)
+    monkeypatch.setattr("portfolio.finance.funds.search_by_isin", fail_search)
 
     fund = resolve_fund_by_isin("ES0182527038", db_path=db_path)
 
@@ -54,7 +54,7 @@ def test_resolve_fund_by_isin_fetches_and_persists_new_isin(tmp_path, monkeypatc
             "isin": isin,
         }
 
-    monkeypatch.setattr("portfolio.funds.search_by_isin", mock_search)
+    monkeypatch.setattr("portfolio.finance.funds.search_by_isin", mock_search)
 
     fund = resolve_fund_by_isin("IE00BYX5NX33", db_path=db_path)
 
