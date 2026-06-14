@@ -3,6 +3,8 @@ import json
 import pandas as pd
 import requests
 
+from portfolio.funds import resolve_fund_by_isin
+
 BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon"
 MS_SERIES_SUFFIX = "]2]1]"
 
@@ -46,7 +48,7 @@ def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def download_price_data(fund_id: str, currency: str, start: str, end: str, timeout: int = 30) -> pd.DataFrame:
+def download_fund_navs(fund_id: str, currency: str, start: str, end: str, timeout: int = 30) -> pd.DataFrame:
     """Download Morningstar time series data and parse it into a pandas DataFrame."""
     params = _compute_params(fund_id, currency, start, end)
 
@@ -73,3 +75,25 @@ def download_price_data(fund_id: str, currency: str, start: str, end: str, timeo
 
     df = pd.json_normalize(records)
     return _normalize_dataframe(df)
+
+
+def download_portfolio_navs(
+    portfolio: dict[str, float],
+    start: str,
+    end: str,
+    currency: str = "EUR",
+) -> pd.DataFrame:
+    """Download NAV series for each ISIN in a portfolio."""
+    navs_df = pd.DataFrame()
+    for isin, weight in portfolio.items():
+        fund = resolve_fund_by_isin(isin)
+        if fund is None:
+            print(f"No fund found for ISIN: {isin}")
+            continue
+        fund_data = download_fund_navs(fund["security_id"], currency, start, end)
+        if fund_data.empty:
+            print(f"No price data for ISIN: {isin}")
+            continue
+        navs_df[isin] = fund_data["value"]
+        print(f"{isin} ({weight:.0%}): {fund['name']}")
+    return navs_df

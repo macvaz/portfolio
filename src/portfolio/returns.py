@@ -2,26 +2,27 @@ import numpy as np
 import pandas as pd
 
 
-def calculate_buy_and_hold_returns(
-    returns_df: pd.DataFrame, initial_weights: list
-) -> pd.DataFrame:
-    """Calculates the evolution of a portfolio based on an initial 1-unit investment
+def calculate_buy_and_hold_returns(navs_df: pd.DataFrame, portfolio: dict[str, float]) -> pd.DataFrame:
+    """Calculate buy-and-hold portfolio evolution from asset NAVs.
 
-    using a Buy and Hold strategy (no rebalancing).
+    Converts price series to returns, applies initial weights without rebalancing,
+    and returns the total portfolio value indexed to base 1.
 
     Parameters:
-    returns_df (pd.DataFrame): DataFrame where columns are assets and rows are
-    time periods
-                               containing assets' returns (e.g., 0.05 for 5%).
-    initial_weights (list): List or array of initial weights for each asset.
-                            Must sum up to 1.0.
+    navs_df (pd.DataFrame): Asset NAVs or prices indexed by date. Columns are
+                            asset identifiers (e.g. ISINs).
+    portfolio (dict[str, float]): Mapping of asset identifier to initial weight.
+                                  Weights must sum to 1.0 and match navs_df columns.
 
     Returns:
-    pd.DataFrame: A DataFrame containing the individual asset evolutions,
-                  and the final total portfolio value indexed to base 1.
+    pd.DataFrame: Single-column DataFrame with ``portfolio_base_1`` indexed to 1.0
+                  at the start of the period.
     """
-    # Convert weights to a numpy array for vector operations
-    weights = np.array(initial_weights)
+
+    navs_df = navs_df.dropna()
+    returns_df = navs_df.pct_change().dropna()
+    weights = [portfolio[isin] for isin in returns_df.columns]
+    weights = np.array(weights)
 
     # Step 1: Calculate the cumulative return (Base 1) for each individual asset
     # (1 + R).cumprod()

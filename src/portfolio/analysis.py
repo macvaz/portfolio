@@ -1,5 +1,9 @@
+import logging
+
 import pandas as pd
 import quantstats as qs
+
+logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
 def generate_performance_report(df: pd.DataFrame, benchmark: str = "SPY", output_file: str = "report.html"):
     """

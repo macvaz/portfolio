@@ -1,10 +1,9 @@
 from portfolio import process_macro_data, print_signals
-from portfolio.funds import resolve_fund_by_isin
-from portfolio.download import download_price_data
+from portfolio.download import download_portfolio_navs
 from portfolio.returns import calculate_buy_and_hold_returns
+from portfolio.analysis import generate_performance_report
 
 import os
-import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +17,7 @@ FRED_SERIES = [
     ("T10Y3M", "Yield_Spread_10Y3M"),
 ]
 
-PORTFOLIO_ISINS = {
+PORTFOLIO = {
     "ES0182527038": 0.20,
     "IE00BYX5NX33": 0.65,
     "IE00BYX5M476": 0.15
@@ -32,23 +31,8 @@ if __name__ == "__main__":
     print_signals(df_macro, END_DATE)
 
     print("\nWorking with the portfolio...")
-    price_series = {}
-    for isin, weight in PORTFOLIO_ISINS.items():
-        fund = resolve_fund_by_isin(isin)
-        if fund is None:
-            print(f"No fund found for ISIN: {isin}")
-            continue
-        fund_data = download_price_data(fund["security_id"], "EUR", START_DATE, END_DATE)
-        if fund_data.empty:
-            print(f"No price data for ISIN: {isin}")
-            continue
-        price_series[isin] = fund_data["value"]
-        print(f"{isin} ({weight:.0%}): {fund['name']}")
+    navs_df = download_portfolio_navs(PORTFOLIO, START_DATE, END_DATE)
 
-    if price_series:
-        prices_df = pd.DataFrame(price_series).dropna()
-        returns_df = prices_df.pct_change().dropna()
-        weights = [PORTFOLIO_ISINS[isin] for isin in returns_df.columns]
-        portfolio = calculate_buy_and_hold_returns(returns_df, weights)
-        print("\nPortfolio evolution (base 1):")
-        print(portfolio)
+    portfolio_df = calculate_buy_and_hold_returns(navs_df, PORTFOLIO)
+    print(portfolio_df)
+    generate_performance_report(portfolio_df, "SPY", "portfolio_performance.html")
