@@ -4,9 +4,6 @@ Morningstar fund search using Playwright.
 This is a server-friendly alternative to the Selenium implementation.
 Playwright automatically downloads and manages browser binaries, making it
 ideal for server environments where Chrome/Chromium is not pre-installed.
-
-Works on: Linux servers, Docker containers, cloud platforms (AWS, GCP, Azure)
-No system-level browser installation required.
 """
 
 import json
@@ -31,7 +28,7 @@ async def search_isin(isin: str) -> Optional[Dict]:
     
     # Build the search URL
     query = f'((isin+~%3D+%22{isin}%22))'
-    url = f"{DOMAIN}/api/v1/es/legacy-search/securities?fields=isin&query={query}&sort=_score"
+    url = f"{DOMAIN}/api/v1/es/legacy-search/securities?fields=isin,name&query={query}&sort=_score"
     
     async with async_playwright() as p:
         print(f"[*] Launching headless browser (Playwright)...")
