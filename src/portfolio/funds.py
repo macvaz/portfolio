@@ -9,8 +9,15 @@ ideal for server environments where Chrome/Chromium is not pre-installed.
 import json
 import re
 import asyncio
+from pathlib import Path
 from typing import Dict, Optional
 from playwright.async_api import async_playwright
+
+from portfolio.isin_mapping import (
+    DEFAULT_MAPPING_PATH,
+    load_isin_mapping,
+    save_isin_mapping,
+)
 
 DOMAIN = "https://global.morningstar.com"
 
@@ -127,4 +134,26 @@ def search_by_isin(isin: str) -> Dict | None:
     security_name = results['fields']['name']['value']
     security_id = results['meta']['securityID']
     return {"security_id": security_id, "name": security_name, "isin": isin}
+
+
+def resolve_fund_by_isin(
+    isin: str, mapping_path: Path = DEFAULT_MAPPING_PATH
+) -> Dict | None:
+    """Return fund metadata for an ISIN, using a local mapping file when available."""
+    mapping = load_isin_mapping(mapping_path)
+    if isin in mapping:
+        entry = mapping[isin]
+        return {
+            "security_id": entry["security_id"],
+            "name": entry.get("name", ""),
+            "isin": isin,
+        }
+
+    fund = search_by_isin(isin)
+    if fund is None:
+        return None
+
+    mapping[isin] = {"security_id": fund["security_id"], "name": fund["name"]}
+    save_isin_mapping(mapping, mapping_path)
+    return fund
 
