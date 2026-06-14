@@ -32,17 +32,14 @@ def download_series(
     if end_date is None:
         end_date = pd.Timestamp.now().strftime("%Y-%m-%d")
 
-    print(f"Connecting to the official FRED API (range {start_date} -> {end_date})...")
     fred = Fred(api_key=api_key)
 
-    print("Downloading time series...")
     macro_series_data = [
         download_fred_data(fred, series_id, column_name, start_date, end_date)
         for series_id, column_name in fred_series
     ]
 
     # 2. Synchronize calendars (We unify everything using S&P 500 trading days)
-    print("Downloading SP500 data...")
     sp500 = download_fred_data(fred, "SP500", "SP500", start_date, end_date)
 
     # Create the master DataFrame indexed with actual market days

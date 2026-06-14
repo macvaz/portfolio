@@ -21,10 +21,8 @@ def calculate_macro_signals(df: pd.DataFrame) -> pd.DataFrame:
     # --- MACRO VOTING MATRIX ---
     # Count how many alerts are triggered concurrently
     df["Macro_Crisis_Votes"] = (
-        df["Alert_Inverted_Curve"].astype(int)
-        + df["Alert_Sahm"].astype(int)
-        + df["Alert_High_Yield"].astype(int)
-        + df["Alert_Financial_Stress"].astype(int)
+        df["Alert_Inverted_Curve"].astype(int) + 
+        df["Alert_Financial_Stress"].astype(int)
     )
 
     # Risk-off Confirmation: Recommends activating defensive bunker if there are 2 or more votes
@@ -62,12 +60,9 @@ def print_signals(df: pd.DataFrame, date: str):
             f"2. Sahm Rule (Employment): {float(row['Sahm_Value']):.2f}% -> {row['Alert_Sahm']}"
         )
         print(
-            f"3. High Yield Spread (Credit): {float(row['High_Yield_Spread']):.2f}% -> {row['Alert_High_Yield']}"
-        )
-        print(
-            f"4. Financial Stress Index: {float(row['Financial_Stress_Index']):.2f} -> {row['Alert_Financial_Stress']}"
+            f"3. Financial Stress Index: {float(row['Financial_Stress_Index']):.2f} -> {row['Alert_Financial_Stress']}"
         )
 
         print("\nMarket signals")
-        print(f"5. SP500 Death Cross: {row['SP500_Death_Cross_Active']}")
-        print(f"6. SP500 Confirmed Death Cross: {row['SP500_Confirmed_Death_Cross']}")
+        print(f"4. SP500 Death Cross: {row['SP500_Death_Cross_Active']}")
+        print(f"5. SP500 Confirmed Death Cross: {row['SP500_Confirmed_Death_Cross']}")

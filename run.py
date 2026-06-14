@@ -21,13 +21,14 @@ def run(
     start_date: str,
     end_date: str,
 ):
+    print("1. Computing macro signals from FRED...")
     df_macro = process_macro_data(FRED_API_KEY, fred_series, start_date, end_date)
     print_signals(df_macro, end_date)
 
-    print("\nWorking with the portfolio...")
+    print("\n2. Computing portfolio returns from MorningStar...")
     navs_df = download_portfolio_navs(portfolio, start_date, end_date)
     portfolio_returns_df = calculate_buy_and_hold_returns(navs_df, portfolio)
-    print("")
+    print("\n3. Calculating portfolio metrics...")
     generate_performance_report(
         portfolio_returns_df, "SPY", "portfolio_performance.html"
     )
@@ -43,4 +44,4 @@ if __name__ == "__main__":
 
     portfolio = {"ES0182527038": 0.20, "IE00BYX5NX33": 0.65, "IE00BYX5M476": 0.15}
 
-    run(fred_series, portfolio, "2025-01-01", date.today().isoformat())
+    run(fred_series, portfolio, "2025-01-02", date.today().isoformat())

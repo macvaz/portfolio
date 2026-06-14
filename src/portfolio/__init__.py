@@ -11,6 +11,7 @@ def process_macro_data(FRED_API_KEY, FRED_SERIES, start_date, end_date) -> pd.Da
     df_series = download_series(
         FRED_API_KEY, FRED_SERIES, start_date=start_date, end_date=end_date
     )
+
     df_macro = calculate_macro_signals(df_series)
     df_final = calculate_market_signals(df_macro)
     return df_final

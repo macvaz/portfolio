@@ -67,6 +67,7 @@ FRED_API_KEY=your_key_here
 
 ```bash
 uv run run.py
+uv run portfolio-api #for running the api
 ```
 
 ## API and web UI
