@@ -367,8 +367,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fredapi" },
-    { name = "pandas" },
+    { name = "fredapi", specifier = ">=0.5.2" },
+    { name = "pandas", specifier = ">=3.0.3" },
     { name = "playwright", specifier = ">=1.60.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0" },
     { name = "python-dotenv" },

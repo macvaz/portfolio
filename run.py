@@ -1,10 +1,15 @@
-from portfolio.series import download_series
-from portfolio.signals import calculate_macro_signals, calculate_market_signals, print_signals
-from portfolio.funds import add_new_funds
+import dataclasses
+from portfolio import process_macro_data, print_signals
+from portfolio.funds import search_by_isin
+from portfolio.download import download_price_data
 
+import os
 import pandas as pd
+from dotenv import load_dotenv
 
-FRED_API_KEY = "30b30cb68b46901be58d1865913c964b" 
+load_dotenv()
+
+FRED_API_KEY = os.getenv("FRED_API_KEY")
 
 FRED_SERIES = [
     ("UNRATE", "Unemployment_Rate"),
@@ -13,18 +18,22 @@ FRED_SERIES = [
     ("T10Y3M", "Yield_Spread_10Y3M"),
 ]
 
-START_DATE = "2019-01-01"
-END_DATE = "2020-04-30"
+PORTFOLIO_ISINS = [
+    "ES0182527038"
+]
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_colwidth', None)
+START_DATE = "2025-01-01"
+END_DATE = "2026-06-11"
 
 if __name__ == "__main__":
-    # df_series = download_series(FRED_API_KEY, FRED_SERIES, start_date=START_DATE, end_date=END_DATE)
-    # df_macro = calculate_macro_signals(df_series)
-    # df_final = calculate_market_signals(df_macro)
+    df_macro = process_macro_data(FRED_API_KEY, FRED_SERIES, start_date=START_DATE, end_date=END_DATE)
+    print_signals(df_macro, END_DATE)
 
-    # print_signals(df_final, END_DATE)
-
-    # Adding new funds
-    add_new_funds(["US0378331005", "US0231351067", "US5949181045"])
+    print("\nWorking with the portfolio...")
+    for isin in PORTFOLIO_ISINS:
+        fund = search_by_isin(isin)
+        if fund is None:
+            print(f"No fund found for ISIN: {isin}")
+            continue
+        fund_data = download_price_data(fund['security_id'], "EUR", START_DATE, END_DATE)
+        print(fund_data)

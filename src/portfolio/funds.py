@@ -15,7 +15,7 @@ from playwright.async_api import async_playwright
 DOMAIN = "https://global.morningstar.com"
 
 
-async def search_isin(isin: str) -> Optional[Dict]:
+async def _search_isin_async(isin: str) -> Optional[Dict]:
     """
     Search for a fund by ISIN using Morningstar's API with Playwright.
     
@@ -109,9 +109,9 @@ async def search_isin(isin: str) -> Optional[Dict]:
             await browser.close()
 
 
-def search_isin_sync(isin: str) -> Optional[Dict]:
+def search_by_isin(isin: str) -> Dict | None:
     """
-    Synchronous wrapper for search_isin().
+    Synchronous wrapper for search_by_isin().
     Use this if you're not in an async context.
     
     Args:
@@ -120,12 +120,11 @@ def search_isin_sync(isin: str) -> Optional[Dict]:
     Returns:
         The API response JSON as a dict, or None if the search fails
     """
-    return asyncio.run(search_isin(isin))
+    response = asyncio.run(_search_isin_async(isin))
+    if response is None:
+        return None
+    results = response['results'][0]
+    security_name = results['fields']['name']['value']
+    security_id = results['meta']['securityID']
+    return {"security_id": security_id, "name": security_name, "isin": isin}
 
-
-if __name__ == "__main__":
-    # Test with the example ISIN
-    result = search_isin_sync("IE00BFMXXD54")
-    if result:
-        print("\nSearch Results:")
-        print(json.dumps(result, indent=2)[:1500])

@@ -73,7 +73,3 @@ def download_price_data(fund_id: str, currency: str, start: str, end: str, timeo
 
     df = pd.json_normalize(records)
     return _normalize_dataframe(df)
-
-
-if __name__ == "__main__":
-    print(download_price_data("0P0001CC3N", "EUR", "2020-01-01", "2020-04-30"))
