@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 
 
-def calculate_buy_and_hold_returns(navs_df: pd.DataFrame, portfolio: dict[str, float]) -> pd.DataFrame:
+def calculate_buy_and_hold_returns(
+    navs_df: pd.DataFrame, portfolio: dict[str, float]
+) -> pd.DataFrame:
     """Calculate buy-and-hold portfolio evolution from asset NAVs.
 
     Converts price series to returns, applies initial weights without rebalancing,
