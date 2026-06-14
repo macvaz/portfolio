@@ -2,14 +2,22 @@ import json
 
 import pandas as pd
 import requests
+from urllib.parse import urlencode
 
-URL = """http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon?
-id={0}%5D2%5D1%5D&currencyId={1}&idtype=Morningstar&frequency=daily&
-startDate={2}&endDate={3}&performanceType=&outputType=COMPACTJSON"""
+BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon"
 
 
-def _compute_url(ric: str, currency: str, start: str, end: str) -> str:
-    return URL.format(ric, currency, start, end).replace("\n", "")
+def _compute_params(fund_id: str, currency: str, start: str, end: str) -> dict[str, str]:
+    return {
+        "id": f"{fund_id}]2]1]",
+        "currencyId": currency,
+        "idtype": "Morningstar",
+        "frequency": "daily",
+        "startDate": start,
+        "endDate": end,
+        "performanceType": "",
+        "outputType": "COMPACTJSON",
+    }
 
 
 def _extract_records(data: list[list[float | int]]) -> list[dict[str, float | int]]:
@@ -35,7 +43,8 @@ def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 def download_price_data(fund_id: str, currency: str, start: str, end: str, timeout: int = 30) -> pd.DataFrame:
     """Download Morningstar time series data and parse it into a pandas DataFrame."""
-    url = _compute_url(fund_id, currency, start, end)
+    params = _compute_params(fund_id, currency, start, end)
+    url = BASE_URL + "?" + urlencode(params)
 
     try:
         response = requests.get(url, timeout=timeout)
