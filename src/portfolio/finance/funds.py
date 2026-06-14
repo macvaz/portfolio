@@ -13,11 +13,7 @@ from pathlib import Path
 from typing import Dict, Optional
 from playwright.async_api import async_playwright
 
-from portfolio.isin_mapping import (
-    DEFAULT_MAPPING_PATH,
-    load_isin_mapping,
-    save_isin_mapping,
-)
+from portfolio.api.database import get_fund, save_fund
 
 DOMAIN = "https://global.morningstar.com"
 
@@ -139,15 +135,14 @@ def search_by_isin(isin: str) -> Dict | None:
 
 
 def resolve_fund_by_isin(
-    isin: str, mapping_path: Path = DEFAULT_MAPPING_PATH
+    isin: str, db_path: Path | None = None
 ) -> Dict | None:
-    """Return fund metadata for an ISIN, using a local mapping file when available."""
-    mapping = load_isin_mapping(mapping_path)
-    if isin in mapping:
-        entry = mapping[isin]
+    """Return fund metadata for an ISIN, using the database when available."""
+    cached = get_fund(isin, db_path)
+    if cached is not None:
         return {
-            "security_id": entry["security_id"],
-            "name": entry.get("name", ""),
+            "security_id": cached["security_id"],
+            "name": cached["name"],
             "isin": isin,
         }
 
@@ -155,6 +150,5 @@ def resolve_fund_by_isin(
     if fund is None:
         return None
 
-    mapping[isin] = {"security_id": fund["security_id"], "name": fund["name"]}
-    save_isin_mapping(mapping, mapping_path)
+    save_fund(isin, fund["name"], fund["security_id"], db_path)
     return fund

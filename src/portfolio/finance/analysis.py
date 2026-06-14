@@ -1,4 +1,6 @@
 import logging
+import tempfile
+from pathlib import Path
 
 import pandas as pd
 import quantstats as qs
@@ -27,3 +29,20 @@ def generate_performance_report(
     print(f"[*] Generating QuantStats report against benchmark: {benchmark}...")
     qs.reports.html(returns, benchmark, output=output_file)
     print(f"[+] Performance report successfully saved to: {output_file}")
+
+
+def generate_performance_report_html(
+    df: pd.DataFrame, benchmark: str = "SPY"
+) -> str:
+    """Generate a QuantStats HTML report and return it as a string."""
+    qs.extend_pandas()
+    returns = df.iloc[:, 0].pct_change().dropna()
+
+    with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tmp:
+        output_path = tmp.name
+
+    try:
+        qs.reports.html(returns, benchmark, output=output_path)
+        return Path(output_path).read_text(encoding="utf-8")
+    finally:
+        Path(output_path).unlink(missing_ok=True)

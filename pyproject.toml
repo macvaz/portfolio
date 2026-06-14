@@ -10,7 +10,18 @@ dependencies = [
     "fredapi>=0.5.2",
     "playwright>=1.60.0",
     "requests>=2.34.2",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "quantstats>=0.0.81",
+    "sqlmodel>=0.0.24",
+    "python-jose[cryptography]>=3.3.0",
+    "bcrypt>=4.0.0",
+    "python-multipart>=0.0.9",
+    "email-validator>=2.0.0",
 ]
+
+[project.scripts]
+portfolio-api = "portfolio.api:main"
 
 [build-system]
 requires = ["setuptools>=65.0", "wheel"]
@@ -35,4 +46,5 @@ dev = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
+    "httpx>=0.28.0",
 ]

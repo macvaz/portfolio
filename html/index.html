@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Portfolio</h1>
+      <p class="subtitle">Manage fund ISINs and generate performance reports.</p>
+
+      <section id="auth-section">
+        <h2>Sign in</h2>
+        <div id="auth-forms">
+          <form id="login-form" class="auth-form">
+            <h3>Log in</h3>
+            <input id="login-email" type="email" placeholder="Email" required />
+            <input id="login-password" type="password" placeholder="Password" required />
+            <button type="submit">Log in</button>
+          </form>
+          <form id="register-form" class="auth-form">
+            <h3>Register</h3>
+            <input id="register-email" type="email" placeholder="Email" required />
+            <input
+              id="register-password"
+              type="password"
+              placeholder="Password (min 8 chars)"
+              minlength="8"
+              required
+            />
+            <button type="submit" class="secondary">Register</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="app-section" hidden>
+        <div class="user-bar">
+          <span id="user-email"></span>
+          <button type="button" id="logout" class="secondary">Log out</button>
+        </div>
+
+        <section>
+          <h2>Add fund by ISIN</h2>
+          <form id="add-fund-form" class="row">
+            <input
+              id="isin-input"
+              placeholder="e.g. IE00BYX5NX33"
+              maxlength="12"
+              required
+            />
+            <button type="submit" id="add-fund">Add ISIN</button>
+          </form>
+        </section>
+
+        <section>
+          <h2>Your portfolio</h2>
+          <p id="funds-empty" class="empty" hidden>No funds yet. Add an ISIN above.</p>
+          <form id="report-form">
+            <ul id="fund-list" class="fund-list"></ul>
+            <p id="weight-total" class="weight-total">Total weight: 0.00</p>
+            <button type="submit" id="generate-report" disabled>Generate report</button>
+          </form>
+        </section>
+      </section>
+
+      <p id="error" class="error" hidden></p>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

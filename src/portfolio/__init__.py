@@ -1,8 +1,8 @@
-from .series import download_series
-from .signals import calculate_macro_signals, calculate_market_signals, print_signals
-from .download import download_portfolio_navs
-from .returns import calculate_buy_and_hold_returns
-from .analysis import generate_performance_report
+from .finance.series import download_series
+from .finance.signals import calculate_macro_signals, calculate_market_signals, print_signals
+from .finance.download import download_portfolio_navs
+from .finance.returns import calculate_buy_and_hold_returns
+from .finance.analysis import generate_performance_report, generate_performance_report_html
 
 import pandas as pd
 
@@ -22,4 +22,5 @@ __all__ = [
     "download_portfolio_navs",
     "calculate_buy_and_hold_returns",
     "generate_performance_report",
+    "generate_performance_report_html",
 ]

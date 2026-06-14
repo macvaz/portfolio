@@ -1,0 +1,70 @@
+from portfolio.api.database import get_fund, init_db, list_funds, save_fund
+from portfolio.funds import resolve_fund_by_isin
+
+
+def test_list_funds_empty_when_db_empty(tmp_path):
+    db_path = tmp_path / "portfolio.db"
+    init_db(db_path)
+    assert list_funds(db_path) == []
+
+
+def test_save_fund_roundtrip(tmp_path):
+    db_path = tmp_path / "portfolio.db"
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
+
+    assert get_fund("ES0182527038", db_path) == {
+        "isin": "ES0182527038",
+        "name": "Test Fund",
+        "security_id": "F0GBR04KHC",
+    }
+    assert list_funds(db_path) == [
+        {
+            "isin": "ES0182527038",
+            "name": "Test Fund",
+            "fund_id": "F0GBR04KHC",
+        }
+    ]
+
+
+def test_resolve_fund_by_isin_uses_cached_fund(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    save_fund("ES0182527038", "Cached Fund", "F0GBR04KHC", db_path)
+
+    def fail_search(_isin):
+        raise AssertionError("Morningstar search should not be called for cached ISIN")
+
+    monkeypatch.setattr("portfolio.funds.search_by_isin", fail_search)
+
+    fund = resolve_fund_by_isin("ES0182527038", db_path=db_path)
+
+    assert fund == {
+        "security_id": "F0GBR04KHC",
+        "name": "Cached Fund",
+        "isin": "ES0182527038",
+    }
+
+
+def test_resolve_fund_by_isin_fetches_and_persists_new_isin(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+
+    def mock_search(isin):
+        return {
+            "security_id": "F0GBR04KHC",
+            "name": "Fetched Fund",
+            "isin": isin,
+        }
+
+    monkeypatch.setattr("portfolio.funds.search_by_isin", mock_search)
+
+    fund = resolve_fund_by_isin("IE00BYX5NX33", db_path=db_path)
+
+    assert fund == {
+        "security_id": "F0GBR04KHC",
+        "name": "Fetched Fund",
+        "isin": "IE00BYX5NX33",
+    }
+    assert get_fund("IE00BYX5NX33", db_path) == {
+        "isin": "IE00BYX5NX33",
+        "name": "Fetched Fund",
+        "security_id": "F0GBR04KHC",
+    }

@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import requests
 
-from portfolio.funds import resolve_fund_by_isin
+from portfolio.finance.funds import resolve_fund_by_isin
 
 BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon"
 MS_SERIES_SUFFIX = "]2]1]"

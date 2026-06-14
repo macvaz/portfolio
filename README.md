@@ -12,19 +12,29 @@ portfolio/
 ├── docs/
 │   └── portfolio_performance.png   # Screenshot of the QuantStats report output
 ├── data/
-│   └── isin_mapping.json           # Cached ISIN → Morningstar fund ID mappings
+│   └── portfolio.db                # SQLite storage (created at runtime)
+├── html/                           # Web UI (HTML/CSS/JS served by FastAPI)
+│   ├── index.html
+│   ├── app.js
+│   └── style.css
 ├── src/portfolio/
 │   ├── __init__.py                 # Package exports and process_macro_data()
 │   ├── analysis.py                 # QuantStats HTML performance reports
+│   ├── api/                        # FastAPI web app package
+│   │   ├── app.py                  # Routes and application factory
+│   │   ├── auth.py                 # JWT authentication
+│   │   ├── database.py             # SQLModel storage and queries
+│   │   └── models.py               # User, Fund, Portfolio tables
 │   ├── download.py                 # Morningstar price downloads
 │   ├── funds.py                    # ISIN lookup via Morningstar (Playwright)
-│   ├── isin_mapping.py             # Load/save ISIN mapping file
 │   ├── returns.py                  # Buy-and-hold portfolio return calculation
 │   ├── series.py                   # FRED series download
 │   └── signals.py                  # Macro and market signal calculations
 └── tests/
-    ├── test_isin_mapping.py
-    └── test_portfolio.py
+    ├── test_api.py
+    ├── test_funds.py
+    ├── test_portfolio.py
+    └── test_portfolio_model.py
 ```
 
 ## `run.py`
@@ -41,7 +51,7 @@ portfolio/
 **What `run()` does:**
 
 1. **Macro signals** — Downloads FRED data, computes macro and market signals, and prints the latest values via `print_signals()`.
-2. **Portfolio NAVs** — For each ISIN in `portfolio`, resolves the Morningstar fund ID (using `data/isin_mapping.json` when cached), downloads daily prices in EUR, and builds a DataFrame of NAVs indexed by date.
+2. **Portfolio NAVs** — For each ISIN in `portfolio`, resolves the Morningstar fund ID (from the SQLite database when cached), downloads daily prices in EUR, and builds a DataFrame of NAVs indexed by date.
 3. **Returns** — Computes buy-and-hold portfolio evolution (no rebalancing) with `calculate_buy_and_hold_returns()`.
 4. **Report** — Generates an HTML performance report (`portfolio_performance.html`) benchmarked against SPY using QuantStats.
 
@@ -59,6 +69,58 @@ FRED_API_KEY=your_key_here
 uv run run.py
 ```
 
+## API and web UI
+
+Fund ISINs are stored in `data/portfolio.db` (SQLite).
+
+**Start the server:**
+
+```bash
+uv run portfolio-api
+```
+
+Open http://localhost:8000 to register, log in, manage funds, save your portfolio, and generate QuantStats HTML reports.
+
+Authentication uses the standard **OAuth2 password flow with JWT bearer tokens**. Set `JWT_SECRET_KEY` in `.env` for production.
+
+### API endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/api/auth/register` | — | Create an account (`email`, `password`) |
+| `POST` | `/api/auth/token` | — | Log in (form: `username`, `password`) → JWT |
+| `GET` | `/api/auth/me` | ✓ | Current user |
+| `GET` | `/api/funds` | ✓ | List stored funds |
+| `POST` | `/api/funds` | ✓ | Add a fund by ISIN |
+| `DELETE` | `/api/funds/{isin}` | ✓ | Remove a fund |
+| `GET` | `/api/portfolio` | ✓ | Current user's saved positions |
+| `PUT` | `/api/portfolio` | ✓ | Save portfolio positions |
+| `POST` | `/api/report` | ✓ | Generate report from saved portfolio |
+
+**Save portfolio body:**
+
+```json
+{
+  "positions": [
+    {"isin": "IE00BYX5NX33", "weighted_assets": 0.65},
+    {"isin": "IE00BYX5M476", "weighted_assets": 0.35}
+  ]
+}
+```
+
+**Report request body** (saves portfolio weights, then generates report):
+
+```json
+{
+  "positions": [
+    {"isin": "IE00BYX5NX33", "weighted_assets": 0.65},
+    {"isin": "IE00BYX5M476", "weighted_assets": 0.35}
+  ],
+  "start_date": "2025-01-01",
+  "benchmark": "SPY"
+}
+```
+
 ## Result
 
 Running `run.py` end-to-end produces a QuantStats HTML tearsheet (`portfolio_performance.html`) with cumulative returns, drawdowns, rolling metrics, monthly heatmaps, and a full statistics table benchmarked against SPY.
@@ -73,6 +135,7 @@ Running `run.py` end-to-end produces a QuantStats HTML tearsheet (`portfolio_per
 - fredapi — FRED API client (macroeconomic series)
 - playwright — browser automation for Morningstar ISIN search
 - quantstats — HTML performance reports
+- fastapi / uvicorn — REST API and web UI
 
 ## Install
 

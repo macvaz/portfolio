@@ -13,13 +13,7 @@ def calculate_macro_signals(df: pd.DataFrame) -> pd.DataFrame:
     df["Sahm_Min_12M"] = df["Unemployment_Rate"].rolling(window=252).min()
     # Sahm Indicator value
     df["Sahm_Value"] = df["Sahm_MA3"] - df["Sahm_Min_12M"]
-    df["Alert_Sahm"] = df["Sahm_Value"] >= 0.5
-
-    # --- INDICATOR 3: HIGH YIELD SPREAD (Credit Risk Filter) ---
-    # FRED already provides the clean calculated Spread, no subtraction needed.
-    # Trigger signal if the spread exceeds 5.5%
-    df["Alert_High_Yield"] = df["High_Yield_Spread"] >= 5.5
-
+    df["Alert_Sahm"] = df["Sahm_Value"] 
     # --- INDICATOR 4: ST. LOUIS FINANCIAL STRESS INDEX (Liquidity Filter) ---
     # Trigger signal if the index exceeds 1.0 (High financial stress)
     df["Alert_Financial_Stress"] = df["Financial_Stress_Index"] >= 1.0
