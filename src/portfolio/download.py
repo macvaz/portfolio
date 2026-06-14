@@ -2,14 +2,19 @@ import json
 
 import pandas as pd
 import requests
-from urllib.parse import urlencode
 
 BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon"
+MS_SERIES_SUFFIX = "]2]1]"
 
 
 def _compute_params(fund_id: str, currency: str, start: str, end: str) -> dict[str, str]:
+    """Build query params for the Morningstar timeseries endpoint.
+
+    Note: the API requires the `id` parameter to include the suffix
+    contained in MS_SERIES_SUFFIX to select the correct time-series variant for a fund. 
+    Omitting this suffix returns an empty result."""
     return {
-        "id": f"{fund_id}]2]1]",
+        "id": f"{fund_id}{MS_SERIES_SUFFIX}",
         "currencyId": currency,
         "idtype": "Morningstar",
         "frequency": "daily",
@@ -44,10 +49,9 @@ def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 def download_price_data(fund_id: str, currency: str, start: str, end: str, timeout: int = 30) -> pd.DataFrame:
     """Download Morningstar time series data and parse it into a pandas DataFrame."""
     params = _compute_params(fund_id, currency, start, end)
-    url = BASE_URL + "?" + urlencode(params)
 
     try:
-        response = requests.get(url, timeout=timeout)
+        response = requests.get(BASE_URL, params=params, timeout=timeout)
         response.raise_for_status()
     except requests.RequestException as exc:
         print(f"Error downloading data from Morningstar: {exc}")
