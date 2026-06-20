@@ -30,6 +30,7 @@ from portfolio.api.models import User
 from portfolio import download_portfolio_navs
 from portfolio.finance.funds import resolve_fund_by_isin
 from portfolio import calculate_buy_and_hold_returns
+from portfolio.api.mock_management import MOCK_MANAGEMENT_DATA
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
 
@@ -174,6 +175,12 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
 def remove_fund(isin: str, _user: CurrentUser) -> None:
     if not delete_fund(isin.upper()):
         raise HTTPException(status_code=404, detail=f"ISIN {isin} not found")
+
+
+@app.get("/api/management")
+def get_management(_user: CurrentUser) -> dict:
+    """Mock management screen data (chart + fund tables)."""
+    return MOCK_MANAGEMENT_DATA
 
 
 @app.get("/api/portfolio", response_model=list[PortfolioPositionResponse])

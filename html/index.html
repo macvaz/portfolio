@@ -3,16 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio</title>
-    <link rel="stylesheet" href="/static/style.css" />
+    <title>Alpha Plans — Management</title>
+    <link rel="stylesheet" href="/static/style.css?v=10" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
-    <main>
-      <h1>Portfolio</h1>
-      <p class="subtitle">Manage fund ISINs and generate performance reports.</p>
+    <header class="top-bar">
+      <div class="top-bar-inner">
+        <img src="/static/logo.png" alt="Alpha Plans" class="site-logo" />
+        <a href="#" id="logout" hidden>logout</a>
+      </div>
+    </header>
 
+    <main>
       <section id="auth-section">
-        <h2>Sign in</h2>
+        <p class="subtitle">Sign in to view your management dashboard.</p>
+        <p id="auth-error" class="auth-error" hidden></p>
         <div id="auth-forms">
           <form id="login-form" class="auth-form">
             <h3>Log in</h3>
@@ -36,37 +42,75 @@
       </section>
 
       <section id="app-section" hidden>
-        <div class="user-bar">
-          <span id="user-email"></span>
-          <button type="button" id="logout" class="secondary">Log out</button>
+        <div id="management-loading" class="management-loading">Loading dashboard…</div>
+
+        <div id="management-view" hidden>
+          <section class="chart-panel">
+            <div class="chart-legend">
+              <span class="legend-item legend-portfolio">Portfolio</span>
+              <span class="legend-item legend-benchmark" id="benchmark-legend">S&amp;P 500</span>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="performance-chart" aria-label="Portfolio performance chart"></canvas>
+            </div>
+          </section>
+
+          <section class="table-panel">
+            <h2 class="table-title">Portfolio</h2>
+            <div class="table-scroll">
+              <table class="fund-table" id="portfolio-table">
+                <thead>
+                  <tr>
+                    <th class="col-name">Name</th>
+                    <th>Weight (%)</th>
+                    <th>β (6m)</th>
+                    <th>Cor (6m)</th>
+                    <th>Vol (1y)</th>
+                    <th>% 1m</th>
+                    <th>% 3m</th>
+                    <th>% 6m</th>
+                    <th>% YTD</th>
+                    <th>SR 6m</th>
+                    <th>SR 1y</th>
+                  </tr>
+                </thead>
+                <tbody id="portfolio-body"></tbody>
+                <tfoot id="portfolio-summary"></tfoot>
+              </table>
+            </div>
+          </section>
+
+          <section class="table-panel">
+            <h2 class="table-title">Favorites</h2>
+            <div class="table-scroll">
+              <table class="fund-table" id="favorites-table">
+                <thead>
+                  <tr>
+                    <th class="col-name">Name</th>
+                    <th>Weight (%)</th>
+                    <th>β (6m)</th>
+                    <th>Cor (6m)</th>
+                    <th>Vol (1y)</th>
+                    <th>% 1m</th>
+                    <th>% 3m</th>
+                    <th>% 6m</th>
+                    <th>% YTD</th>
+                    <th>SR 6m</th>
+                    <th>SR 1y</th>
+                  </tr>
+                </thead>
+                <tbody id="favorites-body"></tbody>
+              </table>
+            </div>
+          </section>
         </div>
-
-        <section>
-          <h2>Add fund by ISIN</h2>
-          <form id="add-fund-form" class="row">
-            <input
-              id="isin-input"
-              placeholder="e.g. IE00BYX5NX33"
-              maxlength="12"
-              required
-            />
-            <button type="submit" id="add-fund">Add ISIN</button>
-          </form>
-        </section>
-
-        <section>
-          <h2>Your portfolio</h2>
-          <p id="funds-empty" class="empty" hidden>No funds yet. Add an ISIN above.</p>
-          <form id="report-form">
-            <ul id="fund-list" class="fund-list"></ul>
-            <p id="weight-total" class="weight-total">Total weight: 0.00</p>
-            <button type="submit" id="generate-report" disabled>Generate report</button>
-          </form>
-        </section>
       </section>
 
       <p id="error" class="error" hidden></p>
     </main>
-    <script src="/static/app.js"></script>
+
+    <script src="/static/api.js?v=8"></script>
+    <script src="/static/management.js?v=8"></script>
+    <script src="/static/app.js?v=8"></script>
   </body>
 </html>
