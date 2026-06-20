@@ -396,22 +396,6 @@
     });
   }
 
-  function formatTotalPct(value) {
-    if (value === null || value === undefined || !Number.isFinite(value)) {
-      return "";
-    }
-    const sign = value >= 0 ? "+" : "";
-    return `${sign}${value.toFixed(2)}% total`;
-  }
-
-  function formatCagrPct(value) {
-    if (value === null || value === undefined || !Number.isFinite(value)) {
-      return "";
-    }
-    const sign = value >= 0 ? "+" : "";
-    return `${sign}${value.toFixed(2)}% CAGR`;
-  }
-
   function cumulativeReturn(values) {
     if (!values || !values.length) {
       return null;
@@ -420,49 +404,57 @@
     return Number.isFinite(last) ? last : null;
   }
 
-  function formatLegendPerformance(cumulative, annualized) {
+  function formatMetricHtml(value, suffix) {
+    if (value === null || value === undefined || !Number.isFinite(value)) {
+      return "";
+    }
+    const sign = value < 0 ? "-" : "";
+    const number = Math.abs(value).toFixed(2);
+    return `&nbsp;${sign}<strong>${number}%</strong>&nbsp;${suffix}`;
+  }
+
+  function formatLegendPerformanceHtml(cumulative, annualized) {
     const parts = [];
-    const cumulativeLabel = formatTotalPct(cumulative);
-    const annualizedLabel = formatCagrPct(annualized);
+    const cumulativeLabel = formatMetricHtml(cumulative, "total");
+    const annualizedLabel = formatMetricHtml(annualized, "CAGR");
     if (cumulativeLabel) {
       parts.push(cumulativeLabel);
     }
     if (annualizedLabel) {
       parts.push(annualizedLabel);
     }
-    return parts.join(", ");
+    return parts.join(",");
   }
 
-  function formatPortfolioLegend(curve) {
-    const perf = formatLegendPerformance(
+  function formatPortfolioLegendHtml(curve) {
+    const perf = formatLegendPerformanceHtml(
       cumulativeReturn(curve.portfolio),
       curve.portfolio_annualized_pct,
     );
-    return perf ? `Portfolio: ${perf}` : "Portfolio";
+    return perf ? `Portfolio:${perf}` : "Portfolio";
   }
 
-  function formatBenchmarkLegend(curve) {
+  function formatBenchmarkLegendHtml(curve) {
     const name = curve.benchmark_name || "S&P 500";
     const isin = curve.benchmark_isin ? ` (${curve.benchmark_isin})` : "";
-    const perf = formatLegendPerformance(
+    const perf = formatLegendPerformanceHtml(
       cumulativeReturn(curve.benchmark),
       curve.benchmark_annualized_pct,
     );
     const base = `${name}${isin}`;
-    return perf ? `${base}: ${perf}` : base;
+    return perf ? `${base}:${perf}` : base;
   }
 
   function buildChartConfig(curve) {
-    const { labels, portfolio, benchmark } = curve;
-    const portfolioLabel = formatPortfolioLegend(curve);
-    const benchmarkLabel = formatBenchmarkLegend(curve);
+    const { labels, portfolio, benchmark, benchmark_name: benchmarkName } = curve;
     const portfolioSeries = smoothSeriesPreserveLast(portfolio);
     const benchmarkSeries =
       benchmark.length > 0 ? smoothSeriesPreserveLast(benchmark) : benchmark;
     const datasets = [
       {
-        label: portfolioLabel,
+        label: "Portfolio",
         data: portfolioSeries,
+        rawValues: portfolio,
         borderColor: "#e91e8c",
         backgroundColor: "rgba(233, 30, 140, 0.08)",
         borderWidth: 2,
@@ -474,8 +466,9 @@
 
     if (benchmark.length > 0) {
       datasets.push({
-        label: benchmarkLabel,
+        label: benchmarkName || "S&P 500",
         data: benchmarkSeries,
+        rawValues: benchmark,
         borderColor: "#1f5eff",
         backgroundColor: "rgba(31, 94, 255, 0.08)",
         borderWidth: 2,
@@ -503,9 +496,13 @@
             display: false,
           },
           tooltip: {
+            boxPadding: 6,
             callbacks: {
               label(context) {
-                return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
+                const rawValues = context.dataset.rawValues;
+                const value = rawValues?.[context.dataIndex];
+                const displayValue = Number.isFinite(value) ? value : context.parsed.y;
+                return `${context.dataset.label}: ${displayValue.toFixed(2)}%`;
               },
             },
           },
@@ -549,8 +546,8 @@
   function renderScreen({ curve, dashboard }) {
     managementData = { curve, dashboard };
 
-    document.getElementById("portfolio-legend").textContent = formatPortfolioLegend(curve);
-    document.getElementById("benchmark-legend").textContent = formatBenchmarkLegend(curve);
+    document.getElementById("portfolio-legend").innerHTML = formatPortfolioLegendHtml(curve);
+    document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
     renderChart(curve);
     renderTableBody("portfolio-body", dashboard.portfolio, { editableWeights: true });
     document.getElementById("portfolio-summary").innerHTML = renderSummaryRow(

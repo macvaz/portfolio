@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alpha Plans</title>
-    <link rel="stylesheet" href="/static/style.css?v=50" />
+    <link rel="stylesheet" href="/static/style.css?v=58" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -82,11 +82,11 @@
 
           <div id="management-view" hidden>
           <section class="chart-panel">
-            <div class="chart-legend">
-              <span class="legend-item legend-portfolio" id="portfolio-legend">Portfolio</span>
-              <span class="legend-item legend-benchmark" id="benchmark-legend">S&amp;P 500</span>
-            </div>
             <div class="chart-wrapper">
+              <div class="chart-legend">
+                <span class="legend-item legend-portfolio" id="portfolio-legend">Portfolio</span>
+                <span class="legend-item legend-benchmark" id="benchmark-legend">S&amp;P 500</span>
+              </div>
               <canvas id="performance-chart" aria-label="Portfolio performance chart"></canvas>
             </div>
           </section>
@@ -159,7 +159,7 @@
     </main>
 
     <script src="/static/api.js?v=9"></script>
-    <script src="/static/management.js?v=49"></script>
+    <script src="/static/management.js?v=61"></script>
     <script src="/static/risk.js?v=2"></script>
     <script src="/static/app.js?v=14"></script>
   </body>
