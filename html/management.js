@@ -124,9 +124,21 @@
     </tr>`;
   }
 
+  function renderSummaryWeightCell(value) {
+    const text = formatWeight(value);
+    return `<td class="col-weight col-weight-editable">
+      <div class="weight-cell-slot">
+        <span class="weight-display">${text}</span>
+      </div>
+    </td>`;
+  }
+
   function renderSummaryRow(summary) {
     const cells = METRIC_COLUMNS.map((column) => {
       const value = summary[column.key];
+      if (column.weightColumn) {
+        return renderSummaryWeightCell(value);
+      }
       const text = formatValue(value, column.format);
       return `<td class="${cellClasses(value, column)}">${text}</td>`;
     }).join("");
@@ -143,6 +155,92 @@
     container.innerHTML = funds.map((fund) => renderFundRow(fund, options)).join("");
   }
 
+  function ensureSyncedColgroup(table, columnCount) {
+    let colgroup = table.querySelector("colgroup[data-sync-cols]");
+    if (!colgroup) {
+      colgroup = document.createElement("colgroup");
+      colgroup.dataset.syncCols = "true";
+      table.insertBefore(colgroup, table.firstChild);
+    }
+
+    while (colgroup.children.length < columnCount) {
+      colgroup.appendChild(document.createElement("col"));
+    }
+    while (colgroup.children.length > columnCount) {
+      colgroup.removeChild(colgroup.lastChild);
+    }
+
+    return colgroup;
+  }
+
+  function resetSyncedTableLayout(...tables) {
+    tables.forEach((table) => {
+      table.querySelector("colgroup[data-sync-cols]")?.remove();
+      table.style.tableLayout = "";
+      table.style.width = "";
+    });
+  }
+
+  function measureTableColumnWidths(table) {
+    const headerCells = table.querySelectorAll("thead tr:first-child th");
+    const rows = [
+      ...table.querySelectorAll("tbody tr"),
+      ...table.querySelectorAll("tfoot tr"),
+    ];
+
+    return Array.from(headerCells).map((headerCell, index) => {
+      let maxWidth = headerCell.getBoundingClientRect().width;
+      rows.forEach((row) => {
+        const cell = row.cells[index];
+        if (cell) {
+          maxWidth = Math.max(maxWidth, cell.getBoundingClientRect().width);
+        }
+      });
+      return maxWidth;
+    });
+  }
+
+  function applyTableColumnWidths(table, widths) {
+    const colgroup = ensureSyncedColgroup(table, widths.length);
+    Array.from(colgroup.children).forEach((col, index) => {
+      col.style.width = `${widths[index]}px`;
+    });
+    const tableWidth = widths.reduce((sum, width) => sum + width, 0);
+    table.style.tableLayout = "fixed";
+    table.style.width = `${Math.max(tableWidth, 1100)}px`;
+  }
+
+  function syncFundTableColumns() {
+    const portfolioTable = document.getElementById("portfolio-table");
+    const favoritesTable = document.getElementById("favorites-table");
+    if (!portfolioTable || !favoritesTable) {
+      return;
+    }
+
+    resetSyncedTableLayout(portfolioTable, favoritesTable);
+
+    const widths = measureTableColumnWidths(portfolioTable);
+    if (!widths.length) {
+      return;
+    }
+
+    applyTableColumnWidths(portfolioTable, widths);
+    applyTableColumnWidths(favoritesTable, widths);
+  }
+
+  let columnSyncFrame = null;
+  let columnSyncTimer = null;
+
+  function scheduleFundTableColumnSync() {
+    if (columnSyncFrame !== null) {
+      cancelAnimationFrame(columnSyncFrame);
+    }
+    columnSyncFrame = requestAnimationFrame(() => {
+      columnSyncFrame = null;
+      syncFundTableColumns();
+    });
+  }
+
   function collectWeightPositions() {
     const positions = [];
     document.querySelectorAll(".weight-input").forEach((input) => {
@@ -156,6 +254,14 @@
       });
     });
     return positions;
+  }
+
+  async function loadScreenData() {
+    const [curve, dashboard] = await Promise.all([
+      api.fetchJson(`${api.API}/curve`),
+      api.fetchJson(`${api.API}/dashboard`),
+    ]);
+    return { curve, dashboard };
   }
 
   async function savePortfolioWeights() {
@@ -174,8 +280,7 @@
         body: JSON.stringify({ positions }),
       });
 
-      const data = await api.fetchJson(`${api.API}/management`);
-      renderManagement(data);
+      renderScreen(await loadScreenData());
     } catch (error) {
       showError(error.message);
     } finally {
@@ -205,6 +310,7 @@
         row.classList.add("row-actions-visible");
         if (focusWeight && weightInput && document.activeElement !== weightInput) {
           weightInput.focus({ preventScroll: true });
+          weightInput.select();
         }
       }
 
@@ -242,6 +348,12 @@
     });
 
     document.querySelectorAll(".weight-input").forEach((input) => {
+      input.addEventListener("focus", () => {
+        input.select();
+      });
+      input.addEventListener("click", () => {
+        input.select();
+      });
       input.addEventListener("change", () => {
         savePortfolioWeights();
       });
@@ -256,35 +368,39 @@
     bindRowActions();
   }
 
-  function buildChartConfig(data) {
-    const { labels, portfolio, benchmark } = data.chart;
+  function buildChartConfig(curve) {
+    const { labels, portfolio, benchmark, benchmark_name: benchmarkName } = curve;
+    const datasets = [
+      {
+        label: "Portfolio",
+        data: portfolio,
+        borderColor: "#e91e8c",
+        backgroundColor: "rgba(233, 30, 140, 0.08)",
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        tension: 0.15,
+      },
+    ];
+
+    if (benchmark.length > 0) {
+      datasets.push({
+        label: benchmarkName,
+        data: benchmark,
+        borderColor: "#1f5eff",
+        backgroundColor: "rgba(31, 94, 255, 0.08)",
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        tension: 0.15,
+      });
+    }
 
     return {
       type: "line",
       data: {
         labels,
-        datasets: [
-          {
-            label: "Portfolio",
-            data: portfolio,
-            borderColor: "#e91e8c",
-            backgroundColor: "rgba(233, 30, 140, 0.08)",
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            tension: 0.15,
-          },
-          {
-            label: data.benchmark_name,
-            data: benchmark,
-            borderColor: "#1f5eff",
-            backgroundColor: "rgba(31, 94, 255, 0.08)",
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            tension: 0.15,
-          },
-        ],
+        datasets,
       },
       options: {
         responsive: true,
@@ -330,7 +446,7 @@
     };
   }
 
-  function renderChart(data) {
+  function renderChart(curve) {
     const canvas = document.getElementById("performance-chart");
     const context = canvas.getContext("2d");
 
@@ -338,22 +454,35 @@
       performanceChart.destroy();
     }
 
-    performanceChart = new Chart(context, buildChartConfig(data));
+    performanceChart = new Chart(context, buildChartConfig(curve));
   }
 
-  function renderManagement(data) {
-    managementData = data;
+  function renderScreen({ curve, dashboard }) {
+    managementData = { curve, dashboard };
 
-    document.getElementById("benchmark-legend").textContent = data.benchmark_name;
-    renderChart(data);
-    renderTableBody("portfolio-body", data.portfolio, { editableWeights: true });
-    document.getElementById("portfolio-summary").innerHTML = renderSummaryRow(data.portfolio_summary);
-    renderTableBody("favorites-body", data.favorites, {
+    document.getElementById("benchmark-legend").textContent = curve.benchmark_name;
+    renderChart(curve);
+    renderTableBody("portfolio-body", dashboard.portfolio, { editableWeights: true });
+    document.getElementById("portfolio-summary").innerHTML = renderSummaryRow(
+      dashboard.portfolio_summary,
+    );
+    renderTableBody("favorites-body", dashboard.favorites, {
       editableWeights: true,
       forceZeroWeight: true,
     });
     bindTableInteractions();
+    scheduleFundTableColumnSync();
   }
+
+  window.addEventListener("resize", () => {
+    if (columnSyncTimer !== null) {
+      clearTimeout(columnSyncTimer);
+    }
+    columnSyncTimer = setTimeout(() => {
+      columnSyncTimer = null;
+      scheduleFundTableColumnSync();
+    }, 150);
+  });
 
   async function loadManagement() {
     const loading = document.getElementById("management-loading");
@@ -363,8 +492,7 @@
     view.hidden = true;
 
     try {
-      const data = await api.fetchJson(`${api.API}/management`);
-      renderManagement(data);
+      renderScreen(await loadScreenData());
       loading.hidden = true;
       view.hidden = false;
     } catch (error) {

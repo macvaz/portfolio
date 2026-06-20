@@ -98,7 +98,50 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     assert nav_path.read_text(encoding="utf-8").startswith("date,nav\n")
 
 
-def test_management_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
+def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    funds_dir = tmp_path / "funds"
+    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.finance.nav_files.DEFAULT_FUNDS_DIR", funds_dir)
+    init_db(db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path)
+
+    import pandas as pd
+    from portfolio.finance.nav_files import save_fund_nav_csv
+
+    df = pd.DataFrame(
+        {"value": [100.0, 110.0, 121.0]},
+        index=pd.to_datetime(["2024-01-31", "2024-02-29", "2024-03-31"]),
+    )
+    save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
+    save_fund_nav_csv("IE00BYX5NX33", df, funds_dir=funds_dir)
+
+    client = TestClient(app)
+    token = _register_and_login(client, "user@example.com", "secretpass")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    client.put(
+        "/api/portfolio",
+        headers=headers,
+        json={
+            "positions": [
+                {"isin": "ES0182527038", "weighted_assets": 0.5},
+                {"isin": "IE00BYX5NX33", "weighted_assets": 0.5},
+            ]
+        },
+    )
+
+    response = client.get("/api/curve", headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["portfolio"][0] == 100.0
+    assert len(data["labels"]) >= 2
+    assert data["benchmark"] == []
+
+
+def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
@@ -121,7 +164,7 @@ def test_management_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
         },
     )
 
-    response = client.get("/api/management", headers=headers)
+    response = client.get("/api/dashboard", headers=headers)
     assert response.status_code == 200
     data = response.json()
 
@@ -133,11 +176,10 @@ def test_management_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     assert data["portfolio"][1]["weight"] == 65.0
     assert data["portfolio_summary"]["weight"] == 100.0
     assert data["portfolio"][0]["beta_6m"] == 0.05
-    assert data["chart"]["labels"]
     assert data["favorites"] == []
 
 
-def test_management_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypatch):
+def test_dashboard_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
@@ -160,7 +202,7 @@ def test_management_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monke
         },
     )
 
-    response = client.get("/api/management", headers=headers)
+    response = client.get("/api/dashboard", headers=headers)
     data = response.json()
 
     assert len(data["portfolio"]) == 1

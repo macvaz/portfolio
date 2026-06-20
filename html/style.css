@@ -244,8 +244,7 @@ button:disabled {
 }
 
 .fund-table .col-weight {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+  padding: 0.25rem 0.65rem;
   overflow: visible;
 }
 
@@ -415,6 +414,10 @@ button:disabled {
 }
 
 .summary-row {
+  font-weight: 600;
+}
+
+.summary-row .weight-cell-slot > .weight-display {
   font-weight: 600;
 }
 

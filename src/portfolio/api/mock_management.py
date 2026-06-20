@@ -1,11 +1,8 @@
-"""Management screen payload: real funds from the database, mocked performance metrics."""
+"""Dashboard screen payload: real funds from the database, mocked performance metrics."""
 
 from datetime import date
 
 from portfolio.api.database import list_funds, list_user_portfolio
-from portfolio.api.management_chart import build_portfolio_chart
-
-BENCHMARK_NAME = "S&P 500"
 
 DEFAULT_MOCK_METRICS = {
     "beta_6m": 0.05,
@@ -29,8 +26,8 @@ def _fund_row(isin: str, name: str, *, weight: float = 0.0) -> dict:
     }
 
 
-def build_management_data(user_id: int, db_path=None, funds_dir=None) -> dict:
-    """Build management payload with real funds/weights and mocked metrics."""
+def build_dashboard_data(user_id: int, db_path=None) -> dict:
+    """Build dashboard payload with real funds/weights and mocked metrics."""
     positions = list_user_portfolio(user_id, db_path)
     portfolio_isins = {position["isin"] for position in positions}
 
@@ -50,9 +47,7 @@ def build_management_data(user_id: int, db_path=None, funds_dir=None) -> dict:
     total_weight = round(sum(fund["weight"] for fund in portfolio), 2)
 
     return {
-        "benchmark_name": BENCHMARK_NAME,
         "as_of": date.today().isoformat(),
-        "chart": build_portfolio_chart(positions, funds_dir),
         "portfolio": portfolio,
         "favorites": favorites,
         "portfolio_summary": {

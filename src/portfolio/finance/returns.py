@@ -3,7 +3,9 @@ import pandas as pd
 
 
 def calculate_buy_and_hold_returns(
-    navs_df: pd.DataFrame, portfolio: dict[str, float]
+    navs_df: pd.DataFrame,
+    portfolio: dict[str, float],
+    cash_weight: float = 0.0,
 ) -> pd.DataFrame:
     """Calculate buy-and-hold portfolio evolution from asset NAVs.
 
@@ -14,7 +16,9 @@ def calculate_buy_and_hold_returns(
     navs_df (pd.DataFrame): Asset NAVs or prices indexed by date. Columns are
                             asset identifiers (e.g. ISINs).
     portfolio (dict[str, float]): Mapping of asset identifier to initial weight.
-                                  Weights must sum to 1.0 and match navs_df columns.
+                                  Weights must match navs_df columns and sum to
+                                  at most 1.0 when combined with ``cash_weight``.
+    cash_weight (float): Uninvested cash weight (0 return), so weights + cash = 1.0.
 
     Returns:
     pd.DataFrame: Single-column DataFrame with ``portfolio_base_1`` indexed to 1.0
@@ -35,10 +39,6 @@ def calculate_buy_and_hold_returns(
 
     # Step 3: Sum across rows to get the total portfolio value over time
     portfolio_evolution = pd.DataFrame(index=returns_df.index)
-    portfolio_evolution["portfolio_base_1"] = weighted_assets.sum(axis=1)
-
-    # Optional: If you want to see the performance of each asset inside the portfolio
-    # you can uncomment the following line:
-    # portfolio_evolution = pd.concat([weighted_assets, portfolio_evolution], axis=1)
+    portfolio_evolution["portfolio_base_1"] = weighted_assets.sum(axis=1) + cash_weight
 
     return portfolio_evolution

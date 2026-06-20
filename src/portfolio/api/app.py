@@ -32,7 +32,8 @@ from portfolio.api.models import User
 from portfolio import download_portfolio_navs
 from portfolio.finance.funds import resolve_fund_by_isin
 from portfolio import calculate_buy_and_hold_returns
-from portfolio.api.mock_management import build_management_data
+from portfolio.api.curve import build_user_equity_curve
+from portfolio.api.mock_management import build_dashboard_data
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
 NAV_START_DATE = "2000-01-01"
@@ -194,10 +195,16 @@ def remove_fund(isin: str, _user: CurrentUser) -> None:
     delete_fund_nav_csv(isin.upper())
 
 
-@app.get("/api/management")
-def get_management(user: CurrentUser) -> dict:
-    """Management screen data: real portfolio funds/weights, mocked metrics elsewhere."""
-    return build_management_data(user.id)
+@app.get("/api/curve")
+def get_curve(user: CurrentUser) -> dict:
+    """Buy-and-hold portfolio equity curve from stored NAV files."""
+    return build_user_equity_curve(user.id)
+
+
+@app.get("/api/dashboard")
+def get_dashboard(user: CurrentUser) -> dict:
+    """Portfolio tables with real funds/weights and mocked metrics."""
+    return build_dashboard_data(user.id)
 
 
 @app.get("/api/portfolio", response_model=list[PortfolioPositionResponse])
