@@ -7,6 +7,7 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   background: #fcf9eb;
   color: #1a1a1a;
+  --logo-orange: #ff9900;
 }
 
 main {
@@ -25,14 +26,15 @@ main {
 }
 
 .top-bar-inner {
+  --header-pad-y: 0.45rem;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0.75rem 2rem;
-  display: flex;
-  justify-content: space-between;
+  padding: var(--header-pad-y) 2rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1rem;
-  min-height: 62px;
+  min-height: 48px;
 }
 
 .page-header h1,
@@ -124,7 +126,7 @@ button:disabled {
 
 .site-logo {
   display: block;
-  height: 38px;
+  height: 32px;
   width: auto;
   margin: 0;
 }
@@ -139,10 +141,64 @@ button:disabled {
   margin: 0;
 }
 
+.add-isin-field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 10.5rem;
+  padding: 0.3rem 0.55rem 0.3rem 0.45rem;
+  border: 1px solid #c8d0da;
+  border-radius: 6px;
+  background: #fcf9eb;
+  cursor: text;
+}
+
+.add-isin-field:focus-within {
+  border-color: #a8b0ba;
+}
+
+.add-isin-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.add-isin-icon-btn:hover {
+  background: transparent;
+  opacity: 0.85;
+}
+
+.add-isin-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
 .add-isin-form input {
-  width: 11rem;
-  padding: 0.4rem 0.65rem;
-  font-size: 0.9rem;
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  color: inherit;
+}
+
+.add-isin-form input::placeholder {
+  color: #6b6358;
+}
+
+.add-isin-form input:focus {
+  outline: none;
 }
 
 #logout {
@@ -158,6 +214,77 @@ button:disabled {
   border-radius: 8px;
 }
 
+/* Tabs */
+
+.app-tabs {
+  display: flex;
+  justify-self: center;
+  align-self: stretch;
+  align-items: center;
+  gap: 2rem;
+  margin-top: calc(-1 * var(--header-pad-y, 0.45rem));
+  margin-bottom: calc(-1 * var(--header-pad-y, 0.45rem));
+}
+
+.app-tab {
+  position: relative;
+  align-self: stretch;
+  margin: 0;
+  padding: 0 0.15rem;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-radius: 0;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.app-tab:hover,
+.app-tab.is-active:hover {
+  background: transparent;
+  color: inherit;
+}
+
+.app-tab.is-active {
+  font-weight: 600;
+}
+
+.app-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--logo-orange);
+  z-index: 1;
+}
+
+.risk-message {
+  margin: 0 0 1rem;
+  padding: 1rem 1.25rem;
+  color: #555;
+  background: #fff;
+  border: 1px solid #e2d8c8;
+  border-radius: 8px;
+}
+
+.risk-report-frame {
+  display: block;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  border: 1px solid #e2d8c8;
+  border-radius: 8px;
+  background: #fff;
+}
+
 /* Chart */
 
 .chart-panel {
@@ -168,19 +295,24 @@ button:disabled {
 
 .chart-legend {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 2rem;
   margin-bottom: 0.75rem;
   font-size: 0.95rem;
 }
 
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+}
+
 .legend-item::before {
   content: "";
-  display: inline-block;
+  display: block;
   width: 28px;
   height: 3px;
   margin-right: 0.5rem;
-  vertical-align: middle;
+  flex-shrink: 0;
   border-radius: 2px;
 }
 
@@ -431,7 +563,20 @@ button:disabled {
   }
 
   .top-bar-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+
+  .app-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 0;
+    margin-bottom: calc(-1 * var(--header-pad-y, 0.45rem));
+  }
+
+  .top-bar-actions {
+    justify-content: flex-end;
+    width: 100%;
   }
 }

@@ -10,7 +10,6 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 from sqlmodel import Session
 
-from portfolio import generate_performance_report_html
 from portfolio.api.auth import (
     CurrentUser,
     authenticate_user,
@@ -29,11 +28,10 @@ from portfolio.api.database import (
 )
 from portfolio.finance.nav_files import delete_fund_nav_csv, download_and_store_fund_nav
 from portfolio.api.models import User
-from portfolio import download_portfolio_navs
 from portfolio.finance.funds import resolve_fund_by_isin
-from portfolio import calculate_buy_and_hold_returns
 from portfolio.api.curve import build_user_equity_curve
 from portfolio.api.mock_management import build_dashboard_data
+from portfolio.api.report import build_report_html, build_user_report_html
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
 NAV_START_DATE = "2000-01-01"
@@ -92,8 +90,6 @@ class PortfolioPositionResponse(BaseModel):
 
 class ReportRequest(BaseModel):
     positions: list[PortfolioPosition]
-    start_date: str = "2000-01-01"
-    end_date: str | None = None
     benchmark: str = "SPY"
 
 
@@ -218,21 +214,25 @@ def save_portfolio(body: PortfolioSave, user: CurrentUser) -> list[dict]:
     return save_user_portfolio(user.id, positions)
 
 
+@app.get("/api/report", response_class=HTMLResponse)
+def get_report(user: CurrentUser, benchmark: str = "SPY") -> HTMLResponse:
+    """QuantStats tearsheet for the user's saved portfolio."""
+    try:
+        html = build_user_report_html(user.id, benchmark)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return HTMLResponse(content=html)
+
+
 @app.post("/api/report", response_class=HTMLResponse)
 def create_report(body: ReportRequest, user: CurrentUser) -> HTMLResponse:
     positions = _validate_positions(body.positions)
-    portfolio = {
-        position["isin"]: position["weighted_assets"] for position in positions
-    }
     save_user_portfolio(user.id, positions)
 
-    end_date = body.end_date or date.today().isoformat()
-    navs_df = download_portfolio_navs(portfolio, body.start_date, end_date)
-    if navs_df.empty:
-        raise HTTPException(status_code=400, detail="No NAV data available")
-
-    portfolio_returns_df = calculate_buy_and_hold_returns(navs_df, portfolio)
-    html = generate_performance_report_html(portfolio_returns_df, body.benchmark)
+    try:
+        html = build_report_html(positions, body.benchmark)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     return HTMLResponse(content=html)
 
 

@@ -1,6 +1,8 @@
 (function () {
   const api = window.PortfolioApi;
 
+  let activeTab = "management";
+
   function showError(message) {
     const targets = [document.getElementById("auth-error"), document.getElementById("error")];
     for (const el of targets) {
@@ -13,18 +15,45 @@
   function setAuthenticated(isAuthenticated) {
     document.getElementById("auth-section").hidden = isAuthenticated;
     document.getElementById("app-section").hidden = !isAuthenticated;
+    const tabsEl = document.getElementById("app-tabs");
     const actionsEl = document.getElementById("top-bar-actions");
     if (isAuthenticated) {
+      tabsEl.removeAttribute("hidden");
       actionsEl.removeAttribute("hidden");
     } else {
+      tabsEl.setAttribute("hidden", "");
       actionsEl.setAttribute("hidden", "");
     }
+  }
+
+  function setActiveTab(tabName) {
+    activeTab = tabName;
+
+    document.querySelectorAll(".app-tab").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.tab === tabName);
+    });
+
+    document.getElementById("management-panel").hidden = tabName !== "management";
+    document.getElementById("risk-panel").hidden = tabName !== "risk";
+  }
+
+  async function showTab(tabName) {
+    setActiveTab(tabName);
+
+    if (tabName === "management") {
+      await window.ManagementView.loadManagement();
+      return;
+    }
+
+    await window.RiskView.loadRiskAnalysis();
   }
 
   function logout() {
     api.setToken(null);
     setAuthenticated(false);
+    setActiveTab("management");
     window.ManagementView.resetManagement();
+    window.RiskView.resetRiskAnalysis();
   }
 
   async function login(event) {
@@ -69,6 +98,7 @@
   async function bootstrapApp() {
     await api.fetchJson(`${api.API}/auth/me`);
     setAuthenticated(true);
+    setActiveTab("management");
     await window.ManagementView.loadManagement();
   }
 
@@ -89,7 +119,12 @@
         body: JSON.stringify({ isin }),
       });
       input.value = "";
-      await window.ManagementView.loadManagement();
+      if (activeTab === "management") {
+        await window.ManagementView.loadManagement();
+      } else {
+        window.RiskView.resetRiskAnalysis();
+        await window.RiskView.loadRiskAnalysis({ force: true });
+      }
     } catch (err) {
       showError(err.message);
     } finally {
@@ -110,6 +145,11 @@
   });
   document.getElementById("add-fund-form").addEventListener("submit", (event) => {
     addFund(event).catch((err) => showError(err.message));
+  });
+  document.querySelectorAll(".app-tab").forEach((button) => {
+    button.addEventListener("click", () => {
+      showTab(button.dataset.tab).catch((err) => showError(err.message));
+    });
   });
 
   if (api.getToken()) {

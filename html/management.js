@@ -281,6 +281,7 @@
       });
 
       renderScreen(await loadScreenData());
+      window.RiskView?.resetRiskAnalysis();
     } catch (error) {
       showError(error.message);
     } finally {
@@ -295,6 +296,7 @@
         method: "DELETE",
       });
       await loadManagement();
+      window.RiskView?.resetRiskAnalysis();
     } catch (error) {
       showError(error.message);
     }

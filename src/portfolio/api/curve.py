@@ -153,6 +153,41 @@ def build_equity_curve(
     }
 
 
+def build_portfolio_evolution(
+    positions: list[dict],
+    funds_dir: Path | None = None,
+) -> pd.Series | None:
+    """Return buy-and-hold portfolio evolution indexed to 1.0, or None."""
+    weights, cash_weight = _portfolio_weights(positions)
+    if not weights:
+        return None
+
+    navs_df = _load_portfolio_navs(weights, funds_dir)
+    available = [isin for isin in weights if isin in navs_df.columns]
+    if not available:
+        return None
+
+    fund_weights = {isin: weights[isin] for isin in available}
+    invested_total = sum(fund_weights.values())
+    if invested_total <= 0:
+        return None
+
+    if invested_total < 1.0:
+        cash_weight = 1.0 - invested_total
+    else:
+        cash_weight = 0.0
+
+    evolution = calculate_buy_and_hold_returns(
+        navs_df[available],
+        fund_weights,
+        cash_weight=cash_weight,
+    )
+    if evolution.empty:
+        return None
+
+    return evolution["portfolio_base_1"]
+
+
 def build_user_equity_curve(
     user_id: int,
     db_path=None,

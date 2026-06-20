@@ -3,25 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alpha Plans — Management</title>
-    <link rel="stylesheet" href="/static/style.css?v=33" />
+    <title>Alpha Plans</title>
+    <link rel="stylesheet" href="/static/style.css?v=46" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
     <header class="top-bar">
       <div class="top-bar-inner">
         <img src="/static/logo.png" alt="Alpha Plans" class="site-logo" />
-        <div id="top-bar-actions" class="top-bar-actions" hidden>
+        <nav class="app-tabs" id="app-tabs" aria-label="Portfolio toolbar" hidden>
+          <button type="button" class="app-tab is-active" data-tab="management">Management</button>
+          <button type="button" class="app-tab" data-tab="risk">Risk analysis</button>
           <form id="add-fund-form" class="add-isin-form">
-            <input
-              id="isin-input"
-              type="text"
-              placeholder="Add ISIN…"
-              maxlength="12"
-              autocomplete="off"
-              spellcheck="false"
-            />
+            <label class="add-isin-field">
+              <button type="submit" class="add-isin-icon-btn" aria-label="Add ISIN">
+                <svg
+                  class="add-isin-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                </svg>
+              </button>
+              <input
+                id="isin-input"
+                type="text"
+                placeholder="Add ISIN…"
+                maxlength="12"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Add ISIN"
+              />
+            </label>
           </form>
+        </nav>
+        <div id="top-bar-actions" class="top-bar-actions" hidden>
           <a href="#" id="logout">logout</a>
         </div>
       </div>
@@ -29,7 +52,7 @@
 
     <main>
       <section id="auth-section">
-        <p class="subtitle">Sign in to view your management dashboard.</p>
+        <p class="subtitle">Sign in to view your portfolio dashboard.</p>
         <p id="auth-error" class="auth-error" hidden></p>
         <div id="auth-forms">
           <form id="login-form" class="auth-form">
@@ -54,9 +77,10 @@
       </section>
 
       <section id="app-section" hidden>
-        <div id="management-loading" class="management-loading">Loading dashboard…</div>
+        <div id="management-panel" class="app-panel">
+          <div id="management-loading" class="management-loading">Loading dashboard…</div>
 
-        <div id="management-view" hidden>
+          <div id="management-view" hidden>
           <section class="chart-panel">
             <div class="chart-legend">
               <span class="legend-item legend-portfolio">Portfolio</span>
@@ -115,14 +139,28 @@
               </table>
             </div>
           </section>
+          </div>
+        </div>
+
+        <div id="risk-panel" class="app-panel" hidden>
+          <div id="risk-loading" class="management-loading">Generating risk analysis…</div>
+          <p id="risk-message" class="risk-message" hidden></p>
+          <iframe
+            id="risk-report-frame"
+            class="risk-report-frame"
+            title="Portfolio risk analysis"
+            scrolling="no"
+            hidden
+          ></iframe>
         </div>
       </section>
 
       <p id="error" class="error" hidden></p>
     </main>
 
-    <script src="/static/api.js?v=8"></script>
-    <script src="/static/management.js?v=30"></script>
-    <script src="/static/app.js?v=10"></script>
+    <script src="/static/api.js?v=9"></script>
+    <script src="/static/management.js?v=31"></script>
+    <script src="/static/risk.js?v=2"></script>
+    <script src="/static/app.js?v=14"></script>
   </body>
 </html>
