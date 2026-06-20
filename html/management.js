@@ -8,12 +8,12 @@
     { key: "weight", format: "percent", weightColumn: true },
     { key: "beta_6m", format: "decimal2" },
     { key: "cor_6m", format: "decimal2" },
-    { key: "vol_1y", format: "decimal2" },
-    { key: "pct_1m", format: "signedPercent" },
+    { key: "vol_1y", format: "decimal2", beforeDivider: true },
+    { key: "pct_1m", format: "signedPercent", divider: true },
     { key: "pct_3m", format: "signedPercent" },
     { key: "pct_6m", format: "signedPercent" },
-    { key: "pct_ytd", format: "signedPercent" },
-    { key: "sr_6m", format: "decimal2", colorize: true },
+    { key: "pct_ytd", format: "signedPercent", beforeDivider: true },
+    { key: "sr_6m", format: "decimal2", colorize: true, divider: true },
     { key: "sr_1y", format: "decimal2", colorize: true },
   ];
 
@@ -47,13 +47,22 @@
     return `<a href="#" class="fund-link" data-isin="${fund.isin}">${fund.name}</a>`;
   }
 
+  function cellClasses(value, column) {
+    return [
+      metricClass(value, column),
+      column.beforeDivider ? "col-before-divider" : "",
+      column.divider ? "col-divider" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
   function renderMetricCells(fund, options = {}) {
     const forceZeroWeight = options.forceZeroWeight === true;
     return METRIC_COLUMNS.map((column) => {
       const value = column.weightColumn && forceZeroWeight ? 0 : fund[column.key];
       const text = formatValue(value, column.format);
-      const className = metricClass(value, column);
-      return `<td class="${className}">${text}</td>`;
+      return `<td class="${cellClasses(value, column)}">${text}</td>`;
     }).join("");
   }
 
@@ -69,13 +78,12 @@
     const cells = METRIC_COLUMNS.map((column) => {
       const value = summary[column.key];
       const text = formatValue(value, column.format);
-      const className = metricClass(value, column);
-      return `<td class="${className}">${text}</td>`;
+      return `<td class="${cellClasses(value, column)}">${text}</td>`;
     }).join("");
 
     return `
     <tr class="summary-row">
-      <td class="col-name"><strong>Portfolio</strong></td>
+      <td class="col-name"></td>
       ${cells}
     </tr>`;
   }

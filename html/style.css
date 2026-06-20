@@ -208,7 +208,6 @@ button:disabled {
 .fund-table td {
   padding: 0.45rem 0.65rem;
   text-align: right;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   white-space: nowrap;
 }
 
@@ -227,8 +226,30 @@ button:disabled {
   white-space: normal;
 }
 
+.fund-table .col-before-divider {
+  padding-right: 1.75rem;
+}
+
+.fund-table .col-divider {
+  position: relative;
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.fund-table .col-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
 .fund-link {
-  color: #1f5eff;
+  color: #0088cc;
   text-decoration: none;
 }
 
@@ -250,10 +271,6 @@ button:disabled {
 
 .summary-row {
   font-weight: 600;
-}
-
-.summary-row td {
-  border-bottom: none;
 }
 
 @media (max-width: 768px) {
