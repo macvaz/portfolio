@@ -370,14 +370,23 @@
     bindRowActions();
   }
 
+  // Chart-only smoothing: trailing moving average for readability. The API and
+  // Risk analysis tab always use raw daily returns; only this chart is smoothed.
+  // The last point stays exact so end-of-period performance matches QuantStats.
   const CHART_SMOOTH_WINDOW = 5;
 
-  function smoothSeries(values, windowSize = CHART_SMOOTH_WINDOW) {
-    if (!values.length || windowSize <= 1) {
+  /** Trailing MA for display; final value is never averaged (see above). */
+  function smoothSeriesPreserveLast(values, windowSize = CHART_SMOOTH_WINDOW) {
+    if (!values.length || windowSize <= 1 || values.length === 1) {
       return values;
     }
 
+    const lastIndex = values.length - 1;
     return values.map((_, index) => {
+      if (index === lastIndex) {
+        return values[index];
+      }
+
       const start = Math.max(0, index - windowSize + 1);
       let sum = 0;
       for (let i = start; i <= index; i += 1) {
@@ -387,33 +396,92 @@
     });
   }
 
+  function formatTotalPct(value) {
+    if (value === null || value === undefined || !Number.isFinite(value)) {
+      return "";
+    }
+    const sign = value >= 0 ? "+" : "";
+    return `${sign}${value.toFixed(2)}% total`;
+  }
+
+  function formatCagrPct(value) {
+    if (value === null || value === undefined || !Number.isFinite(value)) {
+      return "";
+    }
+    const sign = value >= 0 ? "+" : "";
+    return `${sign}${value.toFixed(2)}% CAGR`;
+  }
+
+  function cumulativeReturn(values) {
+    if (!values || !values.length) {
+      return null;
+    }
+    const last = values[values.length - 1];
+    return Number.isFinite(last) ? last : null;
+  }
+
+  function formatLegendPerformance(cumulative, annualized) {
+    const parts = [];
+    const cumulativeLabel = formatTotalPct(cumulative);
+    const annualizedLabel = formatCagrPct(annualized);
+    if (cumulativeLabel) {
+      parts.push(cumulativeLabel);
+    }
+    if (annualizedLabel) {
+      parts.push(annualizedLabel);
+    }
+    return parts.join(", ");
+  }
+
+  function formatPortfolioLegend(curve) {
+    const perf = formatLegendPerformance(
+      cumulativeReturn(curve.portfolio),
+      curve.portfolio_annualized_pct,
+    );
+    return perf ? `Portfolio: ${perf}` : "Portfolio";
+  }
+
+  function formatBenchmarkLegend(curve) {
+    const name = curve.benchmark_name || "S&P 500";
+    const isin = curve.benchmark_isin ? ` (${curve.benchmark_isin})` : "";
+    const perf = formatLegendPerformance(
+      cumulativeReturn(curve.benchmark),
+      curve.benchmark_annualized_pct,
+    );
+    const base = `${name}${isin}`;
+    return perf ? `${base}: ${perf}` : base;
+  }
+
   function buildChartConfig(curve) {
-    const { labels, portfolio, benchmark, benchmark_name: benchmarkName } = curve;
-    const portfolioSeries = smoothSeries(portfolio);
-    const benchmarkSeries = benchmark.length > 0 ? smoothSeries(benchmark) : benchmark;
+    const { labels, portfolio, benchmark } = curve;
+    const portfolioLabel = formatPortfolioLegend(curve);
+    const benchmarkLabel = formatBenchmarkLegend(curve);
+    const portfolioSeries = smoothSeriesPreserveLast(portfolio);
+    const benchmarkSeries =
+      benchmark.length > 0 ? smoothSeriesPreserveLast(benchmark) : benchmark;
     const datasets = [
       {
-        label: "Portfolio",
+        label: portfolioLabel,
         data: portfolioSeries,
         borderColor: "#e91e8c",
         backgroundColor: "rgba(233, 30, 140, 0.08)",
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 4,
-        tension: 0.35,
+        tension: 0.1,
       },
     ];
 
-    if (benchmarkSeries.length > 0) {
+    if (benchmark.length > 0) {
       datasets.push({
-        label: benchmarkName,
+        label: benchmarkLabel,
         data: benchmarkSeries,
         borderColor: "#1f5eff",
         backgroundColor: "rgba(31, 94, 255, 0.08)",
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 4,
-        tension: 0.35,
+        tension: 0.1,
       });
     }
 
@@ -481,7 +549,8 @@
   function renderScreen({ curve, dashboard }) {
     managementData = { curve, dashboard };
 
-    document.getElementById("benchmark-legend").textContent = curve.benchmark_name;
+    document.getElementById("portfolio-legend").textContent = formatPortfolioLegend(curve);
+    document.getElementById("benchmark-legend").textContent = formatBenchmarkLegend(curve);
     renderChart(curve);
     renderTableBody("portfolio-body", dashboard.portfolio, { editableWeights: true });
     document.getElementById("portfolio-summary").innerHTML = renderSummaryRow(

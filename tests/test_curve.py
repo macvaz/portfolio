@@ -1,6 +1,13 @@
 import pandas as pd
 
-from portfolio.api.curve import build_equity_curve
+from portfolio.api.curve import (
+    BENCHMARK_NAME,
+    align_return_series,
+    annualized_return_pct,
+    build_equity_curve,
+    build_portfolio_daily_returns,
+    returns_to_cumulative_curve,
+)
 from portfolio.finance.nav_files import save_fund_nav_csv
 
 
@@ -111,4 +118,53 @@ def test_build_equity_curve_empty_without_nav_files(tmp_path):
     curve = build_equity_curve(positions, funds_dir=tmp_path / "funds")
     assert curve["labels"] == []
     assert curve["portfolio"] == []
+
+
+def test_curve_matches_compounded_portfolio_returns(tmp_path):
+    funds_dir = tmp_path / "funds"
+    df = pd.DataFrame(
+        {"value": [100.0, 110.0, 121.0]},
+        index=pd.to_datetime(["2024-01-31", "2024-02-29", "2024-03-31"]),
+    )
+    save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
+    positions = [{"isin": "ES0182527038", "weighted_assets": 1.0}]
+
+    portfolio_returns = build_portfolio_daily_returns(positions, funds_dir=funds_dir)
+    labels, portfolio_curve = returns_to_cumulative_curve(portfolio_returns)
+    curve = build_equity_curve(positions, funds_dir=funds_dir)
+
+    assert curve["labels"] == labels
+    assert curve["portfolio"] == portfolio_curve
+
+
+def test_annualized_return_pct_matches_quantstats_cagr():
+    import quantstats as qs
+
+    qs.extend_pandas()
+    returns = pd.Series([0.0005] * 252)
+    expected = float(qs.stats.cagr(returns) * 100)
+    assert annualized_return_pct(returns) == round(expected, 2)
+
+
+def test_build_equity_curve_includes_annualized_performance(tmp_path):
+    funds_dir = tmp_path / "funds"
+    df_portfolio = pd.DataFrame(
+        {"value": [100.0, 110.0, 121.0]},
+        index=pd.to_datetime(["2024-01-31", "2024-02-29", "2024-03-31"]),
+    )
+    df_benchmark = pd.DataFrame(
+        {"value": [100.0, 120.0, 140.0]},
+        index=pd.to_datetime(["2024-01-31", "2024-02-29", "2024-03-31"]),
+    )
+    save_fund_nav_csv("ES0182527038", df_portfolio, funds_dir=funds_dir)
+    save_fund_nav_csv("IE00BYX5MX67", df_benchmark, funds_dir=funds_dir)
+
+    curve = build_equity_curve(
+        [{"isin": "ES0182527038", "weighted_assets": 1.0}],
+        funds_dir=funds_dir,
+    )
+
+    assert curve["portfolio_annualized_pct"] is not None
+    assert curve["benchmark_annualized_pct"] is not None
+    assert curve["portfolio_annualized_pct"] != curve["benchmark_annualized_pct"]
 

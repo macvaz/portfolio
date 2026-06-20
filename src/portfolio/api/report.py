@@ -5,7 +5,8 @@ from pathlib import Path
 from portfolio import generate_performance_report_html
 from portfolio.api.curve import (
     BENCHMARK_ISIN,
-    build_portfolio_evolution,
+    align_return_series,
+    build_portfolio_daily_returns,
     load_benchmark_daily_returns,
 )
 from portfolio.api.database import list_user_portfolio
@@ -16,17 +17,18 @@ def build_report_html(
     funds_dir: Path | None = None,
 ) -> str:
     """Build a QuantStats HTML tearsheet from stored NAV files."""
-    evolution = build_portfolio_evolution(positions, funds_dir)
-    if evolution is None or evolution.empty:
+    portfolio_returns = build_portfolio_daily_returns(positions, funds_dir)
+    if portfolio_returns is None or portfolio_returns.empty:
         raise ValueError("No NAV data available for the portfolio")
 
-    portfolio_returns = evolution.pct_change().dropna()
-    if portfolio_returns.empty:
-        raise ValueError("No return data available for the portfolio")
-
-    portfolio_returns.name = "Portfolio"
-
     benchmark_returns = load_benchmark_daily_returns(funds_dir)
+    if benchmark_returns is None or benchmark_returns.empty:
+        raise ValueError(f"No NAV data available for benchmark {BENCHMARK_ISIN}")
+
+    portfolio_returns, benchmark_returns = align_return_series(
+        portfolio_returns,
+        benchmark_returns,
+    )
     if benchmark_returns is None or benchmark_returns.empty:
         raise ValueError(f"No NAV data available for benchmark {BENCHMARK_ISIN}")
 

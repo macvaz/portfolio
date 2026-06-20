@@ -295,6 +295,7 @@ button:disabled {
 
 .chart-legend {
   display: flex;
+  align-items: center;
   justify-content: flex-start;
   gap: 2rem;
   margin-bottom: 0.75rem;
@@ -322,6 +323,12 @@ button:disabled {
 
 .legend-benchmark::before {
   background: #1f5eff;
+}
+
+.chart-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
 }
 
 .chart-wrapper {
@@ -355,9 +362,10 @@ button:disabled {
 
 .fund-table th,
 .fund-table td {
-  padding: 0.45rem 0.65rem;
+  padding: 0.15rem 0.65rem;
   text-align: right;
   white-space: nowrap;
+  line-height: 1.15;
 }
 
 .fund-table th {
@@ -376,7 +384,7 @@ button:disabled {
 }
 
 .fund-table .col-weight {
-  padding: 0.25rem 0.65rem;
+  padding: 0.08rem 0.65rem;
   overflow: visible;
 }
 
@@ -389,7 +397,7 @@ button:disabled {
 .weight-cell-slot {
   display: grid;
   width: 6.25rem;
-  min-height: calc(1em + 0.55rem);
+  min-height: 1em;
 }
 
 .weight-cell-slot > .weight-display,
@@ -398,13 +406,13 @@ button:disabled {
   width: 100%;
   box-sizing: border-box;
   margin: 0;
-  padding: 0.25rem 0.35rem;
+  padding: 0.1rem 0.35rem;
   text-align: right;
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
   font: inherit;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .weight-cell-slot > .weight-display {
@@ -432,7 +440,7 @@ button:disabled {
 
 .weight-input {
   width: 100%;
-  padding: 0.25rem 0.35rem;
+  padding: 0.1rem 0.35rem;
   font-size: inherit;
   text-align: right;
   border: 1px solid transparent;

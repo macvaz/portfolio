@@ -11,11 +11,15 @@ from portfolio.finance.returns import calculate_buy_and_hold_returns
 
 BENCHMARK_NAME = "S&P 500"
 BENCHMARK_ISIN = "IE00BYX5MX67"
+TRADING_DAYS_PER_YEAR = 252
 
 
 def _empty_curve() -> dict:
     return {
         "benchmark_name": BENCHMARK_NAME,
+        "benchmark_isin": BENCHMARK_ISIN,
+        "portfolio_annualized_pct": None,
+        "benchmark_annualized_pct": None,
         "as_of": date.today().isoformat(),
         "labels": [],
         "portfolio": [],
@@ -57,17 +61,6 @@ def _load_portfolio_navs(
     return pd.DataFrame(series).sort_index()
 
 
-def _evolution_to_curve(evolution: pd.Series) -> tuple[list[str], list[float]]:
-    daily = evolution.dropna()
-    if daily.empty:
-        return [], []
-
-    returns_pct = (daily / daily.iloc[0] - 1.0) * 100.0
-    labels = [index_date.strftime("%Y-%m-%d") for index_date in returns_pct.index]
-    values = [round(value, 2) for value in returns_pct.tolist()]
-    return labels, values
-
-
 def _load_benchmark_nav(funds_dir: Path | None = None) -> pd.Series | None:
     nav_df = load_fund_nav_csv(BENCHMARK_ISIN, funds_dir)
     if nav_df.empty or "nav" not in nav_df.columns:
@@ -89,79 +82,59 @@ def load_benchmark_daily_returns(funds_dir: Path | None = None) -> pd.Series | N
     return returns
 
 
-def _benchmark_series_for_labels(
-    labels: list[str],
-    funds_dir: Path | None = None,
-) -> list[float]:
-    nav = _load_benchmark_nav(funds_dir)
-    if nav is None:
-        return []
+def align_return_series(
+    portfolio: pd.Series,
+    benchmark: pd.Series | None,
+) -> tuple[pd.Series, pd.Series | None]:
+    """Align portfolio and benchmark daily returns on shared dates."""
+    portfolio = portfolio.dropna()
+    if benchmark is None or benchmark.empty:
+        return portfolio, None
 
-    navs_df = pd.DataFrame({BENCHMARK_ISIN: nav})
-    evolution = calculate_buy_and_hold_returns(
-        navs_df,
-        {BENCHMARK_ISIN: 1.0},
-        cash_weight=0.0,
-    )
-    if evolution.empty:
-        return []
+    aligned = pd.concat(
+        {"portfolio": portfolio, "benchmark": benchmark},
+        axis=1,
+        join="inner",
+    ).dropna()
+    if aligned.empty:
+        return portfolio, None
 
-    bench_labels, bench_values = _evolution_to_curve(evolution["portfolio_base_1"])
-    if not bench_labels:
-        return []
-
-    bench_series = pd.Series(bench_values, index=pd.to_datetime(bench_labels))
-    portfolio_dates = pd.to_datetime(labels)
-    aligned = bench_series.reindex(portfolio_dates, method="ffill")
-    if aligned.isna().any():
-        return []
-
-    return [round(float(value), 2) for value in aligned.tolist()]
+    portfolio_out = aligned["portfolio"]
+    benchmark_out = aligned["benchmark"]
+    portfolio_out.name = portfolio.name
+    benchmark_out.name = benchmark.name
+    return portfolio_out, benchmark_out
 
 
-def build_equity_curve(
-    positions: list[dict],
-    funds_dir: Path | None = None,
-) -> dict:
-    """Compute buy-and-hold portfolio equity curve from local NAV CSV files."""
-    weights, cash_weight = _portfolio_weights(positions)
-    if not weights:
-        return _empty_curve()
+def returns_to_cumulative_curve(returns: pd.Series) -> tuple[list[str], list[float]]:
+    """Convert daily simple returns to a cumulative % curve starting at zero."""
+    returns = returns.dropna()
+    if returns.empty:
+        return [], []
 
-    navs_df = _load_portfolio_navs(weights, funds_dir)
-    available = [isin for isin in weights if isin in navs_df.columns]
-    if not available:
-        return _empty_curve()
+    wealth = (1 + returns).cumprod()
+    cumulative_pct = (wealth / wealth.iloc[0] - 1.0) * 100.0
+    labels = [index_date.strftime("%Y-%m-%d") for index_date in cumulative_pct.index]
+    values = [round(float(value), 2) for value in cumulative_pct.tolist()]
+    return labels, values
 
-    fund_weights = {isin: weights[isin] for isin in available}
-    invested_total = sum(fund_weights.values())
-    if invested_total <= 0:
-        return _empty_curve()
 
-    if invested_total < 1.0:
-        cash_weight = 1.0 - invested_total
-    else:
-        cash_weight = 0.0
+def annualized_return_pct(
+    returns: pd.Series,
+    periods_per_year: int = TRADING_DAYS_PER_YEAR,
+) -> float | None:
+    """CAGR from daily returns, matching QuantStats (252 trading days per year)."""
+    returns = returns.dropna()
+    if returns.empty:
+        return None
 
-    evolution = calculate_buy_and_hold_returns(
-        navs_df[available],
-        fund_weights,
-        cash_weight=cash_weight,
-    )
-    if evolution.empty:
-        return _empty_curve()
+    total_return = (1 + returns).prod() - 1
+    years = len(returns) / periods_per_year
+    if years <= 0:
+        return None
 
-    labels, portfolio = _evolution_to_curve(evolution["portfolio_base_1"])
-    if not labels:
-        return _empty_curve()
-
-    return {
-        "benchmark_name": BENCHMARK_NAME,
-        "as_of": date.today().isoformat(),
-        "labels": labels,
-        "portfolio": portfolio,
-        "benchmark": _benchmark_series_for_labels(labels, funds_dir),
-    }
+    annualized = (1 + total_return) ** (1 / years) - 1
+    return round(float(annualized * 100), 2)
 
 
 def build_portfolio_evolution(
@@ -197,6 +170,63 @@ def build_portfolio_evolution(
         return None
 
     return evolution["portfolio_base_1"]
+
+
+def build_portfolio_daily_returns(
+    positions: list[dict],
+    funds_dir: Path | None = None,
+) -> pd.Series | None:
+    """Daily simple buy-and-hold portfolio returns used by curve and QuantStats."""
+    evolution = build_portfolio_evolution(positions, funds_dir)
+    if evolution is None or evolution.empty:
+        return None
+
+    returns = evolution.pct_change()
+    # Evolution is indexed from the first return date with base 1.0 on the prior day.
+    returns.iloc[0] = evolution.iloc[0] - 1.0
+    returns = returns.dropna()
+    if returns.empty:
+        return None
+
+    returns.name = "Portfolio"
+    return returns
+
+
+def build_equity_curve(
+    positions: list[dict],
+    funds_dir: Path | None = None,
+) -> dict:
+    """Compute buy-and-hold portfolio equity curve from local NAV CSV files."""
+    portfolio_returns = build_portfolio_daily_returns(positions, funds_dir)
+    if portfolio_returns is None or portfolio_returns.empty:
+        return _empty_curve()
+
+    benchmark_returns = load_benchmark_daily_returns(funds_dir)
+    portfolio_returns, benchmark_returns = align_return_series(
+        portfolio_returns,
+        benchmark_returns,
+    )
+
+    labels, portfolio = returns_to_cumulative_curve(portfolio_returns)
+    if not labels:
+        return _empty_curve()
+
+    benchmark: list[float] = []
+    benchmark_annualized_pct = None
+    if benchmark_returns is not None and not benchmark_returns.empty:
+        _, benchmark = returns_to_cumulative_curve(benchmark_returns)
+        benchmark_annualized_pct = annualized_return_pct(benchmark_returns)
+
+    return {
+        "benchmark_name": BENCHMARK_NAME,
+        "benchmark_isin": BENCHMARK_ISIN,
+        "portfolio_annualized_pct": annualized_return_pct(portfolio_returns),
+        "benchmark_annualized_pct": benchmark_annualized_pct,
+        "as_of": date.today().isoformat(),
+        "labels": labels,
+        "portfolio": portfolio,
+        "benchmark": benchmark,
+    }
 
 
 def build_user_equity_curve(
