@@ -63,21 +63,27 @@ Create a `.env` file in the project root with your FRED API key:
 FRED_API_KEY=your_key_here
 ```
 
-**Run jobs**
+**Run the data job** (macro signals + download fund NAV CSVs for all funds in the database):
 
 ```bash
-uv run get-data.py
+uv run job.py
 ```
+
+Fund NAV files are written to `data/funds/{ISIN}.csv`. Add funds first via `POST /api/funds` before running the job.
+
+Equivalent wrapper script: `uv run get-data.py`
 
 ## API and web UI
 
 Fund ISINs are stored in `data/portfolio.db` (SQLite).
 
-**Start the server:**
+**Start the API server:**
 
 ```bash
 uv run api
 ```
+
+Equivalent wrapper script: `uv run api.py`
 
 Open http://localhost:8000 to register, log in, manage funds, save your portfolio, and generate QuantStats HTML reports.
 
@@ -152,6 +158,13 @@ Or with `uv`:
 ```bash
 uv sync
 ```
+
+**Commands** (registered in `pyproject.toml`):
+
+| Command | Description |
+|---------|-------------|
+| `uv run api.py` | Start the FastAPI web server |
+| `uv run job.py` | Download macro signals and fund NAV CSVs |
 
 ## Tests
 

@@ -24,8 +24,10 @@ from portfolio.api.database import (
     init_db,
     list_funds,
     list_user_portfolio,
+    save_fund,
     save_user_portfolio,
 )
+from portfolio.finance.nav_files import delete_fund_nav_csv
 from portfolio.api.models import User
 from portfolio import download_portfolio_navs
 from portfolio.finance.funds import resolve_fund_by_isin
@@ -164,6 +166,7 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
         raise HTTPException(
             status_code=404, detail=f"No fund found for ISIN {body.isin}"
         )
+    save_fund(fund["isin"], fund["name"], fund["security_id"])
     return {
         "isin": fund["isin"],
         "name": fund["name"],
@@ -175,6 +178,7 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
 def remove_fund(isin: str, _user: CurrentUser) -> None:
     if not delete_fund(isin.upper()):
         raise HTTPException(status_code=404, detail=f"ISIN {isin} not found")
+    delete_fund_nav_csv(isin.upper())
 
 
 @app.get("/api/management")

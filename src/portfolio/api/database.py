@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from pathlib import Path
 
+from sqlalchemy import text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
 from portfolio.api.models import Fund, Portfolio, User
@@ -37,10 +38,40 @@ def get_db(db_path: Path | None = None) -> Generator[Session, None, None]:
         yield session
 
 
+def _migrate_legacy_funds_table(db_path: Path | None = None) -> None:
+    """Move rows from the legacy ``funds`` table into ``fund``."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "funds" not in tables:
+            return
+
+        rows = connection.execute(
+            text("SELECT isin, name, fund_id FROM funds")
+        ).fetchall()
+        if rows:
+            for isin, name, fund_id in rows:
+                connection.execute(
+                    text(
+                        "INSERT OR IGNORE INTO fund (isin, name, fund_id) "
+                        "VALUES (:isin, :name, :fund_id)"
+                    ),
+                    {"isin": isin, "name": name, "fund_id": fund_id},
+                )
+        connection.execute(text("DROP TABLE funds"))
+        connection.commit()
+
+
 def init_db(db_path: Path | None = None) -> None:
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
     SQLModel.metadata.create_all(engine)
+    _migrate_legacy_funds_table(db_path)
 
 
 def create_user(
