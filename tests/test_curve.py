@@ -24,7 +24,7 @@ def test_build_equity_curve_from_nav_files(tmp_path):
 
     curve = build_equity_curve(positions, funds_dir=funds_dir)
 
-    assert curve["labels"] == ["2024-02", "2024-03", "2024-04"]
+    assert curve["labels"] == ["2024-02-29", "2024-03-31", "2024-04-30"]
     assert curve["portfolio"][0] == 0.0
     assert curve["portfolio"][-1] > curve["portfolio"][0]
     assert curve["benchmark"] == []
@@ -101,7 +101,7 @@ def test_build_equity_curve_includes_sp500_benchmark(tmp_path):
         funds_dir=funds_dir,
     )
 
-    assert curve["labels"] == ["2024-02", "2024-03"]
+    assert curve["labels"] == ["2024-02-29", "2024-03-31"]
     assert curve["portfolio"] == [0.0, 10.0]
     assert curve["benchmark"] == [0.0, 16.67]
 

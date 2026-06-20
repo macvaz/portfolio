@@ -58,12 +58,12 @@ def _load_portfolio_navs(
 
 
 def _evolution_to_curve(evolution: pd.Series) -> tuple[list[str], list[float]]:
-    monthly = evolution.resample("ME").last().dropna()
-    if monthly.empty:
+    daily = evolution.dropna()
+    if daily.empty:
         return [], []
 
-    returns_pct = (monthly / monthly.iloc[0] - 1.0) * 100.0
-    labels = [index_date.strftime("%Y-%m") for index_date in returns_pct.index]
+    returns_pct = (daily / daily.iloc[0] - 1.0) * 100.0
+    labels = [index_date.strftime("%Y-%m-%d") for index_date in returns_pct.index]
     values = [round(value, 2) for value in returns_pct.tolist()]
     return labels, values
 
@@ -110,22 +110,13 @@ def _benchmark_series_for_labels(
     if not bench_labels:
         return []
 
-    label_to_value = dict(zip(bench_labels, bench_values, strict=True))
-    sorted_bench = sorted(label_to_value.items())
+    bench_series = pd.Series(bench_values, index=pd.to_datetime(bench_labels))
+    portfolio_dates = pd.to_datetime(labels)
+    aligned = bench_series.reindex(portfolio_dates, method="ffill")
+    if aligned.isna().any():
+        return []
 
-    aligned: list[float] = []
-    for label in labels:
-        value = None
-        for bench_label, bench_value in sorted_bench:
-            if bench_label <= label:
-                value = bench_value
-            else:
-                break
-        if value is None:
-            return []
-        aligned.append(value)
-
-    return aligned
+    return [round(float(value), 2) for value in aligned.tolist()]
 
 
 def build_equity_curve(

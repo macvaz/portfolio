@@ -370,31 +370,50 @@
     bindRowActions();
   }
 
+  const CHART_SMOOTH_WINDOW = 5;
+
+  function smoothSeries(values, windowSize = CHART_SMOOTH_WINDOW) {
+    if (!values.length || windowSize <= 1) {
+      return values;
+    }
+
+    return values.map((_, index) => {
+      const start = Math.max(0, index - windowSize + 1);
+      let sum = 0;
+      for (let i = start; i <= index; i += 1) {
+        sum += values[i];
+      }
+      return sum / (index - start + 1);
+    });
+  }
+
   function buildChartConfig(curve) {
     const { labels, portfolio, benchmark, benchmark_name: benchmarkName } = curve;
+    const portfolioSeries = smoothSeries(portfolio);
+    const benchmarkSeries = benchmark.length > 0 ? smoothSeries(benchmark) : benchmark;
     const datasets = [
       {
         label: "Portfolio",
-        data: portfolio,
+        data: portfolioSeries,
         borderColor: "#e91e8c",
         backgroundColor: "rgba(233, 30, 140, 0.08)",
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 4,
-        tension: 0.15,
+        tension: 0.35,
       },
     ];
 
-    if (benchmark.length > 0) {
+    if (benchmarkSeries.length > 0) {
       datasets.push({
         label: benchmarkName,
-        data: benchmark,
+        data: benchmarkSeries,
         borderColor: "#1f5eff",
         backgroundColor: "rgba(31, 94, 255, 0.08)",
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 4,
-        tension: 0.15,
+        tension: 0.35,
       });
     }
 
