@@ -113,10 +113,12 @@ def save_fund(
 
 def delete_fund(isin: str, db_path: Path | None = None) -> bool:
     init_db(db_path)
+    isin = isin.upper()
     with get_session(db_path) as session:
         fund = session.get(Fund, isin)
         if fund is None:
             return False
+        session.exec(delete(Portfolio).where(Portfolio.isin == isin))
         session.delete(fund)
         session.commit()
     return True

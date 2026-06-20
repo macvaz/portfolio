@@ -129,9 +129,26 @@ button:disabled {
   margin: 0;
 }
 
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.add-isin-form {
+  margin: 0;
+}
+
+.add-isin-form input {
+  width: 11rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.9rem;
+}
+
 #logout {
   color: inherit;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .management-loading {
@@ -226,6 +243,92 @@ button:disabled {
   white-space: normal;
 }
 
+.fund-table .col-weight {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  overflow: visible;
+}
+
+.col-weight-editable {
+  overflow: visible;
+  width: 6.25rem;
+  min-width: 6.25rem;
+}
+
+.weight-cell-slot {
+  display: grid;
+  width: 6.25rem;
+  min-height: calc(1em + 0.55rem);
+}
+
+.weight-cell-slot > .weight-display,
+.weight-cell-slot > .weight-input {
+  grid-area: 1 / 1;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.25rem 0.35rem;
+  text-align: right;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  font: inherit;
+  line-height: 1.2;
+}
+
+.weight-cell-slot > .weight-display {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.weight-cell-slot > .weight-input {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.fund-table tr.row-actions-visible .weight-cell-slot > .weight-display {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.fund-table tr.row-actions-visible .weight-cell-slot > .weight-input {
+  visibility: visible;
+  pointer-events: auto;
+  border-color: #c8d0da;
+  background: #fff;
+}
+
+.weight-input {
+  width: 100%;
+  padding: 0.25rem 0.35rem;
+  font-size: inherit;
+  text-align: right;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  appearance: auto;
+  -moz-appearance: number-input;
+}
+
+.weight-input::-webkit-inner-spin-button,
+.weight-input::-webkit-outer-spin-button {
+  opacity: 1;
+  height: auto;
+  margin-left: 0.45rem;
+}
+
+.weight-input:hover,
+.weight-input:focus {
+  border-color: #c8d0da;
+  background: #fff;
+  outline: none;
+}
+
+.weight-input:disabled {
+  opacity: 0.6;
+}
+
 .fund-table .col-before-divider {
   padding-right: 1.75rem;
 }
@@ -248,6 +351,12 @@ button:disabled {
   background: rgba(0, 0, 0, 0.08);
 }
 
+.fund-name-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
 .fund-link {
   color: #0088cc;
   text-decoration: none;
@@ -255,6 +364,42 @@ button:disabled {
 
 .fund-link:hover {
   text-decoration: underline;
+}
+
+.fund-delete-popup {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  z-index: 20;
+  padding-left: 20px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transform: translateY(-50%);
+}
+
+.fund-name-wrap:hover .fund-delete-popup,
+.fund-delete-popup:hover {
+  display: block;
+}
+
+.fund-delete-btn {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  background: #fff;
+  color: #c0392b;
+  border: 1px solid #e8b4b0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fund-delete-btn:hover {
+  background: #fdecea;
+  border-color: #c0392b;
 }
 
 .metric-positive {

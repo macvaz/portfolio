@@ -27,14 +27,15 @@ from portfolio.api.database import (
     save_fund,
     save_user_portfolio,
 )
-from portfolio.finance.nav_files import delete_fund_nav_csv
+from portfolio.finance.nav_files import delete_fund_nav_csv, download_and_store_fund_nav
 from portfolio.api.models import User
 from portfolio import download_portfolio_navs
 from portfolio.finance.funds import resolve_fund_by_isin
 from portfolio import calculate_buy_and_hold_returns
-from portfolio.api.mock_management import MOCK_MANAGEMENT_DATA
+from portfolio.api.mock_management import build_management_data
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
+NAV_START_DATE = "2000-01-01"
 
 
 @asynccontextmanager
@@ -95,6 +96,18 @@ class ReportRequest(BaseModel):
     benchmark: str = "SPY"
 
 
+def _normalize_portfolio_positions(
+    positions: list[PortfolioPosition],
+) -> list[dict]:
+    normalized = []
+    for position in positions:
+        isin = position.isin.upper()
+        if resolve_fund_by_isin(isin) is None:
+            raise HTTPException(status_code=404, detail=f"Unknown ISIN: {isin}")
+        normalized.append({"isin": isin, "weighted_assets": position.weighted_assets})
+    return normalized
+
+
 def _validate_positions(positions: list[PortfolioPosition]) -> list[dict]:
     if not positions:
         raise HTTPException(status_code=400, detail="Portfolio cannot be empty")
@@ -106,13 +119,7 @@ def _validate_positions(positions: list[PortfolioPosition]) -> list[dict]:
             detail=f"Portfolio weights must sum to 1.0 (got {total_weight:.4f})",
         )
 
-    normalized = []
-    for position in positions:
-        isin = position.isin.upper()
-        if resolve_fund_by_isin(isin) is None:
-            raise HTTPException(status_code=404, detail=f"Unknown ISIN: {isin}")
-        normalized.append({"isin": isin, "weighted_assets": position.weighted_assets})
-    return normalized
+    return _normalize_portfolio_positions(positions)
 
 
 @app.get("/")
@@ -167,6 +174,12 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
             status_code=404, detail=f"No fund found for ISIN {body.isin}"
         )
     save_fund(fund["isin"], fund["name"], fund["security_id"])
+    download_and_store_fund_nav(
+        fund["isin"],
+        fund["security_id"],
+        start_date=NAV_START_DATE,
+        end_date=date.today().isoformat(),
+    )
     return {
         "isin": fund["isin"],
         "name": fund["name"],
@@ -182,9 +195,9 @@ def remove_fund(isin: str, _user: CurrentUser) -> None:
 
 
 @app.get("/api/management")
-def get_management(_user: CurrentUser) -> dict:
-    """Mock management screen data (chart + fund tables)."""
-    return MOCK_MANAGEMENT_DATA
+def get_management(user: CurrentUser) -> dict:
+    """Management screen data: real portfolio funds/weights, mocked metrics elsewhere."""
+    return build_management_data(user.id)
 
 
 @app.get("/api/portfolio", response_model=list[PortfolioPositionResponse])
@@ -194,7 +207,7 @@ def get_portfolio(user: CurrentUser) -> list[dict]:
 
 @app.put("/api/portfolio", response_model=list[PortfolioPositionResponse])
 def save_portfolio(body: PortfolioSave, user: CurrentUser) -> list[dict]:
-    positions = _validate_positions(body.positions)
+    positions = _normalize_portfolio_positions(body.positions)
     return save_user_portfolio(user.id, positions)
 
 

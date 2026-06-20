@@ -3,6 +3,7 @@
 
   let performanceChart = null;
   let managementData = null;
+  let savingWeights = false;
 
   const METRIC_COLUMNS = [
     { key: "weight", format: "percent", weightColumn: true },
@@ -17,6 +18,23 @@
     { key: "sr_1y", format: "decimal2", colorize: true },
   ];
 
+  function showError(message) {
+    const el = document.getElementById("error");
+    if (!el) return;
+    el.textContent = message;
+    el.hidden = !message;
+  }
+
+  function formatWeight(value) {
+    if (!Number.isFinite(value)) {
+      return "0";
+    }
+    if (Math.abs(value - Math.round(value)) < 1e-9) {
+      return String(Math.round(value));
+    }
+    return String(value);
+  }
+
   function formatValue(value, format) {
     if (value === null || value === undefined || Number.isNaN(value)) {
       return "—";
@@ -24,7 +42,7 @@
 
     switch (format) {
       case "percent":
-        return value.toFixed(2);
+        return formatWeight(value);
       case "decimal2":
         return value.toFixed(2);
       case "signedPercent":
@@ -44,7 +62,13 @@
   }
 
   function renderFundName(fund) {
-    return `<a href="#" class="fund-link" data-isin="${fund.isin}">${fund.name}</a>`;
+    return `
+      <div class="fund-name-wrap">
+        <a href="#" class="fund-link" data-isin="${fund.isin}">${fund.name}</a>
+        <div class="fund-delete-popup" role="tooltip">
+          <button type="button" class="fund-delete-btn" data-isin="${fund.isin}">Delete</button>
+        </div>
+      </div>`;
   }
 
   function cellClasses(value, column) {
@@ -57,9 +81,35 @@
       .join(" ");
   }
 
+  function renderWeightInputCell(isin, weight) {
+    const display = formatWeight(weight);
+    return `<td class="col-weight col-weight-editable">
+      <div class="weight-cell-slot">
+        <span class="weight-display">${display}</span>
+        <input
+          type="number"
+          class="weight-input"
+          min="0"
+          max="100"
+          step="1"
+          value="${display}"
+          data-isin="${isin}"
+          aria-label="Weight percent"
+        />
+      </div>
+    </td>`;
+  }
+
   function renderMetricCells(fund, options = {}) {
     const forceZeroWeight = options.forceZeroWeight === true;
+    const editableWeights = options.editableWeights === true;
+
     return METRIC_COLUMNS.map((column) => {
+      if (column.weightColumn && editableWeights) {
+        const weight = forceZeroWeight ? 0 : fund.weight;
+        return renderWeightInputCell(fund.isin, weight);
+      }
+
       const value = column.weightColumn && forceZeroWeight ? 0 : fund[column.key];
       const text = formatValue(value, column.format);
       return `<td class="${cellClasses(value, column)}">${text}</td>`;
@@ -93,12 +143,117 @@
     container.innerHTML = funds.map((fund) => renderFundRow(fund, options)).join("");
   }
 
+  function collectWeightPositions() {
+    const positions = [];
+    document.querySelectorAll(".weight-input").forEach((input) => {
+      const pct = Number.parseFloat(input.value);
+      if (!Number.isFinite(pct) || pct <= 0) {
+        return;
+      }
+      positions.push({
+        isin: input.dataset.isin,
+        weighted_assets: pct / 100,
+      });
+    });
+    return positions;
+  }
+
+  async function savePortfolioWeights() {
+    if (savingWeights) {
+      return;
+    }
+
+    const positions = collectWeightPositions();
+    savingWeights = true;
+    showError("");
+
+    try {
+      await api.fetchJson(`${api.API}/portfolio`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ positions }),
+      });
+
+      const data = await api.fetchJson(`${api.API}/management`);
+      renderManagement(data);
+    } catch (error) {
+      showError(error.message);
+    } finally {
+      savingWeights = false;
+    }
+  }
+
+  async function deleteFund(isin) {
+    showError("");
+    try {
+      await api.fetchJson(`${api.API}/funds/${encodeURIComponent(isin)}`, {
+        method: "DELETE",
+      });
+      await loadManagement();
+    } catch (error) {
+      showError(error.message);
+    }
+  }
+
+  function bindRowActions() {
+    document.querySelectorAll("tr[data-isin]").forEach((row) => {
+      const nameCell = row.querySelector(".col-name");
+      const weightCell = row.querySelector(".col-weight-editable");
+      const weightInput = row.querySelector(".weight-input");
+
+      function showActions(focusWeight = false) {
+        row.classList.add("row-actions-visible");
+        if (focusWeight && weightInput && document.activeElement !== weightInput) {
+          weightInput.focus({ preventScroll: true });
+        }
+      }
+
+      function hideActions() {
+        row.classList.remove("row-actions-visible");
+      }
+
+      nameCell?.addEventListener("mouseenter", () => showActions(true));
+      weightCell?.addEventListener("mouseenter", () => showActions(true));
+
+      row.addEventListener("mouseleave", (event) => {
+        if (!row.contains(event.relatedTarget)) {
+          weightInput?.blur();
+          hideActions();
+        }
+      });
+
+      weightInput?.addEventListener("focus", () => showActions(false));
+    });
+  }
+
   function bindTableInteractions() {
     document.querySelectorAll(".fund-link").forEach((link) => {
       link.addEventListener("click", (event) => {
         event.preventDefault();
       });
     });
+
+    document.querySelectorAll(".fund-delete-btn").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        deleteFund(button.dataset.isin);
+      });
+    });
+
+    document.querySelectorAll(".weight-input").forEach((input) => {
+      input.addEventListener("change", () => {
+        savePortfolioWeights();
+      });
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          input.blur();
+        }
+      });
+    });
+
+    bindRowActions();
   }
 
   function buildChartConfig(data) {
@@ -191,9 +346,12 @@
 
     document.getElementById("benchmark-legend").textContent = data.benchmark_name;
     renderChart(data);
-    renderTableBody("portfolio-body", data.portfolio);
+    renderTableBody("portfolio-body", data.portfolio, { editableWeights: true });
     document.getElementById("portfolio-summary").innerHTML = renderSummaryRow(data.portfolio_summary);
-    renderTableBody("favorites-body", data.favorites, { forceZeroWeight: true });
+    renderTableBody("favorites-body", data.favorites, {
+      editableWeights: true,
+      forceZeroWeight: true,
+    });
     bindTableInteractions();
   }
 
@@ -217,6 +375,7 @@
 
   function resetManagement() {
     managementData = null;
+    savingWeights = false;
     if (performanceChart) {
       performanceChart.destroy();
       performanceChart = null;

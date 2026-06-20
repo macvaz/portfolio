@@ -13,11 +13,11 @@
   function setAuthenticated(isAuthenticated) {
     document.getElementById("auth-section").hidden = isAuthenticated;
     document.getElementById("app-section").hidden = !isAuthenticated;
-    const logoutEl = document.getElementById("logout");
+    const actionsEl = document.getElementById("top-bar-actions");
     if (isAuthenticated) {
-      logoutEl.removeAttribute("hidden");
+      actionsEl.removeAttribute("hidden");
     } else {
-      logoutEl.setAttribute("hidden", "");
+      actionsEl.setAttribute("hidden", "");
     }
   }
 
@@ -72,6 +72,32 @@
     await window.ManagementView.loadManagement();
   }
 
+  async function addFund(event) {
+    event.preventDefault();
+    showError("");
+    const input = document.getElementById("isin-input");
+    const isin = input.value.trim().toUpperCase();
+    if (!isin) {
+      return;
+    }
+
+    input.disabled = true;
+    try {
+      await api.fetchJson(`${api.API}/funds`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isin }),
+      });
+      input.value = "";
+      await window.ManagementView.loadManagement();
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      input.disabled = false;
+      input.focus();
+    }
+  }
+
   document.getElementById("login-form").addEventListener("submit", (event) => {
     login(event).catch((err) => showError(err.message));
   });
@@ -81,6 +107,9 @@
   document.getElementById("logout").addEventListener("click", (event) => {
     event.preventDefault();
     logout();
+  });
+  document.getElementById("add-fund-form").addEventListener("submit", (event) => {
+    addFund(event).catch((err) => showError(err.message));
   });
 
   if (api.getToken()) {

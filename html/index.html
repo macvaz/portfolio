@@ -4,14 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alpha Plans — Management</title>
-    <link rel="stylesheet" href="/static/style.css?v=18" />
+    <link rel="stylesheet" href="/static/style.css?v=31" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
     <header class="top-bar">
       <div class="top-bar-inner">
         <img src="/static/logo.png" alt="Alpha Plans" class="site-logo" />
-        <a href="#" id="logout" hidden>logout</a>
+        <div id="top-bar-actions" class="top-bar-actions" hidden>
+          <form id="add-fund-form" class="add-isin-form">
+            <input
+              id="isin-input"
+              type="text"
+              placeholder="Add ISIN…"
+              maxlength="12"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </form>
+          <a href="#" id="logout">logout</a>
+        </div>
       </div>
     </header>
 
@@ -81,7 +93,7 @@
           </section>
 
           <section class="table-panel">
-            <h2 class="table-title">Favorites</h2>
+            <h2 class="table-title">Other funds</h2>
             <div class="table-scroll">
               <table class="fund-table" id="favorites-table">
                 <thead>
@@ -110,7 +122,7 @@
     </main>
 
     <script src="/static/api.js?v=8"></script>
-    <script src="/static/management.js?v=16"></script>
-    <script src="/static/app.js?v=8"></script>
+    <script src="/static/management.js?v=24"></script>
+    <script src="/static/app.js?v=10"></script>
   </body>
 </html>
