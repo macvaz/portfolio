@@ -90,7 +90,6 @@ class PortfolioPositionResponse(BaseModel):
 
 class ReportRequest(BaseModel):
     positions: list[PortfolioPosition]
-    benchmark: str = "SPY"
 
 
 def _normalize_portfolio_positions(
@@ -215,10 +214,10 @@ def save_portfolio(body: PortfolioSave, user: CurrentUser) -> list[dict]:
 
 
 @app.get("/api/report", response_class=HTMLResponse)
-def get_report(user: CurrentUser, benchmark: str = "SPY") -> HTMLResponse:
+def get_report(user: CurrentUser) -> HTMLResponse:
     """QuantStats tearsheet for the user's saved portfolio."""
     try:
-        html = build_user_report_html(user.id, benchmark)
+        html = build_user_report_html(user.id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return HTMLResponse(content=html)
@@ -230,7 +229,7 @@ def create_report(body: ReportRequest, user: CurrentUser) -> HTMLResponse:
     save_user_portfolio(user.id, positions)
 
     try:
-        html = build_report_html(positions, body.benchmark)
+        html = build_report_html(positions)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return HTMLResponse(content=html)

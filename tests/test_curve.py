@@ -25,7 +25,7 @@ def test_build_equity_curve_from_nav_files(tmp_path):
     curve = build_equity_curve(positions, funds_dir=funds_dir)
 
     assert curve["labels"] == ["2024-02", "2024-03", "2024-04"]
-    assert curve["portfolio"][0] == 100.0
+    assert curve["portfolio"][0] == 0.0
     assert curve["portfolio"][-1] > curve["portfolio"][0]
     assert curve["benchmark"] == []
 
@@ -40,8 +40,8 @@ def test_build_equity_curve_empty_without_positions(tmp_path):
 def test_build_equity_curve_reflects_partial_weights(tmp_path):
     funds_dir = tmp_path / "funds"
     df = pd.DataFrame(
-        {"value": [100.0, 200.0]},
-        index=pd.to_datetime(["2024-01-31", "2024-02-29"]),
+        {"value": [100.0, 110.0, 121.0]},
+        index=pd.to_datetime(["2024-01-31", "2024-02-29", "2024-03-31"]),
     )
     save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
 
@@ -54,9 +54,8 @@ def test_build_equity_curve_reflects_partial_weights(tmp_path):
         funds_dir=funds_dir,
     )
 
-    assert full["portfolio"][-1] == 200.0
-    assert partial["portfolio"][-1] < full["portfolio"][-1]
-    assert partial["portfolio"][-1] > 100.0
+    assert full["portfolio"] == [0.0, 10.0]
+    assert 0 < partial["portfolio"][-1] < full["portfolio"][-1]
 
 
 def test_build_equity_curve_differs_by_portfolio_mix(tmp_path):
@@ -103,8 +102,8 @@ def test_build_equity_curve_includes_sp500_benchmark(tmp_path):
     )
 
     assert curve["labels"] == ["2024-02", "2024-03"]
-    assert curve["portfolio"] == [100.0, 110.0]
-    assert curve["benchmark"] == [100.0, 116.67]
+    assert curve["portfolio"] == [0.0, 10.0]
+    assert curve["benchmark"] == [0.0, 16.67]
 
 
 def test_build_equity_curve_empty_without_nav_files(tmp_path):

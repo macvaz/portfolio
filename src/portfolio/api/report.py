@@ -2,18 +2,17 @@
 
 from pathlib import Path
 
-import pandas as pd
-
 from portfolio import generate_performance_report_html
-from portfolio.api.curve import build_portfolio_evolution
+from portfolio.api.curve import (
+    BENCHMARK_ISIN,
+    build_portfolio_evolution,
+    load_benchmark_daily_returns,
+)
 from portfolio.api.database import list_user_portfolio
-
-DEFAULT_BENCHMARK = "SPY"
 
 
 def build_report_html(
     positions: list[dict],
-    benchmark: str = DEFAULT_BENCHMARK,
     funds_dir: Path | None = None,
 ) -> str:
     """Build a QuantStats HTML tearsheet from stored NAV files."""
@@ -21,13 +20,21 @@ def build_report_html(
     if evolution is None or evolution.empty:
         raise ValueError("No NAV data available for the portfolio")
 
-    portfolio_df = pd.DataFrame({"portfolio": evolution})
-    return generate_performance_report_html(portfolio_df, benchmark)
+    portfolio_returns = evolution.pct_change().dropna()
+    if portfolio_returns.empty:
+        raise ValueError("No return data available for the portfolio")
+
+    portfolio_returns.name = "Portfolio"
+
+    benchmark_returns = load_benchmark_daily_returns(funds_dir)
+    if benchmark_returns is None or benchmark_returns.empty:
+        raise ValueError(f"No NAV data available for benchmark {BENCHMARK_ISIN}")
+
+    return generate_performance_report_html(portfolio_returns, benchmark_returns)
 
 
 def build_user_report_html(
     user_id: int,
-    benchmark: str = DEFAULT_BENCHMARK,
     db_path=None,
     funds_dir: Path | None = None,
 ) -> str:
@@ -35,4 +42,4 @@ def build_user_report_html(
     if not positions:
         raise ValueError("Portfolio is empty")
 
-    return build_report_html(positions, benchmark, funds_dir)
+    return build_report_html(positions, funds_dir)

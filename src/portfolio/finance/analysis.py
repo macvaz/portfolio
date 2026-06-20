@@ -9,34 +9,31 @@ logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
 
 def generate_performance_report(
-    df: pd.DataFrame, benchmark: str = "SPY", output_file: str = "report.html"
+    returns: pd.Series,
+    benchmark: pd.Series,
+    output_file: str = "report.html",
 ):
     """
-    Generates a comprehensive QuantStats HTML report for a given series of prices or returns.
+    Generates a comprehensive QuantStats HTML report for daily return series.
 
     Args:
-        df: DataFrame containing price data (expects the first column to be the primary series).
-        benchmark: Ticker symbol for the benchmark (e.g., 'SPY', '^GSPC').
+        returns: Daily simple returns for the portfolio/strategy.
+        benchmark: Daily simple returns for the benchmark.
         output_file: Path where the HTML report will be saved.
     """
-    # Extend pandas with quantstats methods
     qs.extend_pandas()
 
-    # Calculate returns from the first column of the DataFrame
-    # QuantStats works best with a Series of daily returns
-    returns = df.iloc[:, 0].pct_change().dropna()
-
-    print(f"[*] Generating QuantStats report against benchmark: {benchmark}...")
+    print(f"[*] Generating QuantStats report against benchmark: {benchmark.name}...")
     qs.reports.html(returns, benchmark, output=output_file)
     print(f"[+] Performance report successfully saved to: {output_file}")
 
 
 def generate_performance_report_html(
-    df: pd.DataFrame, benchmark: str = "SPY"
+    returns: pd.Series,
+    benchmark: pd.Series,
 ) -> str:
     """Generate a QuantStats HTML report and return it as a string."""
     qs.extend_pandas()
-    returns = df.iloc[:, 0].pct_change().dropna()
 
     with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tmp:
         output_path = tmp.name

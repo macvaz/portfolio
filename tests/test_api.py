@@ -86,6 +86,7 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
         index=pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"]),
     )
     save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
+    save_fund_nav_csv("IE00BYX5MX67", df, funds_dir=funds_dir)
 
     client = TestClient(app)
     token = _register_and_login(client, "user@example.com", "secretpass")
@@ -97,7 +98,8 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
         json={"positions": [{"isin": "ES0182527038", "weighted_assets": 1.0}]},
     )
 
-    def mock_report_html(portfolio_df, benchmark="SPY"):
+    def mock_report_html(portfolio_returns, benchmark_returns):
+        assert benchmark_returns.name == "S&P 500"
         return "<html><body>QuantStats report</body></html>"
 
     monkeypatch.setattr(
@@ -192,7 +194,7 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     response = client.get("/api/curve", headers=headers)
     assert response.status_code == 200
     data = response.json()
-    assert data["portfolio"][0] == 100.0
+    assert data["portfolio"][0] == 0.0
     assert len(data["labels"]) >= 2
     assert data["benchmark"] == []
 

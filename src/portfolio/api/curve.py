@@ -11,7 +11,6 @@ from portfolio.finance.returns import calculate_buy_and_hold_returns
 
 BENCHMARK_NAME = "S&P 500"
 BENCHMARK_ISIN = "IE00BYX5MX67"
-CHART_BASE_VALUE = 100.0
 
 
 def _empty_curve() -> dict:
@@ -63,21 +62,42 @@ def _evolution_to_curve(evolution: pd.Series) -> tuple[list[str], list[float]]:
     if monthly.empty:
         return [], []
 
-    indexed = monthly / monthly.iloc[0] * CHART_BASE_VALUE
-    labels = [index_date.strftime("%Y-%m") for index_date in indexed.index]
-    values = [round(value, 2) for value in indexed.tolist()]
+    returns_pct = (monthly / monthly.iloc[0] - 1.0) * 100.0
+    labels = [index_date.strftime("%Y-%m") for index_date in returns_pct.index]
+    values = [round(value, 2) for value in returns_pct.tolist()]
     return labels, values
+
+
+def _load_benchmark_nav(funds_dir: Path | None = None) -> pd.Series | None:
+    nav_df = load_fund_nav_csv(BENCHMARK_ISIN, funds_dir)
+    if nav_df.empty or "nav" not in nav_df.columns:
+        return None
+    return nav_df["nav"]
+
+
+def load_benchmark_daily_returns(funds_dir: Path | None = None) -> pd.Series | None:
+    """Daily simple returns for the benchmark fund from stored NAV data."""
+    nav = _load_benchmark_nav(funds_dir)
+    if nav is None:
+        return None
+
+    returns = nav.pct_change().dropna()
+    if returns.empty:
+        return None
+
+    returns.name = BENCHMARK_NAME
+    return returns
 
 
 def _benchmark_series_for_labels(
     labels: list[str],
     funds_dir: Path | None = None,
 ) -> list[float]:
-    nav_df = load_fund_nav_csv(BENCHMARK_ISIN, funds_dir)
-    if nav_df.empty or "nav" not in nav_df.columns:
+    nav = _load_benchmark_nav(funds_dir)
+    if nav is None:
         return []
 
-    navs_df = pd.DataFrame({BENCHMARK_ISIN: nav_df["nav"]})
+    navs_df = pd.DataFrame({BENCHMARK_ISIN: nav})
     evolution = calculate_buy_and_hold_returns(
         navs_df,
         {BENCHMARK_ISIN: 1.0},
