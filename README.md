@@ -6,7 +6,7 @@ A small Python library to download and process time series (fund prices) from Mo
 
 ```
 portfolio/
-├── api.py                          # Starging the API server
+├── api.py                          # Starting the API server
 ├── job.py                          # Downloading data points from morningstar and fred
 ├── pyproject.toml
 ├── uv.lock
