@@ -44,7 +44,9 @@ portfolio/
 │   │   ├── metrics.py              # Fund/portfolio metric computation
 │   │   ├── quantstats.py           # QuantStats HTML reports
 │   │   ├── returns.py              # Buy-and-hold return calculation
-│   │   └── signals.py              # FRED download and signal calculations
+│   │   ├── macro_constants.py      # FRED series and macro column names
+│   │   ├── macro_signals.py        # Macro indicator functions (metadata-driven)
+│   │   └── signals.py              # FRED download and signal pipeline
 │   ├── datasources/
 │   │   ├── fred.py                 # FRED time series download
 │   │   └── morningstar.py          # ISIN lookup and NAV download
@@ -97,6 +99,42 @@ uv run job.py
 ```
 
 Fund NAV files are written to `data/funds/{ISIN}.csv`. Add funds first via the web UI or `POST /api/portfolio/funds` before running the job.
+
+## Macro signals
+
+The data job downloads macroeconomic series from FRED, aligns them to S&P 500 trading days, and runs a metadata-driven pipeline of indicator functions.
+
+**Pipeline**
+
+1. `job.py` defines which FRED series to download (`FRED_SERIES`) and which macro functions to run (`MACRO_SIGNALS`).
+2. `signals.py` downloads the series, forward-fills gaps on the SP500 calendar, and pipes the DataFrame through each macro function.
+3. Market signals (SP500 moving averages and death cross) are computed on top of the macro output.
+
+**Current macro indicators**
+
+| Indicator | Input series | Alert / output |
+|-----------|--------------|----------------|
+| Inverted curve | 10Y–3M yield spread (`T10Y3M`) | `Alert_Inverted_Curve` when spread < 0 |
+| Sahm rule | Unemployment rate (`UNRATE`) | `Sahm_Value` and `Alert_Sahm` (informational) |
+| Financial stress | STL Financial Stress Index (`STLFSI4`) | `Alert_Financial_Stress` when index ≥ 1.0 |
+| Crisis votes | Selected alerts above | `Macro_Crisis_Votes` and `MACRO_SYSTEM_LOCKED` when ≥ 2 votes |
+
+The Sahm rule is tracked but does not count toward crisis votes. Only inverted-curve and financial-stress alerts vote.
+
+**Files**
+
+- `macro_constants.py` — column names and `MACRO_VOTE_ALERTS` (single source of truth for string identifiers).
+- `macro_signals.py` — one function per indicator; each takes a DataFrame and returns it with new columns via `.assign()`.
+- `job.py` — wires FRED series IDs to column names and lists the macro functions to run.
+
+**Adding a new macro signal**
+
+1. Add the column name(s) to `macro_constants.py`.
+2. If needed, add the FRED series to `FRED_SERIES` in `job.py`.
+3. Implement a function in `macro_signals.py` (e.g. `def my_signal(df): return df.assign(...)`).
+4. Append the function to `MACRO_SIGNALS` in `job.py`. To include it in crisis voting, add its alert column to `MACRO_VOTE_ALERTS` in `macro_constants.py`.
+
+When the job runs, the latest macro and market signals are printed to the console.
 
 ## API and web UI
 
