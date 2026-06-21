@@ -23,15 +23,14 @@ from portfolio.api.database import (
     save_user_portfolio,
     set_default_user,
 )
-from portfolio.api.signals_service import get_signals
+from portfolio.api.report import build_report_html, build_user_report_html
 from portfolio.finance.navs import delete_fund_nav_csv, download_and_store_fund_nav
 from portfolio.finance.metrics import refresh_fund_metrics
 from portfolio.api.models import User
 from portfolio.datasources.morningstar import import_isins, morningstar_quote_url
 from portfolio.api.curve import build_user_equity_curve
 from portfolio.api.metrics import get_portfolio_metrics
-from portfolio.api.report import build_report_html, build_user_report_html
-from portfolio.api.signals import router as signals_router
+from portfolio.api.signals import get_signals
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
 NAV_START_DATE = "2000-01-01"
