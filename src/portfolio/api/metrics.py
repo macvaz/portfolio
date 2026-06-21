@@ -3,7 +3,7 @@
 from datetime import date
 
 from portfolio.api.database import get_fund_metrics, list_funds, list_user_portfolio
-from portfolio.finance.funds import morningstar_quote_url, resolve_fund_by_isin
+from portfolio.finance.morningstar import import_isins, morningstar_quote_url
 from portfolio.finance.metrics import compute_portfolio_metrics
 
 
@@ -17,7 +17,7 @@ def _morningstar_link(
         return morningstar_quote_url(performance_id, universe)
     if db_path is None:
         return morningstar_quote_url(performance_id, universe)
-    resolved = resolve_fund_by_isin(isin, db_path)
+    resolved = import_isins(isin, db_path=db_path)
     if resolved is None:
         return morningstar_quote_url(performance_id, universe)
     return morningstar_quote_url(

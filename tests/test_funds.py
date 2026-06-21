@@ -1,5 +1,5 @@
 from portfolio.api.database import get_fund, init_db, list_funds, save_fund
-from portfolio.finance.funds import morningstar_quote_url, resolve_fund_by_isin
+from portfolio.finance.morningstar import import_isins, morningstar_quote_url
 
 
 def test_morningstar_quote_url():
@@ -50,7 +50,7 @@ def test_save_fund_roundtrip(tmp_path):
     ]
 
 
-def test_resolve_fund_by_isin_uses_cached_fund(tmp_path, monkeypatch):
+def test_import_isins_uses_cached_fund(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     save_fund(
         "ES0182527038",
@@ -64,9 +64,9 @@ def test_resolve_fund_by_isin_uses_cached_fund(tmp_path, monkeypatch):
     def fail_search(_isin):
         raise AssertionError("Morningstar search should not be called for cached ISIN")
 
-    monkeypatch.setattr("portfolio.finance.funds.search_by_isin", fail_search)
+    monkeypatch.setattr("portfolio.finance.morningstar._search_by_isin", fail_search)
 
-    fund = resolve_fund_by_isin("ES0182527038", db_path=db_path)
+    fund = import_isins("ES0182527038", db_path=db_path)
 
     assert fund == {
         "security_id": "F0GBR04KHC",
@@ -77,7 +77,7 @@ def test_resolve_fund_by_isin_uses_cached_fund(tmp_path, monkeypatch):
     }
 
 
-def test_resolve_fund_by_isin_fetches_and_persists_new_isin(tmp_path, monkeypatch):
+def test_import_isins_fetches_and_persists_new_isin(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
 
     def mock_search(isin):
@@ -89,9 +89,9 @@ def test_resolve_fund_by_isin_fetches_and_persists_new_isin(tmp_path, monkeypatc
             "isin": isin,
         }
 
-    monkeypatch.setattr("portfolio.finance.funds.search_by_isin", mock_search)
+    monkeypatch.setattr("portfolio.finance.morningstar._search_by_isin", mock_search)
 
-    fund = resolve_fund_by_isin("IE00BYX5NX33", db_path=db_path)
+    fund = import_isins("IE00BYX5NX33", db_path=db_path)
 
     assert fund == {
         "security_id": "F0GBR04KHC",

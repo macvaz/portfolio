@@ -13,7 +13,7 @@ def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):
 
     calls: list[tuple[str, str]] = []
 
-    def mock_download(fund_id, currency, start, end, timeout=30):
+    def mock_download(*, fund_id, start, end, currency, timeout=30):
         calls.append((fund_id, currency))
         import pandas as pd
 
@@ -23,7 +23,7 @@ def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):
         )
 
     monkeypatch.setattr(
-        "portfolio.finance.nav_files.download_fund_navs",
+        "portfolio.finance.nav_files.download_navs",
         mock_download,
     )
 
@@ -56,8 +56,8 @@ def test_run_get_navs_skips_funds_without_data(tmp_path, monkeypatch):
     import pandas as pd
 
     monkeypatch.setattr(
-        "portfolio.finance.nav_files.download_fund_navs",
-        lambda *_args, **_kwargs: pd.DataFrame(),
+        "portfolio.finance.nav_files.download_navs",
+        lambda **_kwargs: pd.DataFrame(),
     )
 
     saved = store_fund_navs_from_db(

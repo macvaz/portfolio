@@ -3,7 +3,7 @@ from pathlib import Path
 
 from portfolio import process_macro_data, print_signals
 from portfolio.finance.metrics import update_all_fund_metrics
-from portfolio.finance.funds import backfill_fund_performance_ids
+from portfolio.finance.morningstar import import_isins
 from portfolio.finance.nav_files import store_fund_navs_from_db
 
 
@@ -33,7 +33,7 @@ def run(
     )
 
     print("\n3. Backfilling Morningstar fund links...")
-    linked = backfill_fund_performance_ids(db_path)
+    linked = import_isins(db_path=db_path)
     print(f"Done. Linked {linked} fund(s).")
 
     print("\n4. Computing fund metrics...")

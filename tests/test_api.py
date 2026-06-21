@@ -118,7 +118,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
             "universe": "FO",
         }
 
-    def mock_download(fund_id, currency, start, end, timeout=30):
+    def mock_download(*, fund_id, start, end, currency, timeout=30):
         import pandas as pd
 
         return pd.DataFrame(
@@ -126,9 +126,9 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
             index=pd.to_datetime(["2024-01-01", "2024-01-02"]),
         )
 
-    monkeypatch.setattr("portfolio.api.app.resolve_fund_by_isin", mock_resolve)
+    monkeypatch.setattr("portfolio.api.app.import_isins", mock_resolve)
     monkeypatch.setattr(
-        "portfolio.finance.nav_files.download_fund_navs",
+        "portfolio.finance.nav_files.download_navs",
         mock_download,
     )
 
@@ -201,7 +201,7 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
-        "portfolio.api.metrics.resolve_fund_by_isin",
+        "portfolio.api.metrics.import_isins",
         lambda isin, db_path=None: None,
     )
     init_db(db_path)
@@ -259,7 +259,7 @@ def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypa
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
-        "portfolio.api.metrics.resolve_fund_by_isin",
+        "portfolio.api.metrics.import_isins",
         lambda isin, db_path=None: None,
     )
     init_db(db_path)

@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from portfolio.api.database import list_funds
-from portfolio.finance.morningstar import download_fund_navs
+from portfolio.finance.morningstar import download_navs
 
 DEFAULT_FUNDS_DIR = Path("data/funds")
 
@@ -68,7 +68,12 @@ def download_and_store_fund_nav(
     currency: str = "EUR",
     funds_dir: Path | None = None,
 ) -> Path | None:
-    nav_df = download_fund_navs(fund_id, currency, start_date, end_date)
+    nav_df = download_navs(
+        fund_id=fund_id,
+        start=start_date,
+        end=end_date,
+        currency=currency,
+    )
     if nav_df.empty:
         return None
     return save_fund_nav_csv(isin, nav_df, funds_dir)

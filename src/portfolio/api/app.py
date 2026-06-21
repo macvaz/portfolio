@@ -26,7 +26,7 @@ from portfolio.api.database import (
 from portfolio.finance.nav_files import delete_fund_nav_csv, download_and_store_fund_nav
 from portfolio.finance.metrics import refresh_fund_metrics
 from portfolio.api.models import User
-from portfolio.finance.funds import morningstar_quote_url, resolve_fund_by_isin
+from portfolio.finance.morningstar import import_isins, morningstar_quote_url
 from portfolio.api.curve import build_user_equity_curve
 from portfolio.api.metrics import get_portfolio_metrics
 from portfolio.api.report import build_report_html, build_user_report_html
@@ -174,7 +174,7 @@ def get_funds() -> list[dict]:
 
 @app.post("/api/funds", response_model=FundResponse)
 def create_fund(body: FundCreate) -> dict:
-    fund = resolve_fund_by_isin(body.isin.upper())
+    fund = import_isins(body.isin.upper())
     if fund is None:
         raise HTTPException(
             status_code=404, detail=f"No fund found for ISIN {body.isin}"
