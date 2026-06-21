@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=62" />
+    <link rel="stylesheet" href="/static/style.css?v=71" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -48,39 +48,27 @@
             </label>
           </form>
         </nav>
-        <div id="top-bar-actions" class="top-bar-actions" hidden>
-          <a href="#" id="logout">logout</a>
+        <div class="toolbar-right">
+          <div class="portfolio-picker">
+            <select id="portfolio-select" aria-label="Select portfolio"></select>
+            <input
+              id="portfolio-create-input"
+              type="text"
+              class="portfolio-create-input"
+              hidden
+              maxlength="200"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="New portfolio name…"
+              aria-label="New portfolio name"
+            />
+          </div>
         </div>
       </div>
     </header>
 
     <main>
-      <section id="auth-section">
-        <p class="subtitle">Sign in to view your portfolio dashboard.</p>
-        <p id="auth-error" class="auth-error" hidden></p>
-        <div id="auth-forms">
-          <form id="login-form" class="auth-form">
-            <h3>Log in</h3>
-            <input id="login-email" type="email" placeholder="Email" required />
-            <input id="login-password" type="password" placeholder="Password" required />
-            <button type="submit">Log in</button>
-          </form>
-          <form id="register-form" class="auth-form">
-            <h3>Register</h3>
-            <input id="register-email" type="email" placeholder="Email" required />
-            <input
-              id="register-password"
-              type="password"
-              placeholder="Password (min 8 chars)"
-              minlength="8"
-              required
-            />
-            <button type="submit" class="secondary">Register</button>
-          </form>
-        </div>
-      </section>
-
-      <section id="app-section" hidden>
+      <section id="app-section">
         <div id="management-panel" class="app-panel">
           <div id="management-loading" class="management-loading">Loading dashboard…</div>
 
@@ -96,7 +84,7 @@
           </section>
 
           <section class="table-panel">
-            <h2 class="table-title">Portfolio</h2>
+            <h2 class="table-title">Portfolio: <span id="portfolio-table-name" class="portfolio-table-name"></span></h2>
             <div class="table-scroll">
               <table class="fund-table" id="portfolio-table">
                 <thead>
@@ -162,9 +150,10 @@
       <p id="error" class="error" hidden></p>
     </main>
 
-    <script src="/static/api.js?v=9"></script>
-    <script src="/static/management.js?v=65"></script>
-    <script src="/static/risk.js?v=2"></script>
-    <script src="/static/app.js?v=14"></script>
+    <script src="/static/api.js?v=11"></script>
+    <script src="/static/portfolios.js?v=4"></script>
+    <script src="/static/management.js?v=68"></script>
+    <script src="/static/risk.js?v=4"></script>
+    <script src="/static/app.js?v=23"></script>
   </body>
 </html>

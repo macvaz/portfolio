@@ -283,11 +283,21 @@
   }
 
   async function loadScreenData() {
-    const [curve, dashboard] = await Promise.all([
-      api.fetchJson(`${api.API}/curve`),
-      api.fetchJson(`${api.API}/dashboard`),
+    const [curve, dashboard, portfolios] = await Promise.all([
+      api.fetchJson(api.withPortfolioId(`${api.API}/curve`)),
+      api.fetchJson(api.withPortfolioId(`${api.API}/dashboard`)),
+      api.fetchJson(`${api.API}/portfolios`),
     ]);
-    return { curve, dashboard };
+    return { curve, dashboard, portfolios };
+  }
+
+  function updatePortfolioTableTitle(portfolios) {
+    const label = document.getElementById("portfolio-table-name");
+    if (!label) {
+      return;
+    }
+    const selected = portfolios.find((portfolio) => portfolio.id === api.getPortfolioId());
+    label.textContent = selected?.name ?? "";
   }
 
   async function savePortfolioWeights() {
@@ -300,7 +310,7 @@
     showError("");
 
     try {
-      await api.fetchJson(`${api.API}/portfolio`, {
+      await api.fetchJson(api.withPortfolioId(`${api.API}/portfolio`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ positions }),
@@ -563,8 +573,10 @@
     performanceChart = new Chart(context, buildChartConfig(curve));
   }
 
-  function renderScreen({ curve, dashboard }) {
-    managementData = { curve, dashboard };
+  function renderScreen({ curve, dashboard, portfolios }) {
+    managementData = { curve, dashboard, portfolios };
+
+    updatePortfolioTableTitle(portfolios);
 
     document.getElementById("portfolio-legend").innerHTML = formatPortfolioLegendHtml(curve);
     document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);

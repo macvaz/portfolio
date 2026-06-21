@@ -95,6 +95,73 @@ def _migrate_fund_universe(db_path: Path | None = None) -> None:
             connection.commit()
 
 
+def _migrate_drop_user_password(db_path: Path | None = None) -> None:
+    """Remove ``hashed_password`` from ``user`` when upgrading an existing database."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "user" not in tables:
+            return
+
+        columns = {
+            row[1]
+            for row in connection.execute(text("PRAGMA table_info(user)"))
+        }
+        if "hashed_password" not in columns:
+            return
+
+        connection.execute(
+            text(
+                "CREATE TABLE user_new ("
+                "id INTEGER NOT NULL PRIMARY KEY, "
+                "email VARCHAR NOT NULL"
+                ")"
+            )
+        )
+        connection.execute(
+            text("INSERT INTO user_new (id, email) SELECT id, email FROM user")
+        )
+        connection.execute(text("DROP TABLE user"))
+        connection.execute(text("ALTER TABLE user_new RENAME TO user"))
+        connection.execute(
+            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_user_email ON user (email)")
+        )
+        connection.commit()
+
+
+def _migrate_user_email_to_name(db_path: Path | None = None) -> None:
+    """Rename ``email`` to ``name`` on ``user`` when upgrading an existing database."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "user" not in tables:
+            return
+
+        columns = {
+            row[1]
+            for row in connection.execute(text("PRAGMA table_info(user)"))
+        }
+        if "name" in columns or "email" not in columns:
+            return
+
+        connection.execute(text("ALTER TABLE user RENAME COLUMN email TO name"))
+        connection.execute(text("DROP INDEX IF EXISTS ix_user_email"))
+        connection.execute(
+            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_user_name ON user (name)")
+        )
+        connection.commit()
+
+
 def init_db(db_path: Path | None = None) -> None:
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
@@ -102,18 +169,31 @@ def init_db(db_path: Path | None = None) -> None:
     _migrate_legacy_funds_table(db_path)
     _migrate_fund_performance_id(db_path)
     _migrate_fund_universe(db_path)
+    _migrate_drop_user_password(db_path)
+    _migrate_user_email_to_name(db_path)
 
 
-def create_user(
-    email: str, hashed_password: str, db_path: Path | None = None
-) -> User:
+def create_user(name: str, db_path: Path | None = None) -> User:
     init_db(db_path)
     with get_session(db_path) as session:
-        user = User(email=email, hashed_password=hashed_password)
+        user = User(name=name)
         session.add(user)
         session.commit()
         session.refresh(user)
         return user
+
+
+def get_user(user_id: int, db_path: Path | None = None) -> User | None:
+    init_db(db_path)
+    with get_session(db_path) as session:
+        return session.get(User, user_id)
+
+
+def list_users(db_path: Path | None = None) -> list[dict]:
+    init_db(db_path)
+    with get_session(db_path) as session:
+        users = session.exec(select(User).order_by(User.name)).all()
+    return [{"id": user.id, "name": user.name} for user in users]
 
 
 def get_fund(isin: str, db_path: Path | None = None) -> dict | None:

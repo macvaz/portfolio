@@ -1,19 +1,12 @@
 from fastapi.testclient import TestClient
 
 from portfolio.api.app import app
-from portfolio.api.database import get_fund_metrics, init_db, save_fund, save_fund_metrics
+from portfolio.api.database import create_user, get_fund_metrics, init_db, save_fund, save_fund_metrics
 
 
-def _register_and_login(client: TestClient, email: str, password: str) -> str:
-    client.post(
-        "/api/auth/register",
-        json={"email": email, "password": password},
-    )
-    response = client.post(
-        "/api/auth/token",
-        data={"username": email, "password": password},
-    )
-    return response.json()["access_token"]
+def _create_user(db_path, name: str = "Growth") -> int:
+    init_db(db_path)
+    return create_user(name, db_path=db_path).id
 
 
 def test_list_and_delete_funds(tmp_path, monkeypatch):
@@ -24,10 +17,9 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
-    response = client.get("/api/funds", headers=headers)
+    response = client.get("/api/funds")
     assert response.status_code == 200
     assert response.json() == [
         {
@@ -38,9 +30,9 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
         }
     ]
 
-    delete_response = client.delete("/api/funds/ES0182527038", headers=headers)
+    delete_response = client.delete("/api/funds/ES0182527038")
     assert delete_response.status_code == 204
-    assert client.get("/api/funds", headers=headers).json() == []
+    assert client.get("/api/funds").json() == []
 
 
 def test_create_report_rejects_empty_portfolio(tmp_path, monkeypatch):
@@ -49,10 +41,9 @@ def test_create_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
-    response = client.post("/api/report", json={"positions": []}, headers=headers)
+    response = client.post("/api/report", params={"portfolio_id": user_id}, json={"positions": []})
     assert response.status_code == 400
 
 
@@ -62,10 +53,9 @@ def test_get_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
-    response = client.get("/api/report", headers=headers)
+    response = client.get("/api/report", params={"portfolio_id": user_id})
     assert response.status_code == 400
     assert response.json()["detail"] == "Portfolio is empty"
 
@@ -90,12 +80,11 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
     save_fund_nav_csv("IE00BYX5MX67", df, funds_dir=funds_dir)
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
     client.put(
         "/api/portfolio",
-        headers=headers,
+        params={"portfolio_id": user_id},
         json={"positions": [{"isin": "ES0182527038", "weighted_assets": 1.0}]},
     )
 
@@ -108,7 +97,7 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
         mock_report_html,
     )
 
-    response = client.get("/api/report", headers=headers)
+    response = client.get("/api/report", params={"portfolio_id": user_id})
     assert response.status_code == 200
     assert "QuantStats report" in response.text
 
@@ -144,12 +133,9 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     )
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
 
     response = client.post(
         "/api/funds",
-        headers=headers,
         json={"isin": "ES0182527038"},
     )
     assert response.status_code == 200
@@ -189,12 +175,11 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     save_fund_nav_csv("IE00BYX5NX33", df, funds_dir=funds_dir)
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
     client.put(
         "/api/portfolio",
-        headers=headers,
+        params={"portfolio_id": user_id},
         json={
             "positions": [
                 {"isin": "ES0182527038", "weighted_assets": 0.5},
@@ -203,7 +188,7 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
         },
     )
 
-    response = client.get("/api/curve", headers=headers)
+    response = client.get("/api/curve", params={"portfolio_id": user_id})
     assert response.status_code == 200
     data = response.json()
     assert data["portfolio"][0] == 0.0
@@ -241,12 +226,11 @@ def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     )
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
     client.put(
         "/api/portfolio",
-        headers=headers,
+        params={"portfolio_id": user_id},
         json={
             "positions": [
                 {"isin": "ES0182527038", "weighted_assets": 0.35},
@@ -255,7 +239,7 @@ def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
         },
     )
 
-    response = client.get("/api/dashboard", headers=headers)
+    response = client.get("/api/dashboard", params={"portfolio_id": user_id})
     assert response.status_code == 200
     data = response.json()
 
@@ -284,12 +268,11 @@ def test_dashboard_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkey
     save_fund("IE00BYX5M476", "Emerging Markets", "F00001020E", db_path=db_path)
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
     client.put(
         "/api/portfolio",
-        headers=headers,
+        params={"portfolio_id": user_id},
         json={
             "positions": [
                 {"isin": "ES0182527038", "weighted_assets": 1.0},
@@ -297,7 +280,7 @@ def test_dashboard_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkey
         },
     )
 
-    response = client.get("/api/dashboard", headers=headers)
+    response = client.get("/api/dashboard", params={"portfolio_id": user_id})
     data = response.json()
 
     assert len(data["portfolio"]) == 1
@@ -317,12 +300,11 @@ def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
     response = client.put(
         "/api/portfolio",
-        headers=headers,
+        params={"portfolio_id": user_id},
         json={"positions": [{"isin": "ES0182527038", "weighted_assets": 0.35}]},
     )
     assert response.status_code == 200
@@ -338,12 +320,11 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
 
     client = TestClient(app)
-    token = _register_and_login(client, "user@example.com", "secretpass")
-    headers = {"Authorization": f"Bearer {token}"}
+    user_id = _create_user(db_path)
 
     save_response = client.put(
         "/api/portfolio",
-        headers=headers,
+        params={"portfolio_id": user_id},
         json={
             "positions": [
                 {"isin": "ES0182527038", "weighted_assets": 0.35},
@@ -371,6 +352,6 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
         },
     ]
 
-    load_response = client.get("/api/portfolio", headers=headers)
+    load_response = client.get("/api/portfolio", params={"portfolio_id": user_id})
     assert load_response.status_code == 200
     assert load_response.json() == save_response.json()

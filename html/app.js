@@ -1,29 +1,26 @@
 (function () {
   const api = window.PortfolioApi;
+  const CREATE_VALUE = window.PortfoliosView.CREATE_VALUE;
 
   let activeTab = "management";
 
   function showError(message) {
-    const targets = [document.getElementById("auth-error"), document.getElementById("error")];
-    for (const el of targets) {
-      if (!el) continue;
-      el.textContent = message;
-      el.hidden = !message;
+    const el = document.getElementById("error");
+    if (!el) {
+      return;
     }
+    el.textContent = message;
+    el.hidden = !message;
   }
 
-  function setAuthenticated(isAuthenticated) {
-    document.getElementById("auth-section").hidden = isAuthenticated;
-    document.getElementById("app-section").hidden = !isAuthenticated;
-    const tabsEl = document.getElementById("app-tabs");
-    const actionsEl = document.getElementById("top-bar-actions");
-    if (isAuthenticated) {
-      tabsEl.removeAttribute("hidden");
-      actionsEl.removeAttribute("hidden");
-    } else {
-      tabsEl.setAttribute("hidden", "");
-      actionsEl.setAttribute("hidden", "");
+  function updateActivePortfolioName(portfolios) {
+    const label = document.getElementById("portfolio-table-name");
+    if (!label) {
+      return;
     }
+    const selectedId = api.getPortfolioId();
+    const selected = portfolios?.find((portfolio) => portfolio.id === selectedId);
+    label.textContent = selected?.name ?? "";
   }
 
   function setActiveTab(tabName) {
@@ -37,69 +34,96 @@
     document.getElementById("risk-panel").hidden = tabName !== "risk";
   }
 
-  async function showTab(tabName) {
-    setActiveTab(tabName);
-
-    if (tabName === "management") {
+  async function reloadActiveTab() {
+    if (activeTab === "management") {
       await window.ManagementView.loadManagement();
       return;
     }
 
+    if (activeTab === "risk") {
+      window.RiskView.resetRiskAnalysis();
+      await window.RiskView.loadRiskAnalysis({ force: true });
+    }
+  }
+
+  async function showTab(tabName) {
+    setActiveTab(tabName);
+
+    if (tabName === "management") {
+      if (api.getPortfolioId() === null) {
+        showError("Select or create a portfolio first.");
+        return;
+      }
+      await window.ManagementView.loadManagement();
+      return;
+    }
+
+    if (api.getPortfolioId() === null) {
+      showError("Select or create a portfolio first.");
+      return;
+    }
     await window.RiskView.loadRiskAnalysis();
   }
 
-  function logout() {
-    api.setToken(null);
-    setAuthenticated(false);
-    setActiveTab("management");
-    window.ManagementView.resetManagement();
-    window.RiskView.resetRiskAnalysis();
+  function restorePortfolioSelectValue() {
+    const select = document.getElementById("portfolio-select");
+    const portfolioId = api.getPortfolioId();
+    if (portfolioId !== null) {
+      select.value = String(portfolioId);
+      return;
+    }
+    if (select.options.length > 1) {
+      select.selectedIndex = 0;
+    }
   }
 
-  async function login(event) {
-    event.preventDefault();
-    showError("");
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value;
-    const body = new URLSearchParams({ username: email, password });
+  function showPortfolioCreateInput() {
+    const select = document.getElementById("portfolio-select");
+    const input = document.getElementById("portfolio-create-input");
+    restorePortfolioSelectValue();
+    select.hidden = true;
+    input.hidden = false;
+    input.value = "";
+    input.focus();
+  }
 
-    const response = await fetch(`${api.API}/auth/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
-    });
-    if (!response.ok) {
-      const payload = await response.json().catch(() => ({}));
-      throw new Error(payload.detail || "Login failed");
+  function hidePortfolioCreateInput() {
+    const select = document.getElementById("portfolio-select");
+    const input = document.getElementById("portfolio-create-input");
+    input.hidden = true;
+    select.hidden = false;
+    restorePortfolioSelectValue();
+  }
+
+  async function ensureSelectedPortfolio(portfolios) {
+    if (!portfolios.length) {
+      api.setPortfolioId(null);
+      updateActivePortfolioName([]);
+      return portfolios;
     }
 
-    const data = await response.json();
-    api.setToken(data.access_token);
-    await bootstrapApp();
-  }
-
-  async function register(event) {
-    event.preventDefault();
-    showError("");
-    const email = document.getElementById("register-email").value.trim();
-    const password = document.getElementById("register-password").value;
-
-    await api.fetchJson(`${api.API}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    document.getElementById("login-email").value = email;
-    document.getElementById("login-password").value = password;
-    await login(new Event("submit"));
+    const storedId = api.getPortfolioId();
+    const selected =
+      portfolios.find((portfolio) => portfolio.id === storedId) ?? portfolios[0];
+    api.setPortfolioId(selected.id);
+    updateActivePortfolioName(portfolios);
+    return portfolios;
   }
 
   async function bootstrapApp() {
-    await api.fetchJson(`${api.API}/auth/me`);
-    setAuthenticated(true);
+    document.getElementById("app-tabs").removeAttribute("hidden");
+
+    const portfolios = await window.PortfoliosView.loadPortfolios();
+    await ensureSelectedPortfolio(portfolios);
+    showError("");
+
     setActiveTab("management");
-    await window.ManagementView.loadManagement();
+    if (api.getPortfolioId() !== null) {
+      await window.ManagementView.loadManagement();
+    } else {
+      showError("Create a portfolio to get started.");
+      showPortfolioCreateInput();
+    }
   }
 
   async function addFund(event) {
@@ -121,7 +145,7 @@
       input.value = "";
       if (activeTab === "management") {
         await window.ManagementView.loadManagement();
-      } else {
+      } else if (activeTab === "risk") {
         window.RiskView.resetRiskAnalysis();
         await window.RiskView.loadRiskAnalysis({ force: true });
       }
@@ -133,16 +157,73 @@
     }
   }
 
-  document.getElementById("login-form").addEventListener("submit", (event) => {
-    login(event).catch((err) => showError(err.message));
+  async function submitNewPortfolioName() {
+    const input = document.getElementById("portfolio-create-input");
+    const name = input.value.trim();
+    if (!name) {
+      hidePortfolioCreateInput();
+      return;
+    }
+
+    showError("");
+    input.disabled = true;
+    try {
+      await window.PortfoliosView.createPortfolio(name);
+      hidePortfolioCreateInput();
+      setActiveTab("management");
+      await window.ManagementView.loadManagement();
+    } catch (err) {
+      showError(err.message);
+      input.focus();
+    } finally {
+      input.disabled = false;
+    }
+  }
+
+  async function handlePortfolioDropdownChange() {
+    const select = document.getElementById("portfolio-select");
+    if (select.value === CREATE_VALUE) {
+      showPortfolioCreateInput();
+      return;
+    }
+
+    const portfolioId = Number.parseInt(select.value, 10);
+    if (!Number.isFinite(portfolioId)) {
+      return;
+    }
+
+    showError("");
+    await window.PortfoliosView.selectPortfolio(portfolioId);
+    await reloadActiveTab();
+  }
+
+  document.getElementById("portfolio-select").addEventListener("change", () => {
+    handlePortfolioDropdownChange().catch((err) => showError(err.message));
   });
-  document.getElementById("register-form").addEventListener("submit", (event) => {
-    register(event).catch((err) => showError(err.message));
+
+  const portfolioCreateInput = document.getElementById("portfolio-create-input");
+  portfolioCreateInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      submitNewPortfolioName().catch((err) => showError(err.message));
+      return;
+    }
+    if (event.key === "Escape") {
+      hidePortfolioCreateInput();
+      showError("");
+    }
   });
-  document.getElementById("logout").addEventListener("click", (event) => {
-    event.preventDefault();
-    logout();
+  portfolioCreateInput.addEventListener("blur", () => {
+    window.setTimeout(() => {
+      if (portfolioCreateInput.hidden) {
+        return;
+      }
+      if (!portfolioCreateInput.value.trim()) {
+        hidePortfolioCreateInput();
+      }
+    }, 0);
   });
+
   document.getElementById("add-fund-form").addEventListener("submit", (event) => {
     addFund(event).catch((err) => showError(err.message));
   });
@@ -152,15 +233,10 @@
     });
   });
 
-  if (api.getToken()) {
-    bootstrapApp().catch((err) => {
-      if (err.message === "SESSION_EXPIRED") {
-        logout();
-        showError("Session expired. Please log in again.");
-        return;
-      }
-      logout();
-      showError(err.message);
-    });
-  }
+  window.AppShell = {
+    showError,
+    updateActivePortfolioName,
+  };
+
+  bootstrapApp().catch((err) => showError(err.message));
 })();

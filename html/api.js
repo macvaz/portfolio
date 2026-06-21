@@ -1,39 +1,34 @@
 (function () {
   const API = "/api";
-  const TOKEN_KEY = "portfolio_token";
+  const PORTFOLIO_ID_KEY = "portfolio_id";
 
-  let token = localStorage.getItem(TOKEN_KEY);
+  let portfolioId = localStorage.getItem(PORTFOLIO_ID_KEY);
 
-  function getToken() {
-    return token;
+  function getPortfolioId() {
+    return portfolioId ? Number(portfolioId) : null;
   }
 
-  function setToken(value) {
-    token = value;
-    if (value) {
-      localStorage.setItem(TOKEN_KEY, value);
-    } else {
-      localStorage.removeItem(TOKEN_KEY);
+  function setPortfolioId(value) {
+    if (value === null || value === undefined || value === "") {
+      portfolioId = null;
+      localStorage.removeItem(PORTFOLIO_ID_KEY);
+      return;
     }
+    portfolioId = String(value);
+    localStorage.setItem(PORTFOLIO_ID_KEY, portfolioId);
   }
 
-  function authHeaders(extra = {}) {
-    const headers = { ...extra };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
+  function withPortfolioId(path) {
+    const id = getPortfolioId();
+    if (id === null) {
+      return path;
     }
-    return headers;
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}portfolio_id=${encodeURIComponent(id)}`;
   }
 
   async function fetchJson(url, options = {}) {
-    const response = await fetch(url, {
-      ...options,
-      headers: authHeaders(options.headers || {}),
-    });
-    if (response.status === 401) {
-      setToken(null);
-      throw new Error("SESSION_EXPIRED");
-    }
+    const response = await fetch(url, options);
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       const detail = body.detail;
@@ -50,9 +45,9 @@
 
   window.PortfolioApi = {
     API,
-    getToken,
-    setToken,
-    authHeaders,
+    getPortfolioId,
+    setPortfolioId,
+    withPortfolioId,
     fetchJson,
   };
 })();

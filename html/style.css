@@ -79,49 +79,51 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.error,
-.auth-error {
+.error {
   color: #c0392b;
   margin-top: 0.75rem;
 }
 
-.auth-error {
-  padding: 0.75rem 1rem;
-  background: #fdecea;
-  border: 1px solid #f5c6c2;
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.portfolio-picker {
+  display: flex;
+  align-items: center;
+}
+
+#portfolio-select,
+.portfolio-create-input {
+  min-width: 10.5rem;
+  max-width: 14rem;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.88rem;
+  border: 1px solid #c8d0da;
   border-radius: 6px;
-  font-weight: 500;
+  background: #fff;
+  color: inherit;
 }
 
-/* Auth */
-
-#auth-section {
-  border: 1px solid #e2d8c8;
-  border-radius: 10px;
-  padding: 1.5rem;
+#portfolio-select {
+  cursor: pointer;
 }
 
-#auth-forms {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+.portfolio-create-input:focus {
+  outline: none;
+  border-color: #a8b0ba;
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  flex: 1;
-  min-width: 240px;
+#portfolio-select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-.auth-form h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.auth-form input {
-  width: 100%;
+.portfolio-table-name {
+  color: #0088cc;
 }
 
 .site-logo {
@@ -131,14 +133,9 @@ button:disabled {
   margin: 0;
 }
 
-.top-bar-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
 .add-isin-form {
   margin: 0;
+  flex-shrink: 0;
 }
 
 .add-isin-field {
@@ -200,13 +197,6 @@ button:disabled {
 .add-isin-form input:focus {
   outline: none;
 }
-
-#logout {
-  color: inherit;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
 .management-loading {
   padding: 2rem;
   text-align: center;
@@ -612,16 +602,16 @@ button:disabled {
     justify-items: stretch;
   }
 
+  .toolbar-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   .app-tabs {
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1rem;
     margin-top: 0;
     margin-bottom: calc(-1 * var(--header-pad-y, 0.45rem));
-  }
-
-  .top-bar-actions {
-    justify-content: flex-end;
-    width: 100%;
   }
 }

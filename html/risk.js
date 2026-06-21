@@ -48,13 +48,7 @@
   }
 
   async function fetchReportHtml() {
-    const response = await fetch(`${api.API}/report`, {
-      headers: api.authHeaders(),
-    });
-    if (response.status === 401) {
-      api.setToken(null);
-      throw new Error("SESSION_EXPIRED");
-    }
+    const response = await fetch(api.withPortfolioId(`${api.API}/report`));
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       const detail = body.detail;

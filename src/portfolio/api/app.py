@@ -3,27 +3,21 @@ from datetime import date
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, EmailStr, Field
-from sqlmodel import Session
+from pydantic import BaseModel, Field
+from sqlmodel import Session, select
 
-from portfolio.api.auth import (
-    CurrentUser,
-    authenticate_user,
-    create_access_token,
-    get_user_by_email,
-    hash_password,
-)
 from portfolio.api.database import (
     delete_fund,
     get_db,
     get_fund,
+    get_user,
     init_db,
     list_funds,
     list_user_portfolio,
+    list_users,
     save_fund,
     save_user_portfolio,
 )
@@ -49,19 +43,13 @@ app = FastAPI(title="Portfolio API", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
 
 
-class UserRegister(BaseModel):
-    email: EmailStr
-    password: str = Field(min_length=8)
+class PortfolioCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
 
 
-class UserResponse(BaseModel):
+class PortfolioListItem(BaseModel):
     id: int
-    email: str
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+    name: str
 
 
 class FundCreate(BaseModel):
@@ -97,6 +85,12 @@ class ReportRequest(BaseModel):
     positions: list[PortfolioPosition]
 
 
+def _require_portfolio(portfolio_id: int) -> int:
+    if get_user(portfolio_id) is None:
+        raise HTTPException(status_code=404, detail=f"Portfolio {portfolio_id} not found")
+    return portfolio_id
+
+
 def _normalize_portfolio_positions(
     positions: list[PortfolioPosition],
 ) -> list[dict]:
@@ -128,42 +122,28 @@ def index() -> FileResponse:
     return FileResponse(WEB_DIR / "index.html")
 
 
-@app.post("/api/auth/register", response_model=UserResponse, status_code=201)
-def register(
-    body: UserRegister,
+@app.get("/api/portfolios", response_model=list[PortfolioListItem])
+def get_portfolios() -> list[dict]:
+    return list_users()
+
+
+@app.post("/api/portfolios", response_model=PortfolioListItem, status_code=201)
+def add_portfolio(
+    body: PortfolioCreate,
     session: Annotated[Session, Depends(get_db)],
-) -> User:
-    if get_user_by_email(session, body.email):
-        raise HTTPException(status_code=400, detail="Email already registered")
-    user = User(email=body.email, hashed_password=hash_password(body.password))
+) -> dict:
+    existing = session.exec(select(User).where(User.name == body.name)).first()
+    if existing is not None:
+        raise HTTPException(status_code=400, detail="Portfolio name already exists")
+    user = User(name=body.name)
     session.add(user)
     session.commit()
     session.refresh(user)
-    return user
-
-
-@app.post("/api/auth/token", response_model=TokenResponse)
-def login(
-    form: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[Session, Depends(get_db)],
-) -> TokenResponse:
-    user = authenticate_user(session, form.username, form.password)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return TokenResponse(access_token=create_access_token(user.email))
-
-
-@app.get("/api/auth/me", response_model=UserResponse)
-def me(user: CurrentUser) -> User:
-    return user
+    return {"id": user.id, "name": user.name}
 
 
 @app.get("/api/funds", response_model=list[FundResponse])
-def get_funds(_user: CurrentUser) -> list[dict]:
+def get_funds() -> list[dict]:
     return [
         {
             **fund,
@@ -176,7 +156,7 @@ def get_funds(_user: CurrentUser) -> list[dict]:
 
 
 @app.post("/api/funds", response_model=FundResponse)
-def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
+def create_fund(body: FundCreate) -> dict:
     fund = resolve_fund_by_isin(body.isin.upper())
     if fund is None:
         raise HTTPException(
@@ -207,49 +187,55 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
 
 
 @app.delete("/api/funds/{isin}", status_code=204)
-def remove_fund(isin: str, _user: CurrentUser) -> None:
+def remove_fund(isin: str) -> None:
     if not delete_fund(isin.upper()):
         raise HTTPException(status_code=404, detail=f"ISIN {isin} not found")
     delete_fund_nav_csv(isin.upper())
 
 
 @app.get("/api/curve")
-def get_curve(user: CurrentUser) -> dict:
+def get_curve(portfolio_id: int) -> dict:
     """Buy-and-hold portfolio equity curve from stored NAV files."""
-    return build_user_equity_curve(user.id)
+    _require_portfolio(portfolio_id)
+    return build_user_equity_curve(portfolio_id)
 
 
 @app.get("/api/dashboard")
-def get_dashboard(user: CurrentUser) -> dict:
+def get_dashboard(portfolio_id: int) -> dict:
     """Portfolio tables with real funds, weights, and stored metrics."""
-    return build_dashboard_data(user.id)
+    _require_portfolio(portfolio_id)
+    return build_dashboard_data(portfolio_id)
 
 
 @app.get("/api/portfolio", response_model=list[PortfolioPositionResponse])
-def get_portfolio(user: CurrentUser) -> list[dict]:
-    return list_user_portfolio(user.id)
+def get_portfolio(portfolio_id: int) -> list[dict]:
+    _require_portfolio(portfolio_id)
+    return list_user_portfolio(portfolio_id)
 
 
 @app.put("/api/portfolio", response_model=list[PortfolioPositionResponse])
-def save_portfolio(body: PortfolioSave, user: CurrentUser) -> list[dict]:
+def save_portfolio(body: PortfolioSave, portfolio_id: int) -> list[dict]:
+    _require_portfolio(portfolio_id)
     positions = _normalize_portfolio_positions(body.positions)
-    return save_user_portfolio(user.id, positions)
+    return save_user_portfolio(portfolio_id, positions)
 
 
 @app.get("/api/report", response_class=HTMLResponse)
-def get_report(user: CurrentUser) -> HTMLResponse:
+def get_report(portfolio_id: int) -> HTMLResponse:
     """QuantStats tearsheet for the user's saved portfolio."""
+    _require_portfolio(portfolio_id)
     try:
-        html = build_user_report_html(user.id)
+        html = build_user_report_html(portfolio_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return HTMLResponse(content=html)
 
 
 @app.post("/api/report", response_class=HTMLResponse)
-def create_report(body: ReportRequest, user: CurrentUser) -> HTMLResponse:
+def create_report(body: ReportRequest, portfolio_id: int) -> HTMLResponse:
+    _require_portfolio(portfolio_id)
     positions = _validate_positions(body.positions)
-    save_user_portfolio(user.id, positions)
+    save_user_portfolio(portfolio_id, positions)
 
     try:
         html = build_report_html(positions)

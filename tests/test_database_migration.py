@@ -50,3 +50,34 @@ def test_migrate_legacy_funds_table(tmp_path):
 
     assert "funds" not in tables
     assert "fund" in tables
+
+
+def test_migrate_drop_user_password(tmp_path):
+    db_path = tmp_path / "portfolio.db"
+    connection = sqlite3.connect(db_path)
+    connection.execute(
+        "CREATE TABLE user ("
+        "id INTEGER NOT NULL PRIMARY KEY, "
+        "email VARCHAR NOT NULL, "
+        "hashed_password VARCHAR NOT NULL"
+        ")"
+    )
+    connection.execute(
+        "INSERT INTO user (id, email, hashed_password) VALUES (?, ?, ?)",
+        (1, "user@example.com", "secret"),
+    )
+    connection.commit()
+    connection.close()
+
+    init_db(db_path)
+
+    connection = sqlite3.connect(db_path)
+    columns = {
+        row[1]
+        for row in connection.execute("PRAGMA table_info(user)")
+    }
+    users = connection.execute("SELECT id, name FROM user").fetchall()
+    connection.close()
+
+    assert columns == {"id", "name"}
+    assert users == [(1, "user@example.com")]

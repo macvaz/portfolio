@@ -1,4 +1,3 @@
-from portfolio.api.auth import hash_password
 from portfolio.api.database import (
     create_user,
     init_db,
@@ -11,7 +10,7 @@ from portfolio.api.database import (
 def test_save_user_portfolio_persists_positions(tmp_path):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
-    user = create_user("user@example.com", hash_password("secretpass"), db_path)
+    user = create_user("Growth", db_path)
 
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)

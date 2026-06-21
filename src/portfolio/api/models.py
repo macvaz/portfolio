@@ -3,8 +3,7 @@ from sqlmodel import Field, SQLModel, UniqueConstraint
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    email: str = Field(unique=True, index=True)
-    hashed_password: str
+    name: str = Field(unique=True, index=True)
 
 
 class Fund(SQLModel, table=True):
