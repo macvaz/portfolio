@@ -2,15 +2,15 @@ from functools import reduce
 
 import pandas as pd
 
-from portfolio.common.macro_signals import (
+from portfolio.common.macro_constants import (
     ALERT_FINANCIAL_STRESS,
     ALERT_INVERTED_CURVE,
     ALERT_SAHM,
     FINANCIAL_STRESS_INDEX,
-    MacroSignalFn,
     SAHM_VALUE,
     YIELD_SPREAD_10Y3M,
 )
+from portfolio.common.macro_signals import MacroSignalFn
 from portfolio.datasources.fred import download_fred_data, init_client
 
 

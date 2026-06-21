@@ -3,11 +3,13 @@ from datetime import date
 
 from dotenv import load_dotenv
 
-from portfolio.common.macro_signals import (
+from portfolio.common.macro_constants import (
     FINANCIAL_STRESS_INDEX,
     HIGH_YIELD_SPREAD,
     UNEMPLOYMENT_RATE,
     YIELD_SPREAD_10Y3M,
+)
+from portfolio.common.macro_signals import (
     financial_stress,
     inverted_curve,
     macro_crisis_votes,

@@ -2,29 +2,22 @@ from collections.abc import Callable
 
 import pandas as pd
 
+from portfolio.common.macro_constants import (
+    ALERT_FINANCIAL_STRESS,
+    ALERT_INVERTED_CURVE,
+    ALERT_SAHM,
+    FINANCIAL_STRESS_INDEX,
+    MACRO_CRISIS_VOTES,
+    MACRO_SYSTEM_LOCKED,
+    MACRO_VOTE_ALERTS,
+    SAHM_MA3,
+    SAHM_MIN_12M,
+    SAHM_VALUE,
+    UNEMPLOYMENT_RATE,
+    YIELD_SPREAD_10Y3M,
+)
+
 MacroSignalFn = Callable[[pd.DataFrame], pd.DataFrame]
-
-# Input series column names
-UNEMPLOYMENT_RATE = "Unemployment_Rate"
-HIGH_YIELD_SPREAD = "High_Yield_Spread"
-FINANCIAL_STRESS_INDEX = "Financial_Stress_Index"
-YIELD_SPREAD_10Y3M = "Yield_Spread_10Y3M"
-
-# Derived macro columns
-SAHM_MA3 = "Sahm_MA3"
-SAHM_MIN_12M = "Sahm_Min_12M"
-SAHM_VALUE = "Sahm_Value"
-
-# Alert columns
-ALERT_INVERTED_CURVE = "Alert_Inverted_Curve"
-ALERT_SAHM = "Alert_Sahm"
-ALERT_FINANCIAL_STRESS = "Alert_Financial_Stress"
-
-# Aggregate macro columns
-MACRO_CRISIS_VOTES = "Macro_Crisis_Votes"
-MACRO_SYSTEM_LOCKED = "MACRO_SYSTEM_LOCKED"
-
-MACRO_VOTE_ALERTS = [ALERT_INVERTED_CURVE, ALERT_FINANCIAL_STRESS]
 
 
 def inverted_curve(df: pd.DataFrame) -> pd.DataFrame:
@@ -51,9 +44,6 @@ def financial_stress(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-MACRO_VOTE_ALERTS = [ALERT_INVERTED_CURVE, ALERT_FINANCIAL_STRESS]
-
-
 def macro_crisis_votes(
     df: pd.DataFrame, vote_columns: list[str] = MACRO_VOTE_ALERTS
 ) -> pd.DataFrame:
@@ -65,3 +55,11 @@ def macro_crisis_votes(
             MACRO_SYSTEM_LOCKED: lambda d: d[MACRO_CRISIS_VOTES] >= 2,
         }
     )
+
+
+MACRO_SIGNALS: list[MacroSignalFn] = [
+    inverted_curve,
+    sahm_rule,
+    financial_stress,
+    macro_crisis_votes,
+]
