@@ -62,12 +62,17 @@
   }
 
   function renderFundName(fund) {
+    const nameLink = fund.morningstar_url
+      ? `<a href="${fund.morningstar_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${fund.name}</a>`
+      : `<span class="fund-name">${fund.name}</span>`;
     return `
       <div class="fund-name-wrap">
-        <a href="#" class="fund-link" data-isin="${fund.isin}">${fund.name}</a>
-        <div class="fund-delete-popup" role="tooltip">
-          <button type="button" class="fund-delete-btn" data-isin="${fund.isin}">Delete</button>
+        <div class="fund-delete-slot">
+          <div class="fund-delete-popup" role="tooltip">
+            <button type="button" class="fund-delete-btn" data-isin="${fund.isin}">Delete</button>
+          </div>
         </div>
+        ${nameLink}
       </div>`;
   }
 
@@ -335,12 +340,6 @@
   }
 
   function bindTableInteractions() {
-    document.querySelectorAll(".fund-link").forEach((link) => {
-      link.addEventListener("click", (event) => {
-        event.preventDefault();
-      });
-    });
-
     document.querySelectorAll(".fund-delete-btn").forEach((button) => {
       button.addEventListener("click", (event) => {
         event.preventDefault();

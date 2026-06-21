@@ -1,6 +1,10 @@
 
+from pathlib import Path
+
 from portfolio import process_macro_data, print_signals
+from portfolio.finance.metrics import update_all_fund_metrics
 from portfolio.finance.nav_files import store_fund_navs_from_db
+
 
 def run(
     fred_api_key: str | None,
@@ -8,6 +12,8 @@ def run(
     start_date: str,
     end_date: str,
     currency: str = "EUR",
+    db_path: Path | None = None,
+    funds_dir: Path | None = None,
 ):
     if fred_api_key:
         print("1. Computing macro signals from FRED...")
@@ -21,6 +27,12 @@ def run(
         start_date,
         end_date,
         currency=currency,
+        db_path=db_path,
+        funds_dir=funds_dir,
     )
+
+    print("\n3. Computing fund metrics...")
+    updated = update_all_fund_metrics(db_path, funds_dir)
+    print(f"Done. Updated metrics for {updated} fund(s).")
 
 

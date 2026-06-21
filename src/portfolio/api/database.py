@@ -4,7 +4,7 @@ from pathlib import Path
 from sqlalchemy import text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
-from portfolio.api.models import Fund, Portfolio, User
+from portfolio.api.models import Fund, Metric, Portfolio, User
 
 CANONICAL_DB_PATH = Path("data/portfolio.db")
 DEFAULT_DB_PATH = CANONICAL_DB_PATH
@@ -67,11 +67,27 @@ def _migrate_legacy_funds_table(db_path: Path | None = None) -> None:
         connection.commit()
 
 
+def _migrate_fund_performance_id(db_path: Path | None = None) -> None:
+    """Add ``performance_id`` to ``fund`` when upgrading an existing database."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        columns = {
+            row[1]
+            for row in connection.execute(text("PRAGMA table_info(fund)"))
+        }
+        if "performance_id" not in columns:
+            connection.execute(
+                text("ALTER TABLE fund ADD COLUMN performance_id TEXT")
+            )
+            connection.commit()
+
+
 def init_db(db_path: Path | None = None) -> None:
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
     SQLModel.metadata.create_all(engine)
     _migrate_legacy_funds_table(db_path)
+    _migrate_fund_performance_id(db_path)
 
 
 def create_user(
@@ -92,22 +108,112 @@ def get_fund(isin: str, db_path: Path | None = None) -> dict | None:
         fund = session.get(Fund, isin)
     if fund is None:
         return None
-    return {"isin": fund.isin, "name": fund.name, "security_id": fund.fund_id}
+    return {
+        "isin": fund.isin,
+        "name": fund.name,
+        "security_id": fund.fund_id,
+        "performance_id": fund.performance_id,
+    }
 
 
 def list_funds(db_path: Path | None = None) -> list[dict]:
     init_db(db_path)
     with get_session(db_path) as session:
         funds = session.exec(select(Fund).order_by(Fund.name)).all()
-    return [{"isin": fund.isin, "name": fund.name, "fund_id": fund.fund_id} for fund in funds]
+    return [
+        {
+            "isin": fund.isin,
+            "name": fund.name,
+            "fund_id": fund.fund_id,
+            "performance_id": fund.performance_id,
+        }
+        for fund in funds
+    ]
 
 
 def save_fund(
-    isin: str, name: str, fund_id: str, db_path: Path | None = None
+    isin: str,
+    name: str,
+    fund_id: str,
+    performance_id: str | None = None,
+    db_path: Path | None = None,
 ) -> None:
     init_db(db_path)
+    isin = isin.upper()
     with get_session(db_path) as session:
-        session.merge(Fund(isin=isin, name=name, fund_id=fund_id))
+        existing = session.get(Fund, isin)
+        if existing is not None and performance_id is None:
+            performance_id = existing.performance_id
+        session.merge(
+            Fund(
+                isin=isin,
+                name=name,
+                fund_id=fund_id,
+                performance_id=performance_id,
+            )
+        )
+        session.commit()
+
+
+def get_fund_metrics(
+    isin: str, db_path: Path | None = None
+) -> dict[str, float | None]:
+    init_db(db_path)
+    with get_session(db_path) as session:
+        metric = session.get(Metric, isin.upper())
+    if metric is None:
+        return {
+            "beta_6m": None,
+            "cor_6m": None,
+            "vol_1y": None,
+            "pct_1w": None,
+            "pct_2w": None,
+            "pct_1m": None,
+            "pct_3m": None,
+            "pct_6m": None,
+            "pct_ytd": None,
+            "sr_6m": None,
+            "sr_1y": None,
+        }
+    return {
+        "beta_6m": metric.beta_6m,
+        "cor_6m": metric.cor_6m,
+        "vol_1y": metric.vol_1y,
+        "pct_1w": metric.pct_1w,
+        "pct_2w": metric.pct_2w,
+        "pct_1m": metric.pct_1m,
+        "pct_3m": metric.pct_3m,
+        "pct_6m": metric.pct_6m,
+        "pct_ytd": metric.pct_ytd,
+        "sr_6m": metric.sr_6m,
+        "sr_1y": metric.sr_1y,
+    }
+
+
+def save_fund_metrics(
+    isin: str,
+    metrics: dict[str, float | None],
+    db_path: Path | None = None,
+) -> None:
+    init_db(db_path)
+    isin = isin.upper()
+    with get_session(db_path) as session:
+        session.merge(
+            Metric(
+                isin=isin,
+                beta_6m=metrics.get("beta_6m"),
+                cor_6m=metrics.get("cor_6m"),
+                vol_1y=metrics.get("vol_1y"),
+                pct_1w=metrics.get("pct_1w"),
+                pct_2w=metrics.get("pct_2w"),
+                pct_1m=metrics.get("pct_1m"),
+                pct_3m=metrics.get("pct_3m"),
+                pct_6m=metrics.get("pct_6m"),
+                pct_ytd=metrics.get("pct_ytd"),
+                sr_6m=metrics.get("sr_6m"),
+                sr_1y=metrics.get("sr_1y"),
+            )
+        )
         session.commit()
 
 
@@ -119,6 +225,9 @@ def delete_fund(isin: str, db_path: Path | None = None) -> bool:
         if fund is None:
             return False
         session.exec(delete(Portfolio).where(Portfolio.isin == isin))
+        metric = session.get(Metric, isin)
+        if metric is not None:
+            session.delete(metric)
         session.delete(fund)
         session.commit()
     return True
@@ -140,6 +249,7 @@ def list_user_portfolio(
             "isin": fund.isin,
             "name": fund.name,
             "fund_id": fund.fund_id,
+            "performance_id": fund.performance_id,
             "weighted_assets": position.weighted_assets,
         }
         for position, fund in rows

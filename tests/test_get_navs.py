@@ -8,8 +8,8 @@ def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
-    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
 
     calls: list[tuple[str, str]] = []
 
@@ -51,7 +51,7 @@ def test_run_get_navs_skips_funds_without_data(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     import pandas as pd
 

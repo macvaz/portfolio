@@ -27,8 +27,9 @@ from portfolio.api.database import (
     save_user_portfolio,
 )
 from portfolio.finance.nav_files import delete_fund_nav_csv, download_and_store_fund_nav
+from portfolio.finance.metrics import refresh_fund_metrics
 from portfolio.api.models import User
-from portfolio.finance.funds import resolve_fund_by_isin
+from portfolio.finance.funds import morningstar_quote_url, resolve_fund_by_isin
 from portfolio.api.curve import build_user_equity_curve
 from portfolio.api.mock_management import build_dashboard_data
 from portfolio.api.report import build_report_html, build_user_report_html
@@ -70,6 +71,7 @@ class FundResponse(BaseModel):
     isin: str
     name: str
     fund_id: str
+    morningstar_url: str | None = None
 
 
 class PortfolioPosition(BaseModel):
@@ -159,7 +161,13 @@ def me(user: CurrentUser) -> User:
 
 @app.get("/api/funds", response_model=list[FundResponse])
 def get_funds(_user: CurrentUser) -> list[dict]:
-    return list_funds()
+    return [
+        {
+            **fund,
+            "morningstar_url": morningstar_quote_url(fund.get("performance_id")),
+        }
+        for fund in list_funds()
+    ]
 
 
 @app.post("/api/funds", response_model=FundResponse)
@@ -169,17 +177,24 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
         raise HTTPException(
             status_code=404, detail=f"No fund found for ISIN {body.isin}"
         )
-    save_fund(fund["isin"], fund["name"], fund["security_id"])
+    save_fund(
+        fund["isin"],
+        fund["name"],
+        fund["security_id"],
+        fund.get("performance_id"),
+    )
     download_and_store_fund_nav(
         fund["isin"],
         fund["security_id"],
         start_date=NAV_START_DATE,
         end_date=date.today().isoformat(),
     )
+    refresh_fund_metrics(fund["isin"])
     return {
         "isin": fund["isin"],
         "name": fund["name"],
         "fund_id": fund["security_id"],
+        "morningstar_url": morningstar_quote_url(fund.get("performance_id")),
     }
 
 
@@ -198,7 +213,7 @@ def get_curve(user: CurrentUser) -> dict:
 
 @app.get("/api/dashboard")
 def get_dashboard(user: CurrentUser) -> dict:
-    """Portfolio tables with real funds/weights and mocked metrics."""
+    """Portfolio tables with real funds, weights, and stored metrics."""
     return build_dashboard_data(user.id)
 
 

@@ -16,6 +16,16 @@ from playwright.async_api import async_playwright
 from portfolio.api.database import get_fund, save_fund
 
 DOMAIN = "https://global.morningstar.com"
+MORNINGSTAR_QUOTE_URL = (
+    "https://global.morningstar.com/es/inversiones/fondos/{performance_id}/cotizacion"
+)
+
+
+def morningstar_quote_url(performance_id: str | None) -> str | None:
+    """Build the Morningstar quote page URL for a fund performance ID."""
+    if not performance_id:
+        return None
+    return MORNINGSTAR_QUOTE_URL.format(performance_id=performance_id)
 
 
 async def _search_isin_async(isin: str) -> Optional[Dict]:
@@ -131,7 +141,13 @@ def search_by_isin(isin: str) -> Dict | None:
     results = response["results"][0]
     security_name = results["fields"]["name"]["value"]
     security_id = results["meta"]["securityID"]
-    return {"security_id": security_id, "name": security_name, "isin": isin}
+    performance_id = results["meta"]["performanceID"]
+    return {
+        "security_id": security_id,
+        "performance_id": performance_id,
+        "name": security_name,
+        "isin": isin,
+    }
 
 
 def resolve_fund_by_isin(
@@ -140,8 +156,33 @@ def resolve_fund_by_isin(
     """Return fund metadata for an ISIN, using the database when available."""
     cached = get_fund(isin, db_path)
     if cached is not None:
+        if cached.get("performance_id"):
+            return {
+                "security_id": cached["security_id"],
+                "performance_id": cached["performance_id"],
+                "name": cached["name"],
+                "isin": isin,
+            }
+
+        fund = search_by_isin(isin)
+        if fund is None:
+            return {
+                "security_id": cached["security_id"],
+                "performance_id": None,
+                "name": cached["name"],
+                "isin": isin,
+            }
+
+        save_fund(
+            isin,
+            cached["name"],
+            cached["security_id"],
+            fund["performance_id"],
+            db_path,
+        )
         return {
             "security_id": cached["security_id"],
+            "performance_id": fund["performance_id"],
             "name": cached["name"],
             "isin": isin,
         }
@@ -150,5 +191,11 @@ def resolve_fund_by_isin(
     if fund is None:
         return None
 
-    save_fund(isin, fund["name"], fund["security_id"], db_path)
+    save_fund(
+        isin,
+        fund["name"],
+        fund["security_id"],
+        fund["performance_id"],
+        db_path,
+    )
     return fund

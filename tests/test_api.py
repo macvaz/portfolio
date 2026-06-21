@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from portfolio.api.app import app
-from portfolio.api.database import init_db, save_fund
+from portfolio.api.database import get_fund_metrics, init_db, save_fund, save_fund_metrics
 
 
 def _register_and_login(client: TestClient, email: str, password: str) -> str:
@@ -21,7 +21,7 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     client = TestClient(app)
     token = _register_and_login(client, "user@example.com", "secretpass")
@@ -34,6 +34,7 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
             "isin": "ES0182527038",
             "name": "Test Fund",
             "fund_id": "F0GBR04KHC",
+            "morningstar_url": None,
         }
     ]
 
@@ -76,7 +77,7 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.finance.nav_files.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     import pandas as pd
     from portfolio.finance.nav_files import save_fund_nav_csv
@@ -120,7 +121,12 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.finance.nav_files.DEFAULT_FUNDS_DIR", funds_dir)
 
     def mock_resolve(isin, db_path=None):
-        return {"isin": isin, "name": "Test Fund", "security_id": "F0GBR04KHC"}
+        return {
+            "isin": isin,
+            "name": "Test Fund",
+            "security_id": "F0GBR04KHC",
+            "performance_id": "0P000068Z4",
+        }
 
     def mock_download(fund_id, currency, start, end, timeout=30):
         import pandas as pd
@@ -150,10 +156,15 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
         "isin": "ES0182527038",
         "name": "Test Fund",
         "fund_id": "F0GBR04KHC",
+        "morningstar_url": (
+            "https://global.morningstar.com/es/inversiones/fondos/0P000068Z4/cotizacion"
+        ),
     }
     nav_path = funds_dir / "ES0182527038.csv"
     assert nav_path.exists()
     assert nav_path.read_text(encoding="utf-8").startswith("date,nav\n")
+    metrics = get_fund_metrics("ES0182527038", db_path)
+    assert metrics["pct_1w"] == 1.0
 
 
 def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
@@ -163,8 +174,8 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.finance.nav_files.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
-    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
 
     import pandas as pd
     from portfolio.finance.nav_files import save_fund_nav_csv
@@ -204,8 +215,25 @@ def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
-    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
+    save_fund_metrics(
+        "ES0182527038",
+        {
+            "beta_6m": 0.05,
+            "cor_6m": 0.19,
+            "vol_1y": 3.44,
+            "pct_1w": 0.5,
+            "pct_2w": 1.1,
+            "pct_1m": 2.30,
+            "pct_3m": -0.56,
+            "pct_6m": 2.49,
+            "pct_ytd": 5.43,
+            "sr_6m": 1.58,
+            "sr_1y": 1.67,
+        },
+        db_path,
+    )
 
     client = TestClient(app)
     token = _register_and_login(client, "user@example.com", "secretpass")
@@ -242,9 +270,9 @@ def test_dashboard_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkey
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
-    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path)
-    save_fund("IE00BYX5M476", "Emerging Markets", "F00001020E", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
+    save_fund("IE00BYX5M476", "Emerging Markets", "F00001020E", db_path=db_path)
 
     client = TestClient(app)
     token = _register_and_login(client, "user@example.com", "secretpass")
@@ -277,7 +305,7 @@ def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     client = TestClient(app)
     token = _register_and_login(client, "user@example.com", "secretpass")
@@ -297,8 +325,8 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path)
-    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
 
     client = TestClient(app)
     token = _register_and_login(client, "user@example.com", "secretpass")
