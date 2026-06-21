@@ -358,6 +358,7 @@ button:disabled {
 
 .table-panel {
   margin-bottom: 1.75rem;
+  overflow: visible;
 }
 
 .table-title {
@@ -367,7 +368,12 @@ button:disabled {
 }
 
 .table-scroll {
+  --delete-tooltip-gutter: 1.75rem;
   overflow-x: auto;
+  overflow-y: visible;
+  margin-left: calc(-1 * var(--delete-tooltip-gutter));
+  padding-left: var(--delete-tooltip-gutter);
+  width: calc(100% + var(--delete-tooltip-gutter));
   border-radius: 6px;
 }
 
@@ -394,18 +400,13 @@ button:disabled {
 }
 
 .fund-table .col-name,
-.fund-table th.col-name {
+.fund-table th.col-name,
+.fund-table td.col-name {
   text-align: left;
   min-width: 220px;
   max-width: 360px;
   white-space: normal;
-}
-
-.fund-table th.col-name {
-  padding-left: calc(0.65rem + 3.75rem + 0.5rem);
-}
-
-.fund-table td.col-name {
+  padding-left: 0;
   overflow: visible;
 }
 
@@ -517,23 +518,9 @@ button:disabled {
 }
 
 .fund-name-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
+  position: relative;
+  display: inline-block;
   max-width: 100%;
-}
-
-.fund-delete-slot {
-  flex: 0 0 3.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.fund-link,
-.fund-name {
-  min-width: 0;
 }
 
 .fund-link {
@@ -547,38 +534,48 @@ button:disabled {
 
 .fund-delete-popup {
   display: none;
-  position: static;
-  z-index: 20;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  z-index: 30;
+  padding-right: 0.35rem;
   background: transparent;
   border: none;
   box-shadow: none;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
-.fund-table tr.row-actions-visible .fund-delete-popup {
-  display: block;
-}
-
+.fund-table tr.row-actions-visible .fund-delete-popup,
 .fund-name-wrap:hover .fund-delete-popup,
 .fund-delete-popup:hover {
   display: block;
+  pointer-events: auto;
 }
 
 .fund-delete-btn {
-  padding: 0.25rem 0.55rem;
-  font-size: 0.78rem;
-  line-height: 1.2;
-  background: #fff;
-  color: #c0392b;
-  border: 1px solid #e8b4b0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  background: transparent;
+  color: #b5473a;
+  border: none;
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  white-space: nowrap;
+}
+
+.fund-delete-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
 }
 
 .fund-delete-btn:hover {
-  background: #fdecea;
-  border-color: #c0392b;
+  color: #922b21;
+  background: rgba(192, 57, 43, 0.08);
 }
 
 .metric-positive {
