@@ -54,7 +54,7 @@
   }
 
   async function fetchPortfolios() {
-    return api.fetchJson(`${api.API}/portfolios`);
+    return api.fetchJson(`${api.PORTFOLIO_API}/portfolios`);
   }
 
   async function loadPortfolios() {
@@ -73,7 +73,7 @@
   }
 
   async function createPortfolio(name) {
-    const portfolio = await api.fetchJson(`${api.API}/portfolios`, {
+    const portfolio = await api.fetchJson(`${api.PORTFOLIO_API}/portfolios`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name }),
@@ -83,7 +83,7 @@
   }
 
   async function deletePortfolio(portfolioId) {
-    await api.fetchJson(`${api.API}/portfolios/${portfolioId}`, {
+    await api.fetchJson(`${api.PORTFOLIO_API}/portfolios/${portfolioId}`, {
       method: "DELETE",
     });
 
@@ -102,7 +102,7 @@
   }
 
   async function setDefaultPortfolio(portfolioId) {
-    await api.fetchJson(`${api.API}/portfolios/${portfolioId}/default`, {
+    await api.fetchJson(`${api.PORTFOLIO_API}/portfolios/${portfolioId}/default`, {
       method: "PUT",
     });
     return fetchPortfolios();

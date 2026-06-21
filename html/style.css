@@ -91,6 +91,11 @@ button:disabled {
   flex-shrink: 0;
 }
 
+.is-layout-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .portfolio-picker {
   display: flex;
   align-items: center;

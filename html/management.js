@@ -284,9 +284,9 @@
 
   async function loadScreenData() {
     const [curve, metrics, portfolios] = await Promise.all([
-      api.fetchJson(api.withPortfolioId(`${api.API}/curve`)),
-      api.fetchJson(api.withPortfolioId(`${api.API}/metrics`)),
-      api.fetchJson(`${api.API}/portfolios`),
+      api.fetchJson(api.withPortfolioId(`${api.PORTFOLIO_API}/curve`)),
+      api.fetchJson(api.withPortfolioId(`${api.PORTFOLIO_API}/metrics`)),
+      api.fetchJson(`${api.PORTFOLIO_API}/portfolios`),
     ]);
     return { curve, metrics, portfolios };
   }
@@ -305,7 +305,7 @@
     showError("");
 
     try {
-      await api.fetchJson(api.withPortfolioId(`${api.API}/portfolio`), {
+      await api.fetchJson(api.withPortfolioId(`${api.PORTFOLIO_API}/positions`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ positions }),

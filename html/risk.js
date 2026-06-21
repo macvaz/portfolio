@@ -48,7 +48,7 @@
   }
 
   async function fetchReportHtml() {
-    const response = await fetch(api.withPortfolioId(`${api.API}/report`));
+    const response = await fetch(api.withPortfolioId(`${api.PORTFOLIO_API}/report`));
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       const detail = body.detail;

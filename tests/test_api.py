@@ -43,7 +43,7 @@ def test_create_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     client = TestClient(app)
     user_id = _create_user(db_path)
 
-    response = client.post("/api/report", params={"portfolio_id": user_id}, json={"positions": []})
+    response = client.post("/api/portfolio/report", params={"portfolio_id": user_id}, json={"positions": []})
     assert response.status_code == 400
 
 
@@ -55,7 +55,7 @@ def test_get_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     client = TestClient(app)
     user_id = _create_user(db_path)
 
-    response = client.get("/api/report", params={"portfolio_id": user_id})
+    response = client.get("/api/portfolio/report", params={"portfolio_id": user_id})
     assert response.status_code == 400
     assert response.json()["detail"] == "Portfolio is empty"
 
@@ -83,7 +83,7 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
     user_id = _create_user(db_path)
 
     client.put(
-        "/api/portfolio",
+        "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={"positions": [{"isin": "ES0182527038", "weighted_assets": 1.0}]},
     )
@@ -97,7 +97,7 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
         mock_report_html,
     )
 
-    response = client.get("/api/report", params={"portfolio_id": user_id})
+    response = client.get("/api/portfolio/report", params={"portfolio_id": user_id})
     assert response.status_code == 200
     assert "QuantStats report" in response.text
 
@@ -178,7 +178,7 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     user_id = _create_user(db_path)
 
     client.put(
-        "/api/portfolio",
+        "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={
             "positions": [
@@ -188,7 +188,7 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
         },
     )
 
-    response = client.get("/api/curve", params={"portfolio_id": user_id})
+    response = client.get("/api/portfolio/curve", params={"portfolio_id": user_id})
     assert response.status_code == 200
     data = response.json()
     assert data["portfolio"][0] == 0.0
@@ -229,7 +229,7 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     user_id = _create_user(db_path)
 
     client.put(
-        "/api/portfolio",
+        "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={
             "positions": [
@@ -239,7 +239,7 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
         },
     )
 
-    response = client.get("/api/metrics", params={"portfolio_id": user_id})
+    response = client.get("/api/portfolio/metrics", params={"portfolio_id": user_id})
     assert response.status_code == 200
     data = response.json()
 
@@ -271,7 +271,7 @@ def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypa
     user_id = _create_user(db_path)
 
     client.put(
-        "/api/portfolio",
+        "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={
             "positions": [
@@ -280,7 +280,7 @@ def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypa
         },
     )
 
-    response = client.get("/api/metrics", params={"portfolio_id": user_id})
+    response = client.get("/api/portfolio/metrics", params={"portfolio_id": user_id})
     data = response.json()
 
     assert len(data["portfolio"]) == 1
@@ -303,7 +303,7 @@ def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
     user_id = _create_user(db_path)
 
     response = client.put(
-        "/api/portfolio",
+        "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={"positions": [{"isin": "ES0182527038", "weighted_assets": 0.35}]},
     )
@@ -323,7 +323,7 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
     user_id = _create_user(db_path)
 
     save_response = client.put(
-        "/api/portfolio",
+        "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={
             "positions": [
@@ -352,7 +352,7 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
         },
     ]
 
-    load_response = client.get("/api/portfolio", params={"portfolio_id": user_id})
+    load_response = client.get("/api/portfolio/positions", params={"portfolio_id": user_id})
     assert load_response.status_code == 200
     assert load_response.json() == save_response.json()
 
@@ -368,15 +368,15 @@ def test_delete_portfolio(tmp_path, monkeypatch):
     user_id = _create_user(db_path)
 
     client.put(
-        "/api/portfolio",
+        "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={"positions": [{"isin": "ES0182527038", "weighted_assets": 1.0}]},
     )
 
-    delete_response = client.delete(f"/api/portfolios/{user_id}")
+    delete_response = client.delete(f"/api/portfolio/portfolios/{user_id}")
     assert delete_response.status_code == 204
-    assert client.get("/api/portfolios").json() == []
-    assert client.get("/api/portfolio", params={"portfolio_id": user_id}).status_code == 404
+    assert client.get("/api/portfolio/portfolios").json() == []
+    assert client.get("/api/portfolio/positions", params={"portfolio_id": user_id}).status_code == 404
 
 
 def test_delete_portfolio_not_found(tmp_path, monkeypatch):
@@ -386,7 +386,7 @@ def test_delete_portfolio_not_found(tmp_path, monkeypatch):
     init_db(db_path)
 
     client = TestClient(app)
-    response = client.delete("/api/portfolios/999")
+    response = client.delete("/api/portfolio/portfolios/999")
     assert response.status_code == 404
 
 
@@ -400,11 +400,11 @@ def test_set_default_portfolio(tmp_path, monkeypatch):
     first_id = _create_user(db_path, "First")
     second_id = _create_user(db_path, "Second")
 
-    response = client.put(f"/api/portfolios/{second_id}/default")
+    response = client.put(f"/api/portfolio/portfolios/{second_id}/default")
     assert response.status_code == 200
     assert response.json() == {"id": second_id, "name": "Second", "is_default": True}
 
-    portfolios = client.get("/api/portfolios").json()
+    portfolios = client.get("/api/portfolio/portfolios").json()
     assert portfolios == [
         {"id": first_id, "name": "First", "is_default": False},
         {"id": second_id, "name": "Second", "is_default": True},

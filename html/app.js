@@ -74,6 +74,21 @@
     }
   }
 
+  function setLayoutHidden(element, hidden) {
+    element.classList.toggle("is-layout-hidden", hidden);
+    element.setAttribute("aria-hidden", hidden ? "true" : "false");
+  }
+
+  function updateToolbarForTab(tabName) {
+    const isTactical = tabName === "tactical";
+    setLayoutHidden(document.querySelector(".toolbar-right"), isTactical);
+    setLayoutHidden(document.getElementById("add-fund-form"), isTactical);
+
+    if (isTactical) {
+      hidePortfolioCreateInput();
+    }
+  }
+
   function setActiveTab(tabName) {
     activeTab = tabName;
 
@@ -84,6 +99,7 @@
     document.getElementById("management-panel").hidden = tabName !== "management";
     document.getElementById("risk-panel").hidden = tabName !== "risk";
     document.getElementById("tactical-panel").hidden = tabName !== "tactical";
+    updateToolbarForTab(tabName);
   }
 
   async function reloadActiveTab() {

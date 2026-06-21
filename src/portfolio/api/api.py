@@ -3,7 +3,7 @@ from datetime import date
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -23,6 +23,7 @@ from portfolio.api.database import (
     save_user_portfolio,
     set_default_user,
 )
+from portfolio.api.signals_service import get_signals
 from portfolio.finance.navs import delete_fund_nav_csv, download_and_store_fund_nav
 from portfolio.finance.metrics import refresh_fund_metrics
 from portfolio.api.models import User
@@ -30,6 +31,7 @@ from portfolio.datasources.morningstar import import_isins, morningstar_quote_ur
 from portfolio.api.curve import build_user_equity_curve
 from portfolio.api.metrics import get_portfolio_metrics
 from portfolio.api.report import build_report_html, build_user_report_html
+from portfolio.api.signals import router as signals_router
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
 NAV_START_DATE = "2000-01-01"
@@ -43,6 +45,9 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Portfolio API", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
+
+portfolio_router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
+signals_router = APIRouter(prefix="/api/signals", tags=["signals"])
 
 
 class PortfolioCreate(BaseModel):
@@ -125,12 +130,17 @@ def index() -> FileResponse:
     return FileResponse(WEB_DIR / "index.html")
 
 
-@app.get("/api/portfolios", response_model=list[PortfolioListItem])
+@signals_router.get("")
+def list_signals() -> dict:
+    """Return tactical macro and market signals."""
+    return get_signals()
+
+@portfolio_router.get("/portfolios", response_model=list[PortfolioListItem])
 def get_portfolios() -> list[dict]:
     return list_users()
 
 
-@app.post("/api/portfolios", response_model=PortfolioListItem, status_code=201)
+@portfolio_router.post("/portfolios", response_model=PortfolioListItem, status_code=201)
 def add_portfolio(
     body: PortfolioCreate,
     session: Annotated[Session, Depends(get_db)],
@@ -145,13 +155,13 @@ def add_portfolio(
     return {"id": user.id, "name": user.name, "is_default": user.is_default}
 
 
-@app.delete("/api/portfolios/{portfolio_id}", status_code=204)
+@portfolio_router.delete("/portfolios/{portfolio_id}", status_code=204)
 def remove_portfolio(portfolio_id: int) -> None:
     if not delete_user(portfolio_id):
         raise HTTPException(status_code=404, detail="Portfolio not found")
 
 
-@app.put("/api/portfolios/{portfolio_id}/default", response_model=PortfolioListItem)
+@portfolio_router.put("/portfolios/{portfolio_id}/default", response_model=PortfolioListItem)
 def mark_default_portfolio(portfolio_id: int) -> dict:
     portfolio = set_default_user(portfolio_id)
     if portfolio is None:
@@ -210,34 +220,34 @@ def remove_fund(isin: str) -> None:
     delete_fund_nav_csv(isin.upper())
 
 
-@app.get("/api/curve")
+@portfolio_router.get("/curve")
 def get_curve(portfolio_id: int) -> dict:
     """Buy-and-hold portfolio equity curve from stored NAV files."""
     _require_portfolio(portfolio_id)
     return build_user_equity_curve(portfolio_id)
 
 
-@app.get("/api/metrics")
+@portfolio_router.get("/metrics")
 def get_metrics(portfolio_id: int) -> dict:
     """Portfolio tables with real funds, weights, and stored metrics."""
     _require_portfolio(portfolio_id)
     return get_portfolio_metrics(portfolio_id)
 
 
-@app.get("/api/portfolio", response_model=list[PortfolioPositionResponse])
+@portfolio_router.get("/positions", response_model=list[PortfolioPositionResponse])
 def get_portfolio(portfolio_id: int) -> list[dict]:
     _require_portfolio(portfolio_id)
     return list_user_portfolio(portfolio_id)
 
 
-@app.put("/api/portfolio", response_model=list[PortfolioPositionResponse])
+@portfolio_router.put("/positions", response_model=list[PortfolioPositionResponse])
 def save_portfolio(body: PortfolioSave, portfolio_id: int) -> list[dict]:
     _require_portfolio(portfolio_id)
     positions = _normalize_portfolio_positions(body.positions)
     return save_user_portfolio(portfolio_id, positions)
 
 
-@app.get("/api/report", response_class=HTMLResponse)
+@portfolio_router.get("/report", response_class=HTMLResponse)
 def get_report(portfolio_id: int) -> HTMLResponse:
     """QuantStats tearsheet for the user's saved portfolio."""
     _require_portfolio(portfolio_id)
@@ -248,7 +258,7 @@ def get_report(portfolio_id: int) -> HTMLResponse:
     return HTMLResponse(content=html)
 
 
-@app.post("/api/report", response_class=HTMLResponse)
+@portfolio_router.post("/report", response_class=HTMLResponse)
 def create_report(body: ReportRequest, portfolio_id: int) -> HTMLResponse:
     _require_portfolio(portfolio_id)
     positions = _validate_positions(body.positions)
@@ -259,6 +269,10 @@ def create_report(body: ReportRequest, portfolio_id: int) -> HTMLResponse:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return HTMLResponse(content=html)
+
+
+app.include_router(portfolio_router)
+app.include_router(signals_router)
 
 
 def main() -> None:

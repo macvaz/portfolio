@@ -1,5 +1,6 @@
 (function () {
   const API = "/api";
+  const PORTFOLIO_API = "/api/portfolio";
   const PORTFOLIO_ID_KEY = "portfolio_id";
 
   let portfolioId = localStorage.getItem(PORTFOLIO_ID_KEY);
@@ -45,6 +46,7 @@
 
   window.PortfolioApi = {
     API,
+    PORTFOLIO_API,
     getPortfolioId,
     setPortfolioId,
     withPortfolioId,
