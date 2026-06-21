@@ -126,6 +126,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
             "name": "Test Fund",
             "security_id": "F0GBR04KHC",
             "performance_id": "0P000068Z4",
+            "universe": "FO",
         }
 
     def mock_download(fund_id, currency, start, end, timeout=30):
@@ -214,6 +215,10 @@ def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr(
+        "portfolio.api.mock_management.resolve_fund_by_isin",
+        lambda isin, db_path=None: None,
+    )
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
@@ -269,6 +274,10 @@ def test_dashboard_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkey
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr(
+        "portfolio.api.mock_management.resolve_fund_by_isin",
+        lambda isin, db_path=None: None,
+    )
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
@@ -348,12 +357,16 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
             "isin": "ES0182527038",
             "name": "Test Fund",
             "fund_id": "F0GBR04KHC",
+            "performance_id": None,
+            "universe": None,
             "weighted_assets": 0.35,
         },
         {
             "isin": "IE00BYX5NX33",
             "name": "World Fund",
             "fund_id": "F00001019E",
+            "performance_id": None,
+            "universe": None,
             "weighted_assets": 0.65,
         },
     ]

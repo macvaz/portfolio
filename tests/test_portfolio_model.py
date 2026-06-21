@@ -30,12 +30,16 @@ def test_save_user_portfolio_persists_positions(tmp_path):
             "isin": "ES0182527038",
             "name": "Test Fund",
             "fund_id": "F0GBR04KHC",
+            "performance_id": None,
+            "universe": None,
             "weighted_assets": 0.4,
         },
         {
             "isin": "IE00BYX5NX33",
             "name": "World Fund",
             "fund_id": "F00001019E",
+            "performance_id": None,
+            "universe": None,
             "weighted_assets": 0.6,
         },
     ]

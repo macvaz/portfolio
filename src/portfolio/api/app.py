@@ -20,6 +20,7 @@ from portfolio.api.auth import (
 from portfolio.api.database import (
     delete_fund,
     get_db,
+    get_fund,
     init_db,
     list_funds,
     list_user_portfolio,
@@ -87,6 +88,8 @@ class PortfolioPositionResponse(BaseModel):
     isin: str
     name: str
     fund_id: str
+    performance_id: str | None = None
+    universe: str | None = None
     weighted_assets: float
 
 
@@ -100,7 +103,7 @@ def _normalize_portfolio_positions(
     normalized = []
     for position in positions:
         isin = position.isin.upper()
-        if resolve_fund_by_isin(isin) is None:
+        if get_fund(isin) is None:
             raise HTTPException(status_code=404, detail=f"Unknown ISIN: {isin}")
         normalized.append({"isin": isin, "weighted_assets": position.weighted_assets})
     return normalized
@@ -164,7 +167,9 @@ def get_funds(_user: CurrentUser) -> list[dict]:
     return [
         {
             **fund,
-            "morningstar_url": morningstar_quote_url(fund.get("performance_id")),
+            "morningstar_url": morningstar_quote_url(
+                fund.get("performance_id"), fund.get("universe")
+            ),
         }
         for fund in list_funds()
     ]
@@ -182,6 +187,7 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
         fund["name"],
         fund["security_id"],
         fund.get("performance_id"),
+        fund.get("universe"),
     )
     download_and_store_fund_nav(
         fund["isin"],
@@ -194,7 +200,9 @@ def create_fund(body: FundCreate, _user: CurrentUser) -> dict:
         "isin": fund["isin"],
         "name": fund["name"],
         "fund_id": fund["security_id"],
-        "morningstar_url": morningstar_quote_url(fund.get("performance_id")),
+        "morningstar_url": morningstar_quote_url(
+            fund.get("performance_id"), fund.get("universe")
+        ),
     }
 
 

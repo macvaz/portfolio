@@ -16,16 +16,24 @@ from playwright.async_api import async_playwright
 from portfolio.api.database import get_fund, save_fund
 
 DOMAIN = "https://global.morningstar.com"
-MORNINGSTAR_QUOTE_URL = (
+MORNINGSTAR_FUND_QUOTE_URL = (
     "https://global.morningstar.com/es/inversiones/fondos/{performance_id}/cotizacion"
+)
+MORNINGSTAR_ETF_QUOTE_URL = (
+    "https://global.morningstar.com/es/inversiones/etfs/{performance_id}/cotizacion"
 )
 
 
-def morningstar_quote_url(performance_id: str | None) -> str | None:
-    """Build the Morningstar quote page URL for a fund performance ID."""
+def morningstar_quote_url(
+    performance_id: str | None,
+    universe: str | None = None,
+) -> str | None:
+    """Build the Morningstar quote page URL for a fund or ETF performance ID."""
     if not performance_id:
         return None
-    return MORNINGSTAR_QUOTE_URL.format(performance_id=performance_id)
+    if universe == "FE":
+        return MORNINGSTAR_ETF_QUOTE_URL.format(performance_id=performance_id)
+    return MORNINGSTAR_FUND_QUOTE_URL.format(performance_id=performance_id)
 
 
 async def _search_isin_async(isin: str) -> Optional[Dict]:
@@ -142,9 +150,11 @@ def search_by_isin(isin: str) -> Dict | None:
     security_name = results["fields"]["name"]["value"]
     security_id = results["meta"]["securityID"]
     performance_id = results["meta"]["performanceID"]
+    universe = results["meta"].get("universe")
     return {
         "security_id": security_id,
         "performance_id": performance_id,
+        "universe": universe,
         "name": security_name,
         "isin": isin,
     }
@@ -156,10 +166,11 @@ def resolve_fund_by_isin(
     """Return fund metadata for an ISIN, using the database when available."""
     cached = get_fund(isin, db_path)
     if cached is not None:
-        if cached.get("performance_id"):
+        if cached.get("performance_id") and cached.get("universe"):
             return {
                 "security_id": cached["security_id"],
                 "performance_id": cached["performance_id"],
+                "universe": cached["universe"],
                 "name": cached["name"],
                 "isin": isin,
             }
@@ -168,7 +179,8 @@ def resolve_fund_by_isin(
         if fund is None:
             return {
                 "security_id": cached["security_id"],
-                "performance_id": None,
+                "performance_id": cached.get("performance_id"),
+                "universe": cached.get("universe"),
                 "name": cached["name"],
                 "isin": isin,
             }
@@ -177,12 +189,14 @@ def resolve_fund_by_isin(
             isin,
             cached["name"],
             cached["security_id"],
-            fund["performance_id"],
+            fund.get("performance_id") or cached.get("performance_id"),
+            fund.get("universe") or cached.get("universe"),
             db_path,
         )
         return {
             "security_id": cached["security_id"],
-            "performance_id": fund["performance_id"],
+            "performance_id": fund.get("performance_id") or cached.get("performance_id"),
+            "universe": fund.get("universe") or cached.get("universe"),
             "name": cached["name"],
             "isin": isin,
         }
@@ -196,6 +210,21 @@ def resolve_fund_by_isin(
         fund["name"],
         fund["security_id"],
         fund["performance_id"],
+        fund.get("universe"),
         db_path,
     )
     return fund
+
+
+def backfill_fund_performance_ids(db_path: Path | None = None) -> int:
+    """Fetch and store Morningstar performance IDs for funds missing them."""
+    from portfolio.api.database import list_funds
+
+    updated = 0
+    for fund in list_funds(db_path):
+        if fund.get("performance_id") and fund.get("universe"):
+            continue
+        resolved = resolve_fund_by_isin(fund["isin"], db_path)
+        if resolved and resolved.get("performance_id"):
+            updated += 1
+    return updated

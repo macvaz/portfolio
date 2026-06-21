@@ -12,6 +12,7 @@ class Fund(SQLModel, table=True):
     name: str
     fund_id: str
     performance_id: str | None = None
+    universe: str | None = None
 
 
 class Metric(SQLModel, table=True):

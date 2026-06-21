@@ -3,8 +3,27 @@
 from datetime import date
 
 from portfolio.api.database import get_fund_metrics, list_funds, list_user_portfolio
-from portfolio.finance.funds import morningstar_quote_url
+from portfolio.finance.funds import morningstar_quote_url, resolve_fund_by_isin
 from portfolio.finance.metrics import compute_portfolio_metrics
+
+
+def _morningstar_link(
+    isin: str,
+    performance_id: str | None,
+    universe: str | None,
+    db_path=None,
+) -> str | None:
+    if performance_id and universe:
+        return morningstar_quote_url(performance_id, universe)
+    if db_path is None:
+        return morningstar_quote_url(performance_id, universe)
+    resolved = resolve_fund_by_isin(isin, db_path)
+    if resolved is None:
+        return morningstar_quote_url(performance_id, universe)
+    return morningstar_quote_url(
+        resolved.get("performance_id") or performance_id,
+        resolved.get("universe") or universe,
+    )
 
 
 def _fund_row(
@@ -13,13 +32,16 @@ def _fund_row(
     *,
     weight: float = 0.0,
     performance_id: str | None = None,
+    universe: str | None = None,
     db_path=None,
 ) -> dict:
     return {
         "isin": isin,
         "name": name,
         "weight": weight,
-        "morningstar_url": morningstar_quote_url(performance_id),
+        "morningstar_url": _morningstar_link(
+            isin, performance_id, universe, db_path
+        ),
         **get_fund_metrics(isin, db_path),
     }
 
@@ -35,6 +57,7 @@ def build_dashboard_data(user_id: int, db_path=None, funds_dir=None) -> dict:
             position["name"],
             weight=round(position["weighted_assets"] * 100, 2),
             performance_id=position.get("performance_id"),
+            universe=position.get("universe"),
             db_path=db_path,
         )
         for position in positions
@@ -44,6 +67,7 @@ def build_dashboard_data(user_id: int, db_path=None, funds_dir=None) -> dict:
             fund["isin"],
             fund["name"],
             performance_id=fund.get("performance_id"),
+            universe=fund.get("universe"),
             db_path=db_path,
         )
         for fund in list_funds(db_path)

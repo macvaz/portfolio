@@ -3,6 +3,7 @@ from pathlib import Path
 
 from portfolio import process_macro_data, print_signals
 from portfolio.finance.metrics import update_all_fund_metrics
+from portfolio.finance.funds import backfill_fund_performance_ids
 from portfolio.finance.nav_files import store_fund_navs_from_db
 
 
@@ -31,7 +32,11 @@ def run(
         funds_dir=funds_dir,
     )
 
-    print("\n3. Computing fund metrics...")
+    print("\n3. Backfilling Morningstar fund links...")
+    linked = backfill_fund_performance_ids(db_path)
+    print(f"Done. Linked {linked} fund(s).")
+
+    print("\n4. Computing fund metrics...")
     updated = update_all_fund_metrics(db_path, funds_dir)
     print(f"Done. Updated metrics for {updated} fund(s).")
 

@@ -27,11 +27,15 @@ def test_migrate_legacy_funds_table(tmp_path):
             "isin": "ES0182527038",
             "name": "Cartesio Y FI",
             "fund_id": "F0GBR04VSJ",
+            "performance_id": None,
+            "universe": None,
         },
         {
             "isin": "IE00BYX5NX33",
             "name": "World Fund",
             "fund_id": "F00001019E",
+            "performance_id": None,
+            "universe": None,
         },
     ]
 
