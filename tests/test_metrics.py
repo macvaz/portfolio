@@ -20,12 +20,19 @@ def _daily_navs(start: str, returns: list[float]) -> pd.DataFrame:
         current += pd.Timedelta(days=1)
         nav *= 1 + daily_return
         rows.append((current.strftime("%Y-%m-%d"), nav))
-    return pd.DataFrame({"value": [row[1] for row in rows]}, index=pd.to_datetime([row[0] for row in rows]))
+    return pd.DataFrame(
+        {"value": [row[1] for row in rows]},
+        index=pd.to_datetime([row[0] for row in rows]),
+    )
 
 
 def test_compute_metrics_from_daily_returns():
-    fund_returns = pd.Series([0.01, -0.005, 0.008, 0.002], index=pd.date_range("2024-01-02", periods=4))
-    benchmark_returns = pd.Series([0.008, -0.004, 0.006, 0.001], index=fund_returns.index)
+    fund_returns = pd.Series(
+        [0.01, -0.005, 0.008, 0.002], index=pd.date_range("2024-01-02", periods=4)
+    )
+    benchmark_returns = pd.Series(
+        [0.008, -0.004, 0.006, 0.001], index=fund_returns.index
+    )
 
     metrics = compute_metrics(fund_returns, benchmark_returns)
 
@@ -70,7 +77,10 @@ def test_compute_portfolio_metrics_from_positions(tmp_path):
     )
 
     metrics = compute_portfolio_metrics(
-        [{"isin": "ES0182527038", "weighted_assets": 0.6}, {"isin": "IE00BYX5NX33", "weighted_assets": 0.4}],
+        [
+            {"isin": "ES0182527038", "weighted_assets": 0.6},
+            {"isin": "IE00BYX5NX33", "weighted_assets": 0.4},
+        ],
         funds_dir=funds_dir,
     )
 

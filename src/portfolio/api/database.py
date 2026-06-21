@@ -72,13 +72,10 @@ def _migrate_fund_performance_id(db_path: Path | None = None) -> None:
     engine = get_engine(db_path)
     with engine.connect() as connection:
         columns = {
-            row[1]
-            for row in connection.execute(text("PRAGMA table_info(fund)"))
+            row[1] for row in connection.execute(text("PRAGMA table_info(fund)"))
         }
         if "performance_id" not in columns:
-            connection.execute(
-                text("ALTER TABLE fund ADD COLUMN performance_id TEXT")
-            )
+            connection.execute(text("ALTER TABLE fund ADD COLUMN performance_id TEXT"))
             connection.commit()
 
 
@@ -87,8 +84,7 @@ def _migrate_fund_universe(db_path: Path | None = None) -> None:
     engine = get_engine(db_path)
     with engine.connect() as connection:
         columns = {
-            row[1]
-            for row in connection.execute(text("PRAGMA table_info(fund)"))
+            row[1] for row in connection.execute(text("PRAGMA table_info(fund)"))
         }
         if "universe" not in columns:
             connection.execute(text("ALTER TABLE fund ADD COLUMN universe TEXT"))
@@ -109,8 +105,7 @@ def _migrate_drop_user_password(db_path: Path | None = None) -> None:
             return
 
         columns = {
-            row[1]
-            for row in connection.execute(text("PRAGMA table_info(user)"))
+            row[1] for row in connection.execute(text("PRAGMA table_info(user)"))
         }
         if "hashed_password" not in columns:
             return
@@ -148,8 +143,7 @@ def _migrate_user_email_to_name(db_path: Path | None = None) -> None:
             return
 
         columns = {
-            row[1]
-            for row in connection.execute(text("PRAGMA table_info(user)"))
+            row[1] for row in connection.execute(text("PRAGMA table_info(user)"))
         }
         if "name" in columns or "email" not in columns:
             return
@@ -176,8 +170,7 @@ def _migrate_user_is_default(db_path: Path | None = None) -> None:
             return
 
         columns = {
-            row[1]
-            for row in connection.execute(text("PRAGMA table_info(user)"))
+            row[1] for row in connection.execute(text("PRAGMA table_info(user)"))
         }
         if "is_default" not in columns:
             connection.execute(
@@ -223,7 +216,10 @@ def list_users(db_path: Path | None = None) -> list[dict]:
     init_db(db_path)
     with get_session(db_path) as session:
         users = session.exec(select(User).order_by(User.name)).all()
-    return [{"id": user.id, "name": user.name, "is_default": user.is_default} for user in users]
+    return [
+        {"id": user.id, "name": user.name, "is_default": user.is_default}
+        for user in users
+    ]
 
 
 def delete_user(user_id: int, db_path: Path | None = None) -> bool:
@@ -312,9 +308,7 @@ def save_fund(
         session.commit()
 
 
-def get_fund_metrics(
-    isin: str, db_path: Path | None = None
-) -> dict[str, float | None]:
+def get_fund_metrics(isin: str, db_path: Path | None = None) -> dict[str, float | None]:
     init_db(db_path)
     with get_session(db_path) as session:
         metric = session.get(Metric, isin.upper())
@@ -390,9 +384,7 @@ def delete_fund(isin: str, db_path: Path | None = None) -> bool:
     return True
 
 
-def list_user_portfolio(
-    user_id: int, db_path: Path | None = None
-) -> list[dict]:
+def list_user_portfolio(user_id: int, db_path: Path | None = None) -> list[dict]:
     init_db(db_path)
     with get_session(db_path) as session:
         rows = session.exec(

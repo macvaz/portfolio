@@ -78,9 +78,7 @@ def test_user_is_default_migration_sets_miguel_agresiva(tmp_path):
         connection.exec_driver_sql(
             "INSERT INTO user (id, name) VALUES (1, 'Miguel_Agresiva')"
         )
-        connection.exec_driver_sql(
-            "INSERT INTO user (id, name) VALUES (2, 'Other')"
-        )
+        connection.exec_driver_sql("INSERT INTO user (id, name) VALUES (2, 'Other')")
         connection.commit()
 
     init_db(db_path)

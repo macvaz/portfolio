@@ -167,4 +167,3 @@ def test_build_equity_curve_includes_annualized_performance(tmp_path):
     assert curve["portfolio_annualized_pct"] is not None
     assert curve["benchmark_annualized_pct"] is not None
     assert curve["portfolio_annualized_pct"] != curve["benchmark_annualized_pct"]
-

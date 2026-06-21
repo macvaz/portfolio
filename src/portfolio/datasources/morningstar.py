@@ -30,6 +30,7 @@ MS_SERIES_SUFFIX = "]2]1]"
 
 __all__ = ["import_isins", "download_navs", "morningstar_quote_url"]
 
+
 async def _search_isin_async(isin: str) -> Optional[Dict]:
     """Search for a fund by ISIN using Morningstar's API with Playwright."""
     query = f"((isin+~%3D+%22{isin}%22))"
@@ -123,9 +124,7 @@ def _search_by_isin(isin: str) -> Dict | None:
     }
 
 
-def _resolve_fund_by_isin(
-    isin: str, db_path: Path | None = None
-) -> Dict | None:
+def _resolve_fund_by_isin(isin: str, db_path: Path | None = None) -> Dict | None:
     """Return fund metadata for an ISIN, using the database when available."""
     cached = get_fund(isin, db_path)
     if cached is not None:
@@ -158,7 +157,8 @@ def _resolve_fund_by_isin(
         )
         return {
             "security_id": cached["security_id"],
-            "performance_id": fund.get("performance_id") or cached.get("performance_id"),
+            "performance_id": fund.get("performance_id")
+            or cached.get("performance_id"),
             "universe": fund.get("universe") or cached.get("universe"),
             "name": cached["name"],
             "isin": isin,
@@ -258,9 +258,11 @@ def _download_fund_navs(
     df = pd.json_normalize(records)
     return _normalize_dataframe(df)
 
+
 ###################################
 # Main morningstar public methods
 ###################################
+
 
 def import_isins(
     isins: str | list[str] | None = None,
@@ -304,7 +306,9 @@ def download_navs(
         if fund is None:
             print(f"No fund found for ISIN: {isin}")
             continue
-        fund_data = _download_fund_navs(fund["security_id"], currency, start, end, timeout)
+        fund_data = _download_fund_navs(
+            fund["security_id"], currency, start, end, timeout
+        )
         if fund_data.empty:
             print(f"No price data for ISIN: {isin}")
             continue

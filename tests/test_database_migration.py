@@ -72,10 +72,7 @@ def test_migrate_drop_user_password(tmp_path):
     init_db(db_path)
 
     connection = sqlite3.connect(db_path)
-    columns = {
-        row[1]
-        for row in connection.execute("PRAGMA table_info(user)")
-    }
+    columns = {row[1] for row in connection.execute("PRAGMA table_info(user)")}
     users = connection.execute("SELECT id, name FROM user").fetchall()
     connection.close()
 

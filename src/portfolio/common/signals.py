@@ -1,13 +1,32 @@
+from functools import reduce
+
 import pandas as pd
 
+from portfolio.common.macro_signals import (
+    ALERT_FINANCIAL_STRESS,
+    ALERT_INVERTED_CURVE,
+    ALERT_SAHM,
+    FINANCIAL_STRESS_INDEX,
+    MacroSignalFn,
+    SAHM_VALUE,
+    YIELD_SPREAD_10Y3M,
+)
 from portfolio.datasources.fred import download_fred_data, init_client
 
-def compute_signals(fred_api_key: str, fred_series: list[tuple[str, str]], start_date: str, end_date: str) -> pd.DataFrame:
+
+def compute_signals(
+    fred_api_key: str,
+    fred_series: list[tuple[str, str]],
+    macro_signals: list[MacroSignalFn],
+    start_date: str,
+    end_date: str,
+) -> pd.DataFrame:
     data_df = download_data(fred_api_key, fred_series, start_date, end_date)
-    macro_df = calculate_macro_signals(data_df)
+    macro_df = calculate_macro_signals(data_df, macro_signals)
     market_df = calculate_market_signals(macro_df)
     print_current_signals(market_df)
     return market_df
+
 
 def download_data(
     fred_api_key: str | None,
@@ -41,34 +60,11 @@ def download_data(
     return df
 
 
-def calculate_macro_signals(df: pd.DataFrame) -> pd.DataFrame:
-    # --- INDICATOR 1: THE FED'S SPREAD (10Y - 3M) ---
-    # Trigger signal if the yield curve inverts (drops below 0)
-    df["Alert_Inverted_Curve"] = df["Yield_Spread_10Y3M"] < 0
-
-    # --- INDICATOR 2: THE SAHM RULE (Unemployment Filter) ---
-    # 3-month moving average of the unemployment rate (~63 trading days)
-    df["Sahm_MA3"] = df["Unemployment_Rate"].rolling(window=63).mean()
-    # 12-month minimum of the unemployment rate (~252 trading days)
-    df["Sahm_Min_12M"] = df["Unemployment_Rate"].rolling(window=252).min()
-    # Sahm Indicator value
-    df["Sahm_Value"] = df["Sahm_MA3"] - df["Sahm_Min_12M"]
-    df["Alert_Sahm"] = df["Sahm_Value"] 
-    # --- INDICATOR 4: ST. LOUIS FINANCIAL STRESS INDEX (Liquidity Filter) ---
-    # Trigger signal if the index exceeds 1.0 (High financial stress)
-    df["Alert_Financial_Stress"] = df["Financial_Stress_Index"] >= 1.0
-
-    # --- MACRO VOTING MATRIX ---
-    # Count how many alerts are triggered concurrently
-    df["Macro_Crisis_Votes"] = (
-        df["Alert_Inverted_Curve"].astype(int) + 
-        df["Alert_Financial_Stress"].astype(int)
-    )
-
-    # Risk-off Confirmation: Recommends activating defensive bunker if there are 2 or more votes
-    df["MACRO_SYSTEM_LOCKED"] = df["Macro_Crisis_Votes"] >= 2
-
-    return df
+def calculate_macro_signals(
+    df: pd.DataFrame,
+    macro_signals: list[MacroSignalFn],
+) -> pd.DataFrame:
+    return reduce(lambda current, signal_fn: signal_fn(current), macro_signals, df)
 
 
 def calculate_market_signals(df: pd.DataFrame) -> pd.DataFrame:
@@ -96,13 +92,13 @@ def print_current_signals(df: pd.DataFrame):
 
     print("\nMacro signals")
     print(
-        f"1. Curve Inversion (10Y-3M): {float(row['Yield_Spread_10Y3M']):.2f}% -> {row['Alert_Inverted_Curve']}"
+        f"1. Curve Inversion (10Y-3M): {float(row[YIELD_SPREAD_10Y3M]):.2f}% -> {row[ALERT_INVERTED_CURVE]}"
     )
     print(
-        f"2. Sahm Rule (Employment): {float(row['Sahm_Value']):.2f}% -> {row['Alert_Sahm']}"
+        f"2. Sahm Rule (Employment): {float(row[SAHM_VALUE]):.2f}% -> {row[ALERT_SAHM]}"
     )
     print(
-        f"3. Financial Stress Index: {float(row['Financial_Stress_Index']):.2f} -> {row['Alert_Financial_Stress']}"
+        f"3. Financial Stress Index: {float(row[FINANCIAL_STRESS_INDEX]):.2f} -> {row[ALERT_FINANCIAL_STRESS]}"
     )
 
     print("\nMarket signals")

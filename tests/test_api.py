@@ -1,7 +1,13 @@
 from fastapi.testclient import TestClient
 
 from portfolio.api.api import app
-from portfolio.api.database import create_user, get_fund_metrics, init_db, save_fund, save_fund_metrics
+from portfolio.api.database import (
+    create_user,
+    get_fund_metrics,
+    init_db,
+    save_fund,
+    save_fund_metrics,
+)
 
 
 def _create_user(db_path, name: str = "Growth") -> int:
@@ -43,7 +49,11 @@ def test_create_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     client = TestClient(app)
     user_id = _create_user(db_path)
 
-    response = client.post("/api/portfolio/risk_report", params={"portfolio_id": user_id}, json={"positions": []})
+    response = client.post(
+        "/api/portfolio/risk_report",
+        params={"portfolio_id": user_id},
+        json={"positions": []},
+    )
     assert response.status_code == 400
 
 
@@ -55,7 +65,9 @@ def test_get_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     client = TestClient(app)
     user_id = _create_user(db_path)
 
-    response = client.get("/api/portfolio/risk_report", params={"portfolio_id": user_id})
+    response = client.get(
+        "/api/portfolio/risk_report", params={"portfolio_id": user_id}
+    )
     assert response.status_code == 400
     assert response.json()["detail"] == "Portfolio is empty"
 
@@ -74,7 +86,9 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
 
     df = pd.DataFrame(
         {"value": [100.0, 101.0, 102.0, 103.0, 104.0]},
-        index=pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"]),
+        index=pd.to_datetime(
+            ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"]
+        ),
     )
     save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
     save_fund_nav_csv("IE00BYX5MX67", df, funds_dir=funds_dir)
@@ -97,7 +111,9 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
         mock_report_html,
     )
 
-    response = client.get("/api/portfolio/risk_report", params={"portfolio_id": user_id})
+    response = client.get(
+        "/api/portfolio/risk_report", params={"portfolio_id": user_id}
+    )
     assert response.status_code == 200
     assert "QuantStats report" in response.text
 
@@ -126,7 +142,9 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
             index=pd.to_datetime(["2024-01-01", "2024-01-02"]),
         )
 
-    monkeypatch.setattr("portfolio.api.services.portfolio.router.import_isins", mock_resolve)
+    monkeypatch.setattr(
+        "portfolio.api.services.portfolio.router.import_isins", mock_resolve
+    )
     monkeypatch.setattr(
         "portfolio.common.navs.download_navs",
         mock_download,
@@ -352,7 +370,9 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
         },
     ]
 
-    load_response = client.get("/api/portfolio/positions", params={"portfolio_id": user_id})
+    load_response = client.get(
+        "/api/portfolio/positions", params={"portfolio_id": user_id}
+    )
     assert load_response.status_code == 200
     assert load_response.json() == save_response.json()
 
@@ -376,7 +396,12 @@ def test_delete_portfolio(tmp_path, monkeypatch):
     delete_response = client.delete(f"/api/portfolio/portfolios/{user_id}")
     assert delete_response.status_code == 204
     assert client.get("/api/portfolio/portfolios").json() == []
-    assert client.get("/api/portfolio/positions", params={"portfolio_id": user_id}).status_code == 404
+    assert (
+        client.get(
+            "/api/portfolio/positions", params={"portfolio_id": user_id}
+        ).status_code
+        == 404
+    )
 
 
 def test_delete_portfolio_not_found(tmp_path, monkeypatch):

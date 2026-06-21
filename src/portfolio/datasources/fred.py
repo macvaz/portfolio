@@ -2,8 +2,10 @@ import pandas as pd
 
 from fredapi import Fred
 
+
 def init_client(api_key: str) -> Fred:
     return Fred(api_key=api_key)
+
 
 def download_fred_data(
     fred_client, series_id, column_name, start_date, end_date

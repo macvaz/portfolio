@@ -49,7 +49,9 @@ class RiskReportRequest(BaseModel):
 
 def require_portfolio(portfolio_id: int) -> int:
     if get_user(portfolio_id) is None:
-        raise HTTPException(status_code=404, detail=f"Portfolio {portfolio_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Portfolio {portfolio_id} not found"
+        )
     return portfolio_id
 
 

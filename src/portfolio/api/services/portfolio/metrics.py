@@ -39,9 +39,7 @@ def _fund_row(
         "isin": isin,
         "name": name,
         "weight": weight,
-        "morningstar_url": _morningstar_link(
-            isin, performance_id, universe, db_path
-        ),
+        "morningstar_url": _morningstar_link(isin, performance_id, universe, db_path),
         **get_fund_metrics(isin, db_path),
     }
 

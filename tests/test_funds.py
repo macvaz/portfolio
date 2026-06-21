@@ -64,7 +64,9 @@ def test_import_isins_uses_cached_fund(tmp_path, monkeypatch):
     def fail_search(_isin):
         raise AssertionError("Morningstar search should not be called for cached ISIN")
 
-    monkeypatch.setattr("portfolio.datasources.morningstar._search_by_isin", fail_search)
+    monkeypatch.setattr(
+        "portfolio.datasources.morningstar._search_by_isin", fail_search
+    )
 
     fund = import_isins("ES0182527038", db_path=db_path)
 
@@ -89,7 +91,9 @@ def test_import_isins_fetches_and_persists_new_isin(tmp_path, monkeypatch):
             "isin": isin,
         }
 
-    monkeypatch.setattr("portfolio.datasources.morningstar._search_by_isin", mock_search)
+    monkeypatch.setattr(
+        "portfolio.datasources.morningstar._search_by_isin", mock_search
+    )
 
     fund = import_isins("IE00BYX5NX33", db_path=db_path)
 

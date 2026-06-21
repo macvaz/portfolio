@@ -1,14 +1,17 @@
 from pathlib import Path
-from portfolio.common.signals import compute_signals
-from portfolio.common.metrics import update_all_fund_metrics
-from portfolio.datasources.morningstar import import_isins
-from portfolio.common.navs import store_fund_navs_from_db
+
 from portfolio.api.database import DEFAULT_DB_PATH
-from portfolio.common.navs import DEFAULT_FUNDS_DIR
+from portfolio.common.macro_signals import MacroSignalFn
+from portfolio.common.metrics import update_all_fund_metrics
+from portfolio.common.navs import DEFAULT_FUNDS_DIR, store_fund_navs_from_db
+from portfolio.common.signals import compute_signals
+from portfolio.datasources.morningstar import import_isins
+
 
 def download(
     fred_api_key: str | None,
     fred_series: list[tuple[str, str]],
+    macro_signals: list[MacroSignalFn],
     start_date: str,
     end_date: str,
     currency: str = "EUR",
@@ -16,7 +19,7 @@ def download(
     funds_dir: Path = DEFAULT_FUNDS_DIR,
 ):
     print("Downloading FRED series...")
-    compute_signals(fred_api_key, fred_series, start_date, end_date)
+    compute_signals(fred_api_key, fred_series, macro_signals, start_date, end_date)
 
     print("\nDownloading fund NAVs from Morningstar...")
     store_fund_navs_from_db(
