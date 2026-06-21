@@ -30,19 +30,6 @@ MS_SERIES_SUFFIX = "]2]1]"
 
 __all__ = ["import_isins", "download_navs", "morningstar_quote_url"]
 
-
-def morningstar_quote_url(
-    performance_id: str | None,
-    universe: str | None = None,
-) -> str | None:
-    """Build the Morningstar quote page URL for a fund or ETF performance ID."""
-    if not performance_id:
-        return None
-    if universe == "FE":
-        return MORNINGSTAR_ETF_QUOTE_URL.format(performance_id=performance_id)
-    return MORNINGSTAR_FUND_QUOTE_URL.format(performance_id=performance_id)
-
-
 async def _search_isin_async(isin: str) -> Optional[Dict]:
     """Search for a fund by ISIN using Morningstar's API with Playwright."""
     query = f"((isin+~%3D+%22{isin}%22))"
@@ -324,3 +311,15 @@ def download_navs(
         navs_df[isin] = fund_data["value"]
         print(f"{isin} ({weight:.0%}): {fund['name']}")
     return navs_df
+
+
+def morningstar_quote_url(
+    performance_id: str | None,
+    universe: str | None = None,
+) -> str | None:
+    """Build the Morningstar quote page URL for a fund or ETF performance ID."""
+    if not performance_id:
+        return None
+    if universe == "FE":
+        return MORNINGSTAR_ETF_QUOTE_URL.format(performance_id=performance_id)
+    return MORNINGSTAR_FUND_QUOTE_URL.format(performance_id=performance_id)
