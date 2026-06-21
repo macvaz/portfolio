@@ -9,7 +9,7 @@ from portfolio.finance.metrics import (
     compute_portfolio_metrics,
     update_all_fund_metrics,
 )
-from portfolio.finance.nav_files import save_fund_nav_csv
+from portfolio.finance.navs import save_fund_nav_csv
 
 
 def _daily_navs(start: str, returns: list[float]) -> pd.DataFrame:

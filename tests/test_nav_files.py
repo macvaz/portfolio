@@ -1,6 +1,6 @@
 import pandas as pd
 
-from portfolio.finance.nav_files import (
+from portfolio.finance.navs import (
     fund_nav_path,
     load_fund_nav_csv,
     nav_dataframe_to_csv,

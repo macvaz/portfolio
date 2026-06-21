@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from portfolio.api.app import app
+from portfolio.api.api import app
 from portfolio.api.database import create_user, get_fund_metrics, init_db, save_fund, save_fund_metrics
 
 
@@ -12,7 +12,7 @@ def _create_user(db_path, name: str = "Growth") -> int:
 def test_list_and_delete_funds(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
@@ -38,7 +38,7 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
 def test_create_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
 
     client = TestClient(app)
     user_id = _create_user(db_path)
@@ -50,7 +50,7 @@ def test_create_report_rejects_empty_portfolio(tmp_path, monkeypatch):
 def test_get_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
 
     client = TestClient(app)
     user_id = _create_user(db_path)
@@ -64,13 +64,13 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr("portfolio.finance.nav_files.DEFAULT_FUNDS_DIR", funds_dir)
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.finance.navs.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     import pandas as pd
-    from portfolio.finance.nav_files import save_fund_nav_csv
+    from portfolio.finance.navs import save_fund_nav_csv
 
     df = pd.DataFrame(
         {"value": [100.0, 101.0, 102.0, 103.0, 104.0]},
@@ -106,8 +106,8 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr("portfolio.finance.nav_files.DEFAULT_FUNDS_DIR", funds_dir)
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.finance.navs.DEFAULT_FUNDS_DIR", funds_dir)
 
     def mock_resolve(isin, db_path=None):
         return {
@@ -126,9 +126,9 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
             index=pd.to_datetime(["2024-01-01", "2024-01-02"]),
         )
 
-    monkeypatch.setattr("portfolio.api.app.import_isins", mock_resolve)
+    monkeypatch.setattr("portfolio.api.api.import_isins", mock_resolve)
     monkeypatch.setattr(
-        "portfolio.finance.nav_files.download_navs",
+        "portfolio.finance.navs.download_navs",
         mock_download,
     )
 
@@ -158,14 +158,14 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr("portfolio.finance.nav_files.DEFAULT_FUNDS_DIR", funds_dir)
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.finance.navs.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
 
     import pandas as pd
-    from portfolio.finance.nav_files import save_fund_nav_csv
+    from portfolio.finance.navs import save_fund_nav_csv
 
     df = pd.DataFrame(
         {"value": [100.0, 110.0, 121.0]},
@@ -199,7 +199,7 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
 def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
         "portfolio.api.metrics.import_isins",
         lambda isin, db_path=None: None,
@@ -257,7 +257,7 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
 def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
         "portfolio.api.metrics.import_isins",
         lambda isin, db_path=None: None,
@@ -295,7 +295,7 @@ def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypa
 def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
@@ -314,7 +314,7 @@ def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
 def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
@@ -360,7 +360,7 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
 def test_delete_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
@@ -382,7 +382,7 @@ def test_delete_portfolio(tmp_path, monkeypatch):
 def test_delete_portfolio_not_found(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 
     client = TestClient(app)
@@ -393,7 +393,7 @@ def test_delete_portfolio_not_found(tmp_path, monkeypatch):
 def test_set_default_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
-    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 
     client = TestClient(app)

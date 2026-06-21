@@ -23,10 +23,10 @@ from portfolio.api.database import (
     save_user_portfolio,
     set_default_user,
 )
-from portfolio.finance.nav_files import delete_fund_nav_csv, download_and_store_fund_nav
+from portfolio.finance.navs import delete_fund_nav_csv, download_and_store_fund_nav
 from portfolio.finance.metrics import refresh_fund_metrics
 from portfolio.api.models import User
-from portfolio.finance.morningstar import import_isins, morningstar_quote_url
+from portfolio.datasources.morningstar import import_isins, morningstar_quote_url
 from portfolio.api.curve import build_user_equity_curve
 from portfolio.api.metrics import get_portfolio_metrics
 from portfolio.api.report import build_report_html, build_user_report_html
@@ -264,4 +264,4 @@ def create_report(body: ReportRequest, portfolio_id: int) -> HTMLResponse:
 def main() -> None:
     import uvicorn
 
-    uvicorn.run("portfolio.api.app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("portfolio.api.api:app", host="0.0.0.0", port=8000, reload=True)

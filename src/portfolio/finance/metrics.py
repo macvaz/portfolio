@@ -13,7 +13,7 @@ from portfolio.api.curve import (
     load_benchmark_daily_returns,
 )
 from portfolio.api.database import list_funds, save_fund_metrics
-from portfolio.finance.nav_files import load_fund_nav_csv
+from portfolio.finance.navs import load_fund_nav_csv
 
 METRIC_KEYS = (
     "beta_6m",

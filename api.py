@@ -1,4 +1,4 @@
-from portfolio.api.app import main
+from portfolio.api.api import main
 
 if __name__ == "__main__":
     main()

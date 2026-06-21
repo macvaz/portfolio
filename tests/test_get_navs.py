@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from portfolio.api.database import init_db, save_fund
-from portfolio.finance.nav_files import store_fund_navs_from_db
+from portfolio.finance.navs import store_fund_navs_from_db
 
 
 def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):
@@ -23,7 +23,7 @@ def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):
         )
 
     monkeypatch.setattr(
-        "portfolio.finance.nav_files.download_navs",
+        "portfolio.finance.navs.download_navs",
         mock_download,
     )
 
@@ -56,7 +56,7 @@ def test_run_get_navs_skips_funds_without_data(tmp_path, monkeypatch):
     import pandas as pd
 
     monkeypatch.setattr(
-        "portfolio.finance.nav_files.download_navs",
+        "portfolio.finance.navs.download_navs",
         lambda **_kwargs: pd.DataFrame(),
     )
 

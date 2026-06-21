@@ -3,8 +3,8 @@ from pathlib import Path
 
 from portfolio import process_macro_data, print_signals
 from portfolio.finance.metrics import update_all_fund_metrics
-from portfolio.finance.morningstar import import_isins
-from portfolio.finance.nav_files import store_fund_navs_from_db
+from portfolio.datasources.morningstar import import_isins
+from portfolio.finance.navs import store_fund_navs_from_db
 
 
 def run(
