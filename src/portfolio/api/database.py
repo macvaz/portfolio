@@ -196,6 +196,18 @@ def list_users(db_path: Path | None = None) -> list[dict]:
     return [{"id": user.id, "name": user.name} for user in users]
 
 
+def delete_user(user_id: int, db_path: Path | None = None) -> bool:
+    init_db(db_path)
+    with get_session(db_path) as session:
+        user = session.get(User, user_id)
+        if user is None:
+            return False
+        session.exec(delete(Portfolio).where(Portfolio.user_id == user_id))
+        session.delete(user)
+        session.commit()
+        return True
+
+
 def get_fund(isin: str, db_path: Path | None = None) -> dict | None:
     init_db(db_path)
     with get_session(db_path) as session:

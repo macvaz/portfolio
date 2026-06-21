@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=71" />
+    <link rel="stylesheet" href="/static/style.css?v=76" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -50,18 +50,42 @@
         </nav>
         <div class="toolbar-right">
           <div class="portfolio-picker">
-            <select id="portfolio-select" aria-label="Select portfolio"></select>
-            <input
-              id="portfolio-create-input"
-              type="text"
-              class="portfolio-create-input"
-              hidden
-              maxlength="200"
-              autocomplete="off"
-              spellcheck="false"
-              placeholder="New portfolio name…"
-              aria-label="New portfolio name"
-            />
+            <button
+              type="button"
+              id="portfolio-create-btn"
+              class="portfolio-create-btn"
+              title="Create portfolio"
+              aria-label="Create portfolio"
+            >
+              <svg
+                class="portfolio-create-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+            <div class="portfolio-select-slot">
+              <select id="portfolio-select" aria-label="Select portfolio"></select>
+              <input
+                id="portfolio-create-input"
+                type="text"
+                class="portfolio-create-input"
+                hidden
+                maxlength="200"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="New portfolio name…"
+                aria-label="New portfolio name"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -84,7 +108,39 @@
           </section>
 
           <section class="table-panel">
-            <h2 class="table-title">Portfolio: <span id="portfolio-table-name" class="portfolio-table-name"></span></h2>
+            <h2 class="table-title">
+              Portfolio:
+              <span class="portfolio-table-name-wrap">
+                <span class="fund-delete-popup">
+                  <button
+                    type="button"
+                    id="portfolio-delete-btn"
+                    class="fund-delete-btn"
+                    aria-label="Delete portfolio"
+                    hidden
+                  >
+                    <svg
+                      class="fund-delete-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                      <path d="M10 11v6" />
+                      <path d="M14 11v6" />
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                    </svg>
+                  </button>
+                </span>
+                <span id="portfolio-table-name" class="portfolio-table-name"></span>
+              </span>
+            </h2>
             <div class="table-scroll">
               <table class="fund-table" id="portfolio-table">
                 <thead>
@@ -151,9 +207,9 @@
     </main>
 
     <script src="/static/api.js?v=11"></script>
-    <script src="/static/portfolios.js?v=4"></script>
-    <script src="/static/management.js?v=68"></script>
+    <script src="/static/portfolios.js?v=7"></script>
+    <script src="/static/management.js?v=69"></script>
     <script src="/static/risk.js?v=4"></script>
-    <script src="/static/app.js?v=23"></script>
+    <script src="/static/app.js?v=26"></script>
   </body>
 </html>

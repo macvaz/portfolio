@@ -292,12 +292,7 @@
   }
 
   function updatePortfolioTableTitle(portfolios) {
-    const label = document.getElementById("portfolio-table-name");
-    if (!label) {
-      return;
-    }
-    const selected = portfolios.find((portfolio) => portfolio.id === api.getPortfolioId());
-    label.textContent = selected?.name ?? "";
+    window.AppShell?.updateActivePortfolioName(portfolios);
   }
 
   async function savePortfolioWeights() {

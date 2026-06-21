@@ -355,3 +355,36 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
     load_response = client.get("/api/portfolio", params={"portfolio_id": user_id})
     assert load_response.status_code == 200
     assert load_response.json() == save_response.json()
+
+
+def test_delete_portfolio(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    init_db(db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+
+    client = TestClient(app)
+    user_id = _create_user(db_path)
+
+    client.put(
+        "/api/portfolio",
+        params={"portfolio_id": user_id},
+        json={"positions": [{"isin": "ES0182527038", "weighted_assets": 1.0}]},
+    )
+
+    delete_response = client.delete(f"/api/portfolios/{user_id}")
+    assert delete_response.status_code == 204
+    assert client.get("/api/portfolios").json() == []
+    assert client.get("/api/portfolio", params={"portfolio_id": user_id}).status_code == 404
+
+
+def test_delete_portfolio_not_found(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    init_db(db_path)
+
+    client = TestClient(app)
+    response = client.delete("/api/portfolios/999")
+    assert response.status_code == 404

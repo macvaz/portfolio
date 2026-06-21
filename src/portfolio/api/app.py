@@ -11,6 +11,7 @@ from sqlmodel import Session, select
 
 from portfolio.api.database import (
     delete_fund,
+    delete_user,
     get_db,
     get_fund,
     get_user,
@@ -140,6 +141,12 @@ def add_portfolio(
     session.commit()
     session.refresh(user)
     return {"id": user.id, "name": user.name}
+
+
+@app.delete("/api/portfolios/{portfolio_id}", status_code=204)
+def remove_portfolio(portfolio_id: int) -> None:
+    if not delete_user(portfolio_id):
+        raise HTTPException(status_code=404, detail="Portfolio not found")
 
 
 @app.get("/api/funds", response_model=list[FundResponse])

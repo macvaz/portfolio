@@ -1,6 +1,5 @@
 (function () {
   const api = window.PortfolioApi;
-  const CREATE_VALUE = window.PortfoliosView.CREATE_VALUE;
 
   let activeTab = "management";
 
@@ -15,12 +14,36 @@
 
   function updateActivePortfolioName(portfolios) {
     const label = document.getElementById("portfolio-table-name");
+    const deleteBtn = document.getElementById("portfolio-delete-btn");
     if (!label) {
       return;
     }
     const selectedId = api.getPortfolioId();
     const selected = portfolios?.find((portfolio) => portfolio.id === selectedId);
     label.textContent = selected?.name ?? "";
+    if (deleteBtn) {
+      deleteBtn.hidden = !selected;
+    }
+  }
+
+  async function deleteActivePortfolio() {
+    const portfolioId = api.getPortfolioId();
+    if (portfolioId === null) {
+      return;
+    }
+
+    showError("");
+    try {
+      await window.PortfoliosView.deletePortfolio(portfolioId);
+      if (api.getPortfolioId() === null) {
+        window.ManagementView?.resetManagement();
+        showError("Create a portfolio to get started.");
+        return;
+      }
+      await reloadActiveTab();
+    } catch (err) {
+      showError(err.message);
+    }
   }
 
   function setActiveTab(tabName) {
@@ -70,17 +93,21 @@
     const portfolioId = api.getPortfolioId();
     if (portfolioId !== null) {
       select.value = String(portfolioId);
-      return;
-    }
-    if (select.options.length > 1) {
-      select.selectedIndex = 0;
     }
   }
 
   function showPortfolioCreateInput() {
+    const slot = document.querySelector(".portfolio-select-slot");
     const select = document.getElementById("portfolio-select");
     const input = document.getElementById("portfolio-create-input");
+    const createBtn = document.getElementById("portfolio-create-btn");
     restorePortfolioSelectValue();
+
+    const { width, height } = select.getBoundingClientRect();
+    slot.style.width = `${width}px`;
+    slot.style.height = `${height}px`;
+
+    createBtn.classList.add("is-invisible");
     select.hidden = true;
     input.hidden = false;
     input.value = "";
@@ -88,9 +115,15 @@
   }
 
   function hidePortfolioCreateInput() {
+    const slot = document.querySelector(".portfolio-select-slot");
     const select = document.getElementById("portfolio-select");
     const input = document.getElementById("portfolio-create-input");
+    const createBtn = document.getElementById("portfolio-create-btn");
+
+    slot.style.width = "";
+    slot.style.height = "";
     input.hidden = true;
+    createBtn.classList.remove("is-invisible");
     select.hidden = false;
     restorePortfolioSelectValue();
   }
@@ -122,7 +155,6 @@
       await window.ManagementView.loadManagement();
     } else {
       showError("Create a portfolio to get started.");
-      showPortfolioCreateInput();
     }
   }
 
@@ -182,11 +214,6 @@
 
   async function handlePortfolioDropdownChange() {
     const select = document.getElementById("portfolio-select");
-    if (select.value === CREATE_VALUE) {
-      showPortfolioCreateInput();
-      return;
-    }
-
     const portfolioId = Number.parseInt(select.value, 10);
     if (!Number.isFinite(portfolioId)) {
       return;
@@ -196,6 +223,16 @@
     await window.PortfoliosView.selectPortfolio(portfolioId);
     await reloadActiveTab();
   }
+
+  document.getElementById("portfolio-create-btn").addEventListener("click", () => {
+    showPortfolioCreateInput();
+  });
+
+  document.getElementById("portfolio-delete-btn").addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteActivePortfolio().catch((err) => showError(err.message));
+  });
 
   document.getElementById("portfolio-select").addEventListener("change", () => {
     handlePortfolioDropdownChange().catch((err) => showError(err.message));
