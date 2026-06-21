@@ -8,7 +8,7 @@ from portfolio.api.services.portfolio.curve import (
     build_portfolio_daily_returns,
     returns_to_cumulative_curve,
 )
-from portfolio.finance.navs import save_fund_nav_csv
+from portfolio.common.navs import save_fund_nav_csv
 
 
 def test_build_equity_curve_from_nav_files(tmp_path):

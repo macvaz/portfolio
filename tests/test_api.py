@@ -65,12 +65,12 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr("portfolio.finance.navs.DEFAULT_FUNDS_DIR", funds_dir)
+    monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     import pandas as pd
-    from portfolio.finance.navs import save_fund_nav_csv
+    from portfolio.common.navs import save_fund_nav_csv
 
     df = pd.DataFrame(
         {"value": [100.0, 101.0, 102.0, 103.0, 104.0]},
@@ -107,7 +107,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr("portfolio.finance.navs.DEFAULT_FUNDS_DIR", funds_dir)
+    monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
 
     def mock_resolve(isin, db_path=None):
         return {
@@ -128,7 +128,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
 
     monkeypatch.setattr("portfolio.api.services.portfolio.router.import_isins", mock_resolve)
     monkeypatch.setattr(
-        "portfolio.finance.navs.download_navs",
+        "portfolio.common.navs.download_navs",
         mock_download,
     )
 
@@ -159,13 +159,13 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr("portfolio.finance.navs.DEFAULT_FUNDS_DIR", funds_dir)
+    monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
 
     import pandas as pd
-    from portfolio.finance.navs import save_fund_nav_csv
+    from portfolio.common.navs import save_fund_nav_csv
 
     df = pd.DataFrame(
         {"value": [100.0, 110.0, 121.0]},

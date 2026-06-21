@@ -40,12 +40,13 @@ portfolio/
 │   │       └── signals/
 │   │           ├── router.py       # /api/signals endpoints
 │   │           └── service.py      # Tactical signals service
+│   ├── common/
+│   │   └── navs.py                 # NAV CSV storage
 │   ├── datasources/
 │   │   ├── fred.py                 # FRED time series download
 │   │   └── morningstar.py          # ISIN lookup and NAV download
 │   └── finance/
 │       ├── metrics.py              # Fund/portfolio metric computation
-│       ├── navs.py                 # NAV CSV storage
 │       ├── quantstats.py           # QuantStats HTML reports
 │       ├── returns.py              # Buy-and-hold return calculation
 │       └── signals.py              # Macro and market signal calculations
