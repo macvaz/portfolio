@@ -6,8 +6,8 @@ A small Python library to download and process time series (fund prices) from Mo
 
 ```
 portfolio/
-├── api.py                          # Starting the API server
-├── job.py                          # Downloading data points from morningstar and fred
+├── api.py                          # Wrapper to start the API server
+├── job.py                          # Data job entry point
 ├── pyproject.toml
 ├── uv.lock
 ├── docs/
@@ -24,8 +24,7 @@ portfolio/
 │   ├── risk.js
 │   └── style.css
 ├── src/portfolio/
-│   ├── __init__.py                 # Package exports
-│   ├── get_data.py                 # Data job orchestration
+│   ├── __init__.py
 │   ├── api/
 │   │   ├── api.py                  # FastAPI app shell
 │   │   ├── database.py             # SQLModel storage and queries
@@ -45,10 +44,12 @@ portfolio/
 │   │   ├── metrics.py              # Fund/portfolio metric computation
 │   │   ├── quantstats.py           # QuantStats HTML reports
 │   │   ├── returns.py              # Buy-and-hold return calculation
-│   │   ├── signals.py              # Macro and market signal calculations
+│   │   └── signals.py              # FRED download and signal calculations
 │   ├── datasources/
 │   │   ├── fred.py                 # FRED time series download
 │   │   └── morningstar.py          # ISIN lookup and NAV download
+│   └── job/
+│       └── download.py             # Data job orchestration
 └── tests/
     ├── test_api.py
     ├── test_curve.py
@@ -57,7 +58,8 @@ portfolio/
     ├── test_metrics.py
     ├── test_nav_files.py
     ├── test_portfolio.py
-    └── test_portfolio_model.py
+    ├── test_portfolio_model.py
+    └── test_database_migration.py
 ```
 
 ## Install
