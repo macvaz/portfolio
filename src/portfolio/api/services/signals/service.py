@@ -4,7 +4,7 @@ from datetime import date
 from functools import reduce
 import pandas as pd
 
-df = None
+df = pd.DataFrame()
 
 def get_signals() -> dict:
     """Return tactical signals. Mock implementation for now."""
@@ -33,13 +33,6 @@ def rsi(df, window=14):
        rsi=lambda df: 100 - (100 / (1 + gain / loss)) 
     )
 
-result = (
-    df
-    .pipe(momentum, window=10)
-    .pipe(volatility, window=20)
-    .pipe(rsi)
-    )
-# Dynamic pipeline
-
-signals = [momentum, volatility, rsi]
-result = reduce(lambda df, sig: df.pipe(sig), signals, df)
+def compute_dynamic_signals(df: pd.DataFrame) -> pd.DataFrame:
+    signals = [momentum, volatility, rsi]
+    return reduce(lambda df, sig: df.pipe(sig), signals, df)
