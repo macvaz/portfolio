@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from portfolio.api.database import list_funds
-from portfolio.finance.download import download_fund_navs
+from portfolio.finance.morningstar import download_fund_navs
 
 DEFAULT_FUNDS_DIR = Path("data/funds")
 

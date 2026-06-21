@@ -7,7 +7,6 @@ import pandas as pd
 import quantstats as qs
 
 from portfolio.api.curve import (
-    BENCHMARK_ISIN,
     TRADING_DAYS_PER_YEAR,
     align_return_series,
     build_portfolio_daily_returns,
@@ -95,7 +94,7 @@ def compute_metrics(
     fund_returns: pd.Series,
     benchmark_returns: pd.Series | None = None,
 ) -> dict[str, float | None]:
-    """Compute dashboard metrics from daily fund returns."""
+    """Compute portfolio metrics from daily fund returns."""
     fund_returns = fund_returns.dropna()
     if fund_returns.empty:
         return _empty_metrics()

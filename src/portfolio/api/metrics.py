@@ -1,4 +1,4 @@
-"""Dashboard screen payload: real funds, weights, and metrics from the database."""
+"""Portfolio metrics payload: funds, weights, and stored metrics from the database."""
 
 from datetime import date
 
@@ -46,8 +46,8 @@ def _fund_row(
     }
 
 
-def build_dashboard_data(user_id: int, db_path=None, funds_dir=None) -> dict:
-    """Build dashboard payload with real funds, weights, and stored metrics."""
+def get_portfolio_metrics(user_id: int, db_path=None, funds_dir=None) -> dict:
+    """Build portfolio metrics payload with funds, weights, and stored metrics."""
     positions = list_user_portfolio(user_id, db_path)
     portfolio_isins = {position["isin"] for position in positions}
 

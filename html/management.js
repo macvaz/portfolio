@@ -283,12 +283,12 @@
   }
 
   async function loadScreenData() {
-    const [curve, dashboard, portfolios] = await Promise.all([
+    const [curve, metrics, portfolios] = await Promise.all([
       api.fetchJson(api.withPortfolioId(`${api.API}/curve`)),
-      api.fetchJson(api.withPortfolioId(`${api.API}/dashboard`)),
+      api.fetchJson(api.withPortfolioId(`${api.API}/metrics`)),
       api.fetchJson(`${api.API}/portfolios`),
     ]);
-    return { curve, dashboard, portfolios };
+    return { curve, metrics, portfolios };
   }
 
   function updatePortfolioTableTitle(portfolios) {
@@ -566,19 +566,19 @@
     performanceChart = new Chart(context, buildChartConfig(curve));
   }
 
-  function renderScreen({ curve, dashboard, portfolios }) {
-    managementData = { curve, dashboard, portfolios };
+  function renderScreen({ curve, metrics, portfolios }) {
+    managementData = { curve, metrics, portfolios };
 
     updatePortfolioTableTitle(portfolios);
 
     document.getElementById("portfolio-legend").innerHTML = formatPortfolioLegendHtml(curve);
     document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
     renderChart(curve);
-    renderTableBody("portfolio-body", dashboard.portfolio, { editableWeights: true });
+    renderTableBody("portfolio-body", metrics.portfolio, { editableWeights: true });
     document.getElementById("portfolio-summary").innerHTML = renderSummaryRow(
-      dashboard.portfolio_summary,
+      metrics.portfolio_summary,
     );
-    renderTableBody("favorites-body", dashboard.favorites, {
+    renderTableBody("favorites-body", metrics.favorites, {
       editableWeights: true,
       forceZeroWeight: true,
     });
@@ -608,7 +608,7 @@
       loading.hidden = true;
       view.hidden = false;
     } catch (error) {
-      loading.textContent = "Failed to load dashboard.";
+      loading.textContent = "Failed to load metrics.";
       throw error;
     }
   }
@@ -621,7 +621,7 @@
       performanceChart = null;
     }
     document.getElementById("management-loading").hidden = false;
-    document.getElementById("management-loading").textContent = "Loading dashboard…";
+    document.getElementById("management-loading").textContent = "Loading metrics…";
     document.getElementById("management-view").hidden = true;
     document.getElementById("portfolio-body").innerHTML = "";
     document.getElementById("portfolio-summary").innerHTML = "";

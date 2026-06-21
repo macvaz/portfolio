@@ -28,7 +28,7 @@ from portfolio.finance.metrics import refresh_fund_metrics
 from portfolio.api.models import User
 from portfolio.finance.funds import morningstar_quote_url, resolve_fund_by_isin
 from portfolio.api.curve import build_user_equity_curve
-from portfolio.api.mock_management import build_dashboard_data
+from portfolio.api.metrics import get_portfolio_metrics
 from portfolio.api.report import build_report_html, build_user_report_html
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
@@ -217,11 +217,11 @@ def get_curve(portfolio_id: int) -> dict:
     return build_user_equity_curve(portfolio_id)
 
 
-@app.get("/api/dashboard")
-def get_dashboard(portfolio_id: int) -> dict:
+@app.get("/api/metrics")
+def get_metrics(portfolio_id: int) -> dict:
     """Portfolio tables with real funds, weights, and stored metrics."""
     _require_portfolio(portfolio_id)
-    return build_dashboard_data(portfolio_id)
+    return get_portfolio_metrics(portfolio_id)
 
 
 @app.get("/api/portfolio", response_model=list[PortfolioPositionResponse])

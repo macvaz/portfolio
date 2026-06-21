@@ -196,12 +196,12 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     assert data["benchmark"] == []
 
 
-def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
+def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
-        "portfolio.api.mock_management.resolve_fund_by_isin",
+        "portfolio.api.metrics.resolve_fund_by_isin",
         lambda isin, db_path=None: None,
     )
     init_db(db_path)
@@ -239,7 +239,7 @@ def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
         },
     )
 
-    response = client.get("/api/dashboard", params={"portfolio_id": user_id})
+    response = client.get("/api/metrics", params={"portfolio_id": user_id})
     assert response.status_code == 200
     data = response.json()
 
@@ -254,12 +254,12 @@ def test_dashboard_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     assert data["favorites"] == []
 
 
-def test_dashboard_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypatch):
+def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
-        "portfolio.api.mock_management.resolve_fund_by_isin",
+        "portfolio.api.metrics.resolve_fund_by_isin",
         lambda isin, db_path=None: None,
     )
     init_db(db_path)
@@ -280,7 +280,7 @@ def test_dashboard_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkey
         },
     )
 
-    response = client.get("/api/dashboard", params={"portfolio_id": user_id})
+    response = client.get("/api/metrics", params={"portfolio_id": user_id})
     data = response.json()
 
     assert len(data["portfolio"]) == 1
