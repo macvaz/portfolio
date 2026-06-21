@@ -1,5 +1,9 @@
-from .datasources.fred import download_series
-from .finance.signals import calculate_macro_signals, calculate_market_signals, print_signals
+from .finance.signals import (
+    calculate_macro_signals,
+    calculate_market_signals,
+    download_series,
+    print_signals,
+)
 from .datasources.morningstar import download_navs
 from .finance.returns import calculate_buy_and_hold_returns
 from .finance.quantstats import generate_performance_report, generate_performance_report_html
