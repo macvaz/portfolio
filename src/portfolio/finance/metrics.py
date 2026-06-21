@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 import quantstats as qs
 
-from portfolio.api.curve import (
+from portfolio.api.services.portfolio.curve import (
     TRADING_DAYS_PER_YEAR,
     align_return_series,
     build_portfolio_daily_returns,

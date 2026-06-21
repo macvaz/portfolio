@@ -1,9 +1,9 @@
-"""QuantStats risk analysis report for a saved user portfolio."""
+"""QuantStats risk report for a saved user portfolio."""
 
 from pathlib import Path
 
 from portfolio import generate_performance_report_html
-from portfolio.api.curve import (
+from portfolio.api.services.portfolio.curve import (
     BENCHMARK_ISIN,
     align_return_series,
     build_portfolio_daily_returns,
@@ -12,7 +12,7 @@ from portfolio.api.curve import (
 from portfolio.api.database import list_user_portfolio
 
 
-def build_report_html(
+def build_risk_report_html(
     positions: list[dict],
     funds_dir: Path | None = None,
 ) -> str:
@@ -35,7 +35,7 @@ def build_report_html(
     return generate_performance_report_html(portfolio_returns, benchmark_returns)
 
 
-def build_user_report_html(
+def build_user_risk_report_html(
     user_id: int,
     db_path=None,
     funds_dir: Path | None = None,
@@ -44,4 +44,4 @@ def build_user_report_html(
     if not positions:
         raise ValueError("Portfolio is empty")
 
-    return build_report_html(positions, funds_dir)
+    return build_risk_report_html(positions, funds_dir)

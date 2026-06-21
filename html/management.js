@@ -323,7 +323,7 @@
   async function deleteFund(isin) {
     showError("");
     try {
-      await api.fetchJson(`${api.API}/funds/${encodeURIComponent(isin)}`, {
+      await api.fetchJson(`${api.PORTFOLIO_API}/funds/${encodeURIComponent(isin)}`, {
         method: "DELETE",
       });
       await loadManagement();
@@ -396,7 +396,7 @@
   }
 
   // Chart-only smoothing: trailing moving average for readability. The API and
-  // Risk analysis tab always use raw daily returns; only this chart is smoothed.
+  // Risk report tab always use raw daily returns; only this chart is smoothed.
   // The last point stays exact so end-of-period performance matches QuantStats.
   const CHART_SMOOTH_WINDOW = 5;
 

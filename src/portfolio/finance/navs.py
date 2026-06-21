@@ -92,7 +92,7 @@ def store_fund_navs_from_db(
     if not funds:
         print(
             "No funds found in database. Add funds via the API "
-            "(POST /api/funds) before running get-data."
+            "(POST /api/portfolio/funds) before running get-data."
         )
         return []
 

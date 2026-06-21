@@ -17,7 +17,7 @@
         <img src="/static/logo.png" alt="Alpha Plans" class="site-logo" />
         <nav class="app-tabs" id="app-tabs" aria-label="Portfolio toolbar" hidden>
           <button type="button" class="app-tab is-active" data-tab="management">Portfolio management</button>
-          <button type="button" class="app-tab" data-tab="risk">Risk analysis</button>
+          <button type="button" class="app-tab" data-tab="risk">Risk report</button>
           <button type="button" class="app-tab" data-tab="tactical">Tactical signals</button>
           <form id="add-fund-form" class="add-isin-form">
             <label class="add-isin-field">
@@ -215,12 +215,12 @@
         </div>
 
         <div id="risk-panel" class="app-panel" hidden>
-          <div id="risk-loading" class="management-loading">Generating risk analysis…</div>
+          <div id="risk-loading" class="management-loading">Generating risk report…</div>
           <p id="risk-message" class="risk-message" hidden></p>
           <iframe
             id="risk-report-frame"
             class="risk-report-frame"
-            title="Portfolio risk analysis"
+            title="Portfolio risk report"
             scrolling="no"
             hidden
           ></iframe>
@@ -234,8 +234,8 @@
 
     <script src="/static/api.js?v=12"></script>
     <script src="/static/portfolios.js?v=11"></script>
-    <script src="/static/management.js?v=71"></script>
-    <script src="/static/risk.js?v=5"></script>
-    <script src="/static/app.js?v=35"></script>
+    <script src="/static/management.js?v=72"></script>
+    <script src="/static/risk.js?v=6"></script>
+    <script src="/static/app.js?v=36"></script>
   </body>
 </html>

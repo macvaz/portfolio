@@ -264,7 +264,7 @@
 
     input.disabled = true;
     try {
-      await api.fetchJson(`${api.API}/funds`, {
+      await api.fetchJson(`${api.PORTFOLIO_API}/funds`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isin }),

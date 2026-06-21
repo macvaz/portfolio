@@ -1,6 +1,6 @@
 import pandas as pd
 
-from portfolio.api.curve import (
+from portfolio.api.services.portfolio.curve import (
     BENCHMARK_NAME,
     align_return_series,
     annualized_return_pct,

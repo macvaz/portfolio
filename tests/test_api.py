@@ -19,7 +19,7 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
     client = TestClient(app)
     user_id = _create_user(db_path)
 
-    response = client.get("/api/funds")
+    response = client.get("/api/portfolio/funds")
     assert response.status_code == 200
     assert response.json() == [
         {
@@ -30,12 +30,12 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
         }
     ]
 
-    delete_response = client.delete("/api/funds/ES0182527038")
+    delete_response = client.delete("/api/portfolio/funds/ES0182527038")
     assert delete_response.status_code == 204
-    assert client.get("/api/funds").json() == []
+    assert client.get("/api/portfolio/funds").json() == []
 
 
-def test_create_report_rejects_empty_portfolio(tmp_path, monkeypatch):
+def test_create_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
@@ -43,11 +43,11 @@ def test_create_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     client = TestClient(app)
     user_id = _create_user(db_path)
 
-    response = client.post("/api/portfolio/report", params={"portfolio_id": user_id}, json={"positions": []})
+    response = client.post("/api/portfolio/risk_report", params={"portfolio_id": user_id}, json={"positions": []})
     assert response.status_code == 400
 
 
-def test_get_report_rejects_empty_portfolio(tmp_path, monkeypatch):
+def test_get_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
@@ -55,12 +55,12 @@ def test_get_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     client = TestClient(app)
     user_id = _create_user(db_path)
 
-    response = client.get("/api/portfolio/report", params={"portfolio_id": user_id})
+    response = client.get("/api/portfolio/risk_report", params={"portfolio_id": user_id})
     assert response.status_code == 400
     assert response.json()["detail"] == "Portfolio is empty"
 
 
-def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
+def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
@@ -93,11 +93,11 @@ def test_get_report_returns_quantstats_html(tmp_path, monkeypatch):
         return "<html><body>QuantStats report</body></html>"
 
     monkeypatch.setattr(
-        "portfolio.api.report.generate_performance_report_html",
+        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
         mock_report_html,
     )
 
-    response = client.get("/api/portfolio/report", params={"portfolio_id": user_id})
+    response = client.get("/api/portfolio/risk_report", params={"portfolio_id": user_id})
     assert response.status_code == 200
     assert "QuantStats report" in response.text
 
@@ -126,7 +126,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
             index=pd.to_datetime(["2024-01-01", "2024-01-02"]),
         )
 
-    monkeypatch.setattr("portfolio.api.api.import_isins", mock_resolve)
+    monkeypatch.setattr("portfolio.api.services.portfolio.router.import_isins", mock_resolve)
     monkeypatch.setattr(
         "portfolio.finance.navs.download_navs",
         mock_download,
@@ -135,7 +135,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     client = TestClient(app)
 
     response = client.post(
-        "/api/funds",
+        "/api/portfolio/funds",
         json={"isin": "ES0182527038"},
     )
     assert response.status_code == 200
@@ -201,7 +201,7 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
-        "portfolio.api.metrics.import_isins",
+        "portfolio.api.services.portfolio.metrics.import_isins",
         lambda isin, db_path=None: None,
     )
     init_db(db_path)
@@ -259,7 +259,7 @@ def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypa
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr(
-        "portfolio.api.metrics.import_isins",
+        "portfolio.api.services.portfolio.metrics.import_isins",
         lambda isin, db_path=None: None,
     )
     init_db(db_path)

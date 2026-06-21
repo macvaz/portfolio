@@ -48,7 +48,7 @@
   }
 
   async function fetchReportHtml() {
-    const response = await fetch(api.withPortfolioId(`${api.PORTFOLIO_API}/report`));
+    const response = await fetch(api.withPortfolioId(`${api.PORTFOLIO_API}/risk_report`));
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       const detail = body.detail;
@@ -91,7 +91,7 @@
     frame.srcdoc = "";
     frame.style.height = "0";
     frame.onload = null;
-    document.getElementById("risk-loading").textContent = "Generating risk analysis…";
+    document.getElementById("risk-loading").textContent = "Generating risk report…";
   }
 
   window.RiskView = {
