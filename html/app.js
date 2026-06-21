@@ -96,12 +96,54 @@
     }
   }
 
+  const CREATE_BTN_REVEAL_MS = 1000;
+  let createBtnHideTimer = null;
+
+  function revealPortfolioCreateBtn() {
+    const picker = document.querySelector(".portfolio-picker");
+    if (!picker || picker.classList.contains("is-creating")) {
+      return;
+    }
+    picker.classList.add("is-create-revealed");
+    if (createBtnHideTimer !== null) {
+      clearTimeout(createBtnHideTimer);
+      createBtnHideTimer = null;
+    }
+  }
+
+  function scheduleHidePortfolioCreateBtn() {
+    const picker = document.querySelector(".portfolio-picker");
+    if (!picker || picker.classList.contains("is-creating")) {
+      return;
+    }
+    if (createBtnHideTimer !== null) {
+      clearTimeout(createBtnHideTimer);
+    }
+    createBtnHideTimer = window.setTimeout(() => {
+      createBtnHideTimer = null;
+      picker.classList.remove("is-create-revealed");
+    }, CREATE_BTN_REVEAL_MS);
+  }
+
+  function clearPortfolioCreateBtnReveal() {
+    const picker = document.querySelector(".portfolio-picker");
+    if (createBtnHideTimer !== null) {
+      clearTimeout(createBtnHideTimer);
+      createBtnHideTimer = null;
+    }
+    picker?.classList.remove("is-create-revealed");
+  }
+
   function showPortfolioCreateInput() {
+    const picker = document.querySelector(".portfolio-picker");
     const slot = document.querySelector(".portfolio-select-slot");
     const select = document.getElementById("portfolio-select");
     const input = document.getElementById("portfolio-create-input");
     const createBtn = document.getElementById("portfolio-create-btn");
     restorePortfolioSelectValue();
+
+    clearPortfolioCreateBtnReveal();
+    picker?.classList.add("is-creating");
 
     const { width, height } = select.getBoundingClientRect();
     slot.style.width = `${width}px`;
@@ -115,10 +157,14 @@
   }
 
   function hidePortfolioCreateInput() {
+    const picker = document.querySelector(".portfolio-picker");
     const slot = document.querySelector(".portfolio-select-slot");
     const select = document.getElementById("portfolio-select");
     const input = document.getElementById("portfolio-create-input");
     const createBtn = document.getElementById("portfolio-create-btn");
+
+    picker?.classList.remove("is-creating");
+    clearPortfolioCreateBtnReveal();
 
     slot.style.width = "";
     slot.style.height = "";
@@ -227,6 +273,14 @@
   document.getElementById("portfolio-create-btn").addEventListener("click", () => {
     showPortfolioCreateInput();
   });
+
+  const portfolioSelectSlot = document.querySelector(".portfolio-select-slot");
+  const portfolioCreateBtn = document.getElementById("portfolio-create-btn");
+
+  portfolioSelectSlot.addEventListener("mouseenter", revealPortfolioCreateBtn);
+  portfolioSelectSlot.addEventListener("mouseleave", scheduleHidePortfolioCreateBtn);
+  portfolioCreateBtn.addEventListener("mouseenter", revealPortfolioCreateBtn);
+  portfolioCreateBtn.addEventListener("mouseleave", scheduleHidePortfolioCreateBtn);
 
   document.getElementById("portfolio-delete-btn").addEventListener("click", (event) => {
     event.preventDefault();

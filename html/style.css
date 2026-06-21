@@ -110,6 +110,13 @@ button:disabled {
   color: inherit;
   cursor: pointer;
   opacity: 0.55;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.portfolio-picker:not(.is-creating).is-create-revealed .portfolio-create-btn {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .portfolio-create-btn:hover {
@@ -153,16 +160,27 @@ button:disabled {
 
 #portfolio-select {
   cursor: pointer;
+  color: #0088cc;
+  border-color: #c8d0da;
+  background: #fff;
 }
 
-.portfolio-create-input:focus {
+#portfolio-select:focus,
+#portfolio-select:focus-visible {
   outline: none;
-  border-color: #a8b0ba;
+  border-color: #c8d0da;
+  box-shadow: none;
 }
 
 #portfolio-select:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  color: inherit;
+}
+
+.portfolio-create-input:focus {
+  outline: none;
+  border-color: #a8b0ba;
 }
 
 .portfolio-table-name-wrap {

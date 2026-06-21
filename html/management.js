@@ -461,13 +461,11 @@
 
   function formatBenchmarkLegendHtml(curve) {
     const name = curve.benchmark_name || "S&P 500";
-    const isin = curve.benchmark_isin ? ` (${curve.benchmark_isin})` : "";
     const perf = formatLegendPerformanceHtml(
       cumulativeReturn(curve.benchmark),
       curve.benchmark_annualized_pct,
     );
-    const base = `${name}${isin}`;
-    return perf ? `${base}:${perf}` : base;
+    return perf ? `${name}:${perf}` : name;
   }
 
   function buildChartConfig(curve) {
