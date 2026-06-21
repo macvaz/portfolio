@@ -16,8 +16,9 @@
       <div class="top-bar-inner">
         <img src="/static/logo.png" alt="Alpha Plans" class="site-logo" />
         <nav class="app-tabs" id="app-tabs" aria-label="Portfolio toolbar" hidden>
-          <button type="button" class="app-tab is-active" data-tab="management">Management</button>
+          <button type="button" class="app-tab is-active" data-tab="management">Portfolio management</button>
           <button type="button" class="app-tab" data-tab="risk">Risk analysis</button>
+          <button type="button" class="app-tab" data-tab="tactical">Tactical signals</button>
           <form id="add-fund-form" class="add-isin-form">
             <label class="add-isin-field">
               <button type="submit" class="add-isin-icon-btn" aria-label="Add ISIN">
@@ -224,6 +225,8 @@
             hidden
           ></iframe>
         </div>
+
+        <div id="tactical-panel" class="app-panel" hidden></div>
       </section>
 
       <p id="error" class="error" hidden></p>
@@ -233,6 +236,6 @@
     <script src="/static/portfolios.js?v=10"></script>
     <script src="/static/management.js?v=70"></script>
     <script src="/static/risk.js?v=4"></script>
-    <script src="/static/app.js?v=32"></script>
+    <script src="/static/app.js?v=33"></script>
   </body>
 </html>

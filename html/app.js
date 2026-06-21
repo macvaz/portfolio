@@ -83,6 +83,7 @@
 
     document.getElementById("management-panel").hidden = tabName !== "management";
     document.getElementById("risk-panel").hidden = tabName !== "risk";
+    document.getElementById("tactical-panel").hidden = tabName !== "tactical";
   }
 
   async function reloadActiveTab() {
@@ -106,6 +107,11 @@
         return;
       }
       await window.ManagementView.loadManagement();
+      return;
+    }
+
+    if (tabName === "tactical") {
+      showError("");
       return;
     }
 
