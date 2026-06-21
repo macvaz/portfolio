@@ -4,6 +4,7 @@ from sqlmodel import Field, SQLModel, UniqueConstraint
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True, index=True)
+    is_default: bool = Field(default=False)
 
 
 class Fund(SQLModel, table=True):

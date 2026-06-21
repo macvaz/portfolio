@@ -188,17 +188,85 @@ button:disabled {
   display: inline-block;
 }
 
-.portfolio-table-name-wrap:hover .fund-delete-popup,
-.portfolio-table-name-wrap .fund-delete-popup:hover {
-  display: block;
+.portfolio-table-actions {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  z-index: 30;
+  transform: translateY(-50%);
+  padding-left: 0.35rem;
+  align-items: center;
+  gap: 0.15rem;
+  pointer-events: none;
+}
+
+.portfolio-table-name-wrap:hover .portfolio-table-actions,
+.portfolio-table-name-wrap .portfolio-table-actions:hover {
+  display: flex;
   pointer-events: auto;
 }
 
-.portfolio-table-name-wrap .fund-delete-popup {
-  right: auto;
-  left: 100%;
-  padding-right: 0;
-  padding-left: 0.35rem;
+.portfolio-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.portfolio-action-btn:hover,
+.portfolio-action-btn:focus,
+.portfolio-action-btn:disabled,
+.portfolio-action-btn:disabled:hover {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.portfolio-action-icon,
+.portfolio-default-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
+.portfolio-default-btn {
+  color: #8a6d1f;
+}
+
+.portfolio-default-btn:hover:not(:disabled) {
+  color: #6f5718;
+  background: rgba(201, 162, 39, 0.12);
+}
+
+.portfolio-default-btn.is-active {
+  color: #c9a227;
+}
+
+.portfolio-default-btn.is-active .portfolio-default-icon {
+  fill: currentColor;
+}
+
+.portfolio-default-btn:disabled,
+.portfolio-default-btn:disabled:hover {
+  background: transparent;
+  cursor: default;
+  opacity: 1;
+}
+
+.portfolio-delete-btn {
+  color: #b5473a;
+}
+
+.portfolio-delete-btn:hover {
+  color: #922b21;
+  background: rgba(192, 57, 43, 0.08);
 }
 
 .portfolio-table-name {

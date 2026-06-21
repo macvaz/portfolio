@@ -21,6 +21,7 @@ from portfolio.api.database import (
     list_users,
     save_fund,
     save_user_portfolio,
+    set_default_user,
 )
 from portfolio.finance.nav_files import delete_fund_nav_csv, download_and_store_fund_nav
 from portfolio.finance.metrics import refresh_fund_metrics
@@ -51,6 +52,7 @@ class PortfolioCreate(BaseModel):
 class PortfolioListItem(BaseModel):
     id: int
     name: str
+    is_default: bool = False
 
 
 class FundCreate(BaseModel):
@@ -140,13 +142,21 @@ def add_portfolio(
     session.add(user)
     session.commit()
     session.refresh(user)
-    return {"id": user.id, "name": user.name}
+    return {"id": user.id, "name": user.name, "is_default": user.is_default}
 
 
 @app.delete("/api/portfolios/{portfolio_id}", status_code=204)
 def remove_portfolio(portfolio_id: int) -> None:
     if not delete_user(portfolio_id):
         raise HTTPException(status_code=404, detail="Portfolio not found")
+
+
+@app.put("/api/portfolios/{portfolio_id}/default", response_model=PortfolioListItem)
+def mark_default_portfolio(portfolio_id: int) -> dict:
+    portfolio = set_default_user(portfolio_id)
+    if portfolio is None:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
+    return portfolio
 
 
 @app.get("/api/funds", response_model=list[FundResponse])

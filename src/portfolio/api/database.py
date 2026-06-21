@@ -162,6 +162,35 @@ def _migrate_user_email_to_name(db_path: Path | None = None) -> None:
         connection.commit()
 
 
+def _migrate_user_is_default(db_path: Path | None = None) -> None:
+    """Add ``is_default`` to ``user`` and set Miguel_Agresiva as the default portfolio."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "user" not in tables:
+            return
+
+        columns = {
+            row[1]
+            for row in connection.execute(text("PRAGMA table_info(user)"))
+        }
+        if "is_default" not in columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE user ADD COLUMN is_default BOOLEAN NOT NULL DEFAULT 0"
+                )
+            )
+            connection.execute(
+                text("UPDATE user SET is_default = 1 WHERE name = 'Miguel_Agresiva'")
+            )
+            connection.commit()
+
+
 def init_db(db_path: Path | None = None) -> None:
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
@@ -171,6 +200,7 @@ def init_db(db_path: Path | None = None) -> None:
     _migrate_fund_universe(db_path)
     _migrate_drop_user_password(db_path)
     _migrate_user_email_to_name(db_path)
+    _migrate_user_is_default(db_path)
 
 
 def create_user(name: str, db_path: Path | None = None) -> User:
@@ -193,7 +223,7 @@ def list_users(db_path: Path | None = None) -> list[dict]:
     init_db(db_path)
     with get_session(db_path) as session:
         users = session.exec(select(User).order_by(User.name)).all()
-    return [{"id": user.id, "name": user.name} for user in users]
+    return [{"id": user.id, "name": user.name, "is_default": user.is_default} for user in users]
 
 
 def delete_user(user_id: int, db_path: Path | None = None) -> bool:
@@ -206,6 +236,20 @@ def delete_user(user_id: int, db_path: Path | None = None) -> bool:
         session.delete(user)
         session.commit()
         return True
+
+
+def set_default_user(user_id: int, db_path: Path | None = None) -> dict | None:
+    init_db(db_path)
+    with get_session(db_path) as session:
+        user = session.get(User, user_id)
+        if user is None:
+            return None
+        for existing in session.exec(select(User)).all():
+            existing.is_default = existing.id == user_id
+            session.add(existing)
+        session.commit()
+        session.refresh(user)
+        return {"id": user.id, "name": user.name, "is_default": user.is_default}
 
 
 def get_fund(isin: str, db_path: Path | None = None) -> dict | None:

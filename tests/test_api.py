@@ -388,3 +388,24 @@ def test_delete_portfolio_not_found(tmp_path, monkeypatch):
     client = TestClient(app)
     response = client.delete("/api/portfolios/999")
     assert response.status_code == 404
+
+
+def test_set_default_portfolio(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.app.init_db", lambda: init_db(db_path))
+    init_db(db_path)
+
+    client = TestClient(app)
+    first_id = _create_user(db_path, "First")
+    second_id = _create_user(db_path, "Second")
+
+    response = client.put(f"/api/portfolios/{second_id}/default")
+    assert response.status_code == 200
+    assert response.json() == {"id": second_id, "name": "Second", "is_default": True}
+
+    portfolios = client.get("/api/portfolios").json()
+    assert portfolios == [
+        {"id": first_id, "name": "First", "is_default": False},
+        {"id": second_id, "name": "Second", "is_default": True},
+    ]

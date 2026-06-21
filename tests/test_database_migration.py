@@ -79,5 +79,5 @@ def test_migrate_drop_user_password(tmp_path):
     users = connection.execute("SELECT id, name FROM user").fetchall()
     connection.close()
 
-    assert columns == {"id", "name"}
+    assert columns == {"id", "name", "is_default"}
     assert users == [(1, "user@example.com")]

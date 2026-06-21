@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=80" />
+    <link rel="stylesheet" href="/static/style.css?v=83" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -111,16 +111,39 @@
             <h2 class="table-title">
               Portfolio:
               <span class="portfolio-table-name-wrap">
-                <span class="fund-delete-popup">
+                <span class="portfolio-table-actions">
                   <button
                     type="button"
-                    id="portfolio-delete-btn"
-                    class="fund-delete-btn"
-                    aria-label="Delete portfolio"
+                    id="portfolio-default-btn"
+                    class="portfolio-action-btn portfolio-default-btn"
+                    aria-label="Set as default portfolio"
+                    title="Set as default portfolio"
                     hidden
                   >
                     <svg
-                      class="fund-delete-icon"
+                      class="portfolio-default-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    id="portfolio-delete-btn"
+                    class="portfolio-action-btn portfolio-delete-btn"
+                    aria-label="Delete portfolio"
+                    title="Delete portfolio"
+                    hidden
+                  >
+                    <svg
+                      class="portfolio-action-icon"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
                       fill="none"
@@ -207,9 +230,9 @@
     </main>
 
     <script src="/static/api.js?v=11"></script>
-    <script src="/static/portfolios.js?v=7"></script>
+    <script src="/static/portfolios.js?v=10"></script>
     <script src="/static/management.js?v=70"></script>
     <script src="/static/risk.js?v=4"></script>
-    <script src="/static/app.js?v=29"></script>
+    <script src="/static/app.js?v=32"></script>
   </body>
 </html>

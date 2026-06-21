@@ -9,6 +9,24 @@
       .replaceAll('"', "&quot;");
   }
 
+  function resolveDefaultPortfolio(portfolios) {
+    if (!portfolios.length) {
+      return null;
+    }
+    return portfolios.find((portfolio) => portfolio.is_default) ?? portfolios[0];
+  }
+
+  function resolveActivePortfolio(portfolios, selectedId) {
+    if (!portfolios.length) {
+      return null;
+    }
+    return (
+      portfolios.find((portfolio) => portfolio.id === selectedId) ??
+      portfolios.find((portfolio) => portfolio.is_default) ??
+      portfolios[0]
+    );
+  }
+
   function renderPortfolioSelect(portfolios) {
     const select = document.getElementById("portfolio-select");
     if (!select) {
@@ -31,8 +49,7 @@
       )
       .join("");
 
-    const active =
-      portfolios.find((portfolio) => portfolio.id === selectedId) ?? portfolios[0];
+    const active = resolveActivePortfolio(portfolios, selectedId);
     select.value = String(active.id);
   }
 
@@ -79,17 +96,26 @@
     }
 
     const activeId = api.getPortfolioId();
-    const nextId =
-      portfolios.find((portfolio) => portfolio.id === activeId)?.id ?? portfolios[0].id;
-    await selectPortfolio(nextId);
+    const next = resolveActivePortfolio(portfolios, activeId);
+    await selectPortfolio(next.id);
     return portfolios;
+  }
+
+  async function setDefaultPortfolio(portfolioId) {
+    await api.fetchJson(`${api.API}/portfolios/${portfolioId}/default`, {
+      method: "PUT",
+    });
+    return fetchPortfolios();
   }
 
   window.PortfoliosView = {
     loadPortfolios,
+    fetchPortfolios,
     selectPortfolio,
     createPortfolio,
     deletePortfolio,
+    setDefaultPortfolio,
     renderPortfolioSelect,
+    resolveDefaultPortfolio,
   };
 })();

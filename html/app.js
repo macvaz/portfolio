@@ -15,6 +15,7 @@
   function updateActivePortfolioName(portfolios) {
     const label = document.getElementById("portfolio-table-name");
     const deleteBtn = document.getElementById("portfolio-delete-btn");
+    const defaultBtn = document.getElementById("portfolio-default-btn");
     if (!label) {
       return;
     }
@@ -23,6 +24,33 @@
     label.textContent = selected?.name ?? "";
     if (deleteBtn) {
       deleteBtn.hidden = !selected;
+    }
+    if (defaultBtn) {
+      const isDefault = selected?.is_default === true;
+      defaultBtn.hidden = !selected;
+      defaultBtn.disabled = isDefault;
+      defaultBtn.classList.toggle("is-active", isDefault);
+      defaultBtn.title = isDefault ? "Default portfolio" : "Set as default portfolio";
+      defaultBtn.setAttribute(
+        "aria-label",
+        isDefault ? "Default portfolio" : "Set as default portfolio",
+      );
+    }
+  }
+
+  async function setActivePortfolioAsDefault() {
+    const portfolioId = api.getPortfolioId();
+    if (portfolioId === null) {
+      return;
+    }
+
+    showError("");
+    try {
+      const portfolios = await window.PortfoliosView.setDefaultPortfolio(portfolioId);
+      updateActivePortfolioName(portfolios);
+      window.PortfoliosView.renderPortfolioSelect(portfolios);
+    } catch (err) {
+      showError(err.message);
     }
   }
 
@@ -181,18 +209,17 @@
       return portfolios;
     }
 
-    const storedId = api.getPortfolioId();
-    const selected =
-      portfolios.find((portfolio) => portfolio.id === storedId) ?? portfolios[0];
+    const selected = window.PortfoliosView.resolveDefaultPortfolio(portfolios);
     api.setPortfolioId(selected.id);
     updateActivePortfolioName(portfolios);
+    window.PortfoliosView.renderPortfolioSelect(portfolios);
     return portfolios;
   }
 
   async function bootstrapApp() {
     document.getElementById("app-tabs").removeAttribute("hidden");
 
-    const portfolios = await window.PortfoliosView.loadPortfolios();
+    const portfolios = await window.PortfoliosView.fetchPortfolios();
     await ensureSelectedPortfolio(portfolios);
     showError("");
 
@@ -281,6 +308,12 @@
   portfolioSelectSlot.addEventListener("mouseleave", scheduleHidePortfolioCreateBtn);
   portfolioCreateBtn.addEventListener("mouseenter", revealPortfolioCreateBtn);
   portfolioCreateBtn.addEventListener("mouseleave", scheduleHidePortfolioCreateBtn);
+
+  document.getElementById("portfolio-default-btn").addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setActivePortfolioAsDefault().catch((err) => showError(err.message));
+  });
 
   document.getElementById("portfolio-delete-btn").addEventListener("click", (event) => {
     event.preventDefault();
