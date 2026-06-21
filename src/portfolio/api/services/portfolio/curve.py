@@ -7,7 +7,7 @@ import pandas as pd
 
 from portfolio.api.database import list_user_portfolio
 from portfolio.common.navs import load_fund_nav_csv
-from portfolio.finance.returns import calculate_buy_and_hold_returns
+from portfolio.common.returns import calculate_buy_and_hold_returns
 
 BENCHMARK_NAME = "S&P 500"
 BENCHMARK_ISIN = "IE00BYX5MX67"

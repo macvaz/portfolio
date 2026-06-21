@@ -24,7 +24,7 @@ portfolio/
 │   ├── risk.js
 │   └── style.css
 ├── src/portfolio/
-│   ├── __init__.py                 # Package exports and process_macro_data()
+│   ├── __init__.py                 # Package exports
 │   ├── get_data.py                 # Data job orchestration
 │   ├── api/
 │   │   ├── api.py                  # FastAPI app shell
@@ -41,15 +41,14 @@ portfolio/
 │   │           ├── router.py       # /api/signals endpoints
 │   │           └── service.py      # Tactical signals service
 │   ├── common/
-│   │   └── navs.py                 # NAV CSV storage
+│   │   ├── navs.py                 # NAV CSV storage
+│   │   ├── metrics.py              # Fund/portfolio metric computation
+│   │   ├── quantstats.py           # QuantStats HTML reports
+│   │   ├── returns.py              # Buy-and-hold return calculation
+│   │   ├── signals.py              # Macro and market signal calculations
 │   ├── datasources/
 │   │   ├── fred.py                 # FRED time series download
 │   │   └── morningstar.py          # ISIN lookup and NAV download
-│   └── finance/
-│       ├── metrics.py              # Fund/portfolio metric computation
-│       ├── quantstats.py           # QuantStats HTML reports
-│       ├── returns.py              # Buy-and-hold return calculation
-│       └── signals.py              # Macro and market signal calculations
 └── tests/
     ├── test_api.py
     ├── test_curve.py

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from portfolio import generate_performance_report_html
+from portfolio.common.quantstats import generate_performance_report_html
 from portfolio.api.services.portfolio.curve import (
     BENCHMARK_ISIN,
     align_return_series,

@@ -2,21 +2,20 @@ import pandas as pd
 
 from portfolio.datasources.fred import download_fred_data, init_client
 
-def download_series(
-    api_key: str, fred_series: list, start_date="1998-01-01", end_date=None
+def compute_signals(fred_api_key: str, fred_series: list[tuple[str, str]], start_date: str, end_date: str) -> pd.DataFrame:
+    data_df = download_data(fred_api_key, fred_series, start_date, end_date)
+    macro_df = calculate_macro_signals(data_df)
+    market_df = calculate_market_signals(macro_df)
+    print_current_signals(market_df)
+    return market_df
+
+def download_data(
+    fred_api_key: str | None,
+    fred_series: list[tuple[str, str]],
+    start_date: str,
+    end_date: str,
 ) -> pd.DataFrame:
-    """
-    Downloads official macro indicators from the FRED API and calculates
-    the voting system for portfolio protection.
-    """
-    if api_key == "YOUR_FRED_API_KEY_HERE":
-        raise ValueError("Please enter a valid FRED API Key to run the script.")
-
-    # Default end_date to today if not provided so we fetch the most recent data
-    if end_date is None:
-        end_date = pd.Timestamp.now().strftime("%Y-%m-%d")
-
-    fred = init_client(api_key)
+    fred = init_client(fred_api_key)
 
     macro_series_data = [
         download_fred_data(fred, series_id, column_name, start_date, end_date)
@@ -89,21 +88,23 @@ def calculate_market_signals(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def print_signals(df: pd.DataFrame, date: str):
-    if date in df.index:
-        row = df.loc[date]
+def print_current_signals(df: pd.DataFrame):
+    if df.empty:
+        return
 
-        print("\nMacro signals")
-        print(
-            f"1. Curve Inversion (10Y-3M): {float(row['Yield_Spread_10Y3M']):.2f}% -> {row['Alert_Inverted_Curve']}"
-        )
-        print(
-            f"2. Sahm Rule (Employment): {float(row['Sahm_Value']):.2f}% -> {row['Alert_Sahm']}"
-        )
-        print(
-            f"3. Financial Stress Index: {float(row['Financial_Stress_Index']):.2f} -> {row['Alert_Financial_Stress']}"
-        )
+    row = df.iloc[-1]
 
-        print("\nMarket signals")
-        print(f"4. SP500 Death Cross: {row['SP500_Death_Cross_Active']}")
-        print(f"5. SP500 Confirmed Death Cross: {row['SP500_Confirmed_Death_Cross']}")
+    print("\nMacro signals")
+    print(
+        f"1. Curve Inversion (10Y-3M): {float(row['Yield_Spread_10Y3M']):.2f}% -> {row['Alert_Inverted_Curve']}"
+    )
+    print(
+        f"2. Sahm Rule (Employment): {float(row['Sahm_Value']):.2f}% -> {row['Alert_Sahm']}"
+    )
+    print(
+        f"3. Financial Stress Index: {float(row['Financial_Stress_Index']):.2f} -> {row['Alert_Financial_Stress']}"
+    )
+
+    print("\nMarket signals")
+    print(f"4. SP500 Death Cross: {row['SP500_Death_Cross_Active']}")
+    print(f"5. SP500 Confirmed Death Cross: {row['SP500_Confirmed_Death_Cross']}")

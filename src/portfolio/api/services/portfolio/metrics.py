@@ -4,7 +4,7 @@ from datetime import date
 
 from portfolio.api.database import get_fund_metrics, list_funds, list_user_portfolio
 from portfolio.datasources.morningstar import import_isins, morningstar_quote_url
-from portfolio.finance.metrics import compute_portfolio_metrics
+from portfolio.common.metrics import compute_portfolio_metrics
 
 
 def _morningstar_link(

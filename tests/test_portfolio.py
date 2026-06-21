@@ -1,14 +1,12 @@
-from portfolio import (
-    calculate_buy_and_hold_returns,
-    download_navs,
+from portfolio.common.quantstats import (
     generate_performance_report,
     generate_performance_report_html,
-    process_macro_data,
 )
+from portfolio.common.returns import calculate_buy_and_hold_returns
+from portfolio.datasources.morningstar import download_navs
 
 
 def test_package_exports():
-    assert callable(process_macro_data)
     assert callable(download_navs)
     assert callable(calculate_buy_and_hold_returns)
     assert callable(generate_performance_report)

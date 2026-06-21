@@ -3,8 +3,6 @@ import os
 
 from dotenv import load_dotenv
 
-from portfolio.api.database import DEFAULT_DB_PATH
-from portfolio.common.navs import DEFAULT_FUNDS_DIR
 from portfolio.job.download import download
 
 load_dotenv()
@@ -23,8 +21,5 @@ if __name__ == "__main__":
         FRED_API_KEY,
         FRED_SERIES,
         "2000-01-01",
-        date.today().isoformat(),
-        "EUR",
-        DEFAULT_DB_PATH,
-        DEFAULT_FUNDS_DIR,
+        date.today().isoformat()
     )
