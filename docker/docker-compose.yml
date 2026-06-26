@@ -1,0 +1,30 @@
+x-app-volumes: &app-volumes
+  - ../src:/app/src:ro
+  - ../html:/app/html:ro
+  - ../api.py:/app/api.py:ro
+  - ../job.py:/app/job.py:ro
+  - ../data:/app/data
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: api
+    ports:
+      - "8000:8000"
+    volumes: *app-volumes
+    env_file:
+      - ../.env
+
+  job:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: job
+    volumes: *app-volumes
+    env_file:
+      - ../.env
+    profiles:
+      - job
+    restart: "no"

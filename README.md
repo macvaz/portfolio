@@ -8,6 +8,13 @@ A small Python library to download and process time series (fund prices) from Mo
 portfolio/
 ├── api.py                          # Wrapper to start the API server
 ├── job.py                          # Data job entry point
+├── bin/
+│   ├── api.sh                      # Start API via Docker Compose
+│   └── job.sh                      # Run data job via Docker Compose
+├── docker/
+│   ├── Dockerfile                  # API + job image
+│   ├── docker-compose.yml          # Local API / job stack
+│   └── entrypoint.sh               # Dispatches api vs job command
 ├── pyproject.toml
 ├── uv.lock
 ├── docs/
@@ -176,6 +183,67 @@ Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, a
     {"isin": "IE00BYX5M476", "weighted_assets": 0.35}
   ]
 }
+```
+
+## Docker
+
+One image holds Python dependencies and Playwright; **application code is mounted from the host** at runtime (`src/`, `html/`, `api.py`, `job.py`, and `data/`). Rebuild the image only when dependencies change.
+
+Pass `api` or `job` as the command (default is `api`).
+
+**Scripts** (from the repository root):
+
+```bash
+./bin/api.sh          # start API on http://localhost:8000
+./bin/job.sh          # run data job once
+```
+
+Build the image:
+
+```bash
+docker build -f docker/Dockerfile -t portfolio .
+```
+
+**Docker Compose** (same as the scripts):
+
+```bash
+docker compose -f docker/docker-compose.yml up --build
+docker compose -f docker/docker-compose.yml --profile job run --rm job
+```
+
+**Plain `docker run`** — mount code and data explicitly:
+
+```bash
+docker run -p 8000:8000 \
+  -v "$(pwd)/src:/app/src:ro" \
+  -v "$(pwd)/html:/app/html:ro" \
+  -v "$(pwd)/api.py:/app/api.py:ro" \
+  -v "$(pwd)/job.py:/app/job.py:ro" \
+  -v "$(pwd)/data:/app/data" \
+  portfolio api
+
+docker run \
+  -v "$(pwd)/src:/app/src:ro" \
+  -v "$(pwd)/html:/app/html:ro" \
+  -v "$(pwd)/api.py:/app/api.py:ro" \
+  -v "$(pwd)/job.py:/app/job.py:ro" \
+  -v "$(pwd)/data:/app/data" \
+  --env-file .env \
+  portfolio job
+```
+
+Open http://localhost:8000 for the API.
+
+### Environment variables
+
+Compose and `docker run --env-file .env` inject variables into the container environment. The job reads `FRED_API_KEY` from there (`job.py` also calls `load_dotenv()`, which is only needed when a `.env` file is present on disk).
+
+The API does not use `.env` today. The job requires `FRED_API_KEY` for the macro signals step; without it, the job skips FRED and continues with fund NAV downloads.
+
+Create `.env` in the project root:
+
+```
+FRED_API_KEY=your_key_here
 ```
 
 ## Tests
