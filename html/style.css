@@ -768,18 +768,79 @@ button:disabled {
 
 .table-scroll--signals {
   --delete-tooltip-gutter: 0;
+  --signal-col-code: 16rem;
+  --signal-col-value: 6.5rem;
+  --signal-col-threshold: 6.5rem;
   margin-left: 0;
   padding-left: 0;
   width: 100%;
 }
 
+.signal-table-header-grid {
+  display: grid;
+  grid-template-columns:
+    var(--signal-col-code)
+    minmax(0, 1fr)
+    var(--signal-col-value)
+    var(--signal-col-threshold);
+  align-items: center;
+  min-width: 800px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.alerts-header-title {
+  margin: 0;
+  padding-left: 0;
+  padding-right: 1.75rem;
+}
+
+.alerts-summary {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.alerts-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: 2rem;
+}
+
+.alert-name {
+  display: inline-block;
+  padding: 0.12rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+
+.signal-table td.col-value {
+  padding-left: 1rem;
+}
+
+.alert-name--active {
+  background: #c0392b;
+}
+
+.alert-name--inactive {
+  background: #4a7c59;
+}
+
 .signal-table col.col-signal-code {
-  width: 16rem;
+  width: var(--signal-col-code);
 }
 
 .signal-table col.col-signal-value,
 .signal-table col.col-signal-threshold {
-  width: 6.5rem;
+  width: var(--signal-col-value);
+}
+
+.signal-table col.col-signal-threshold {
+  width: var(--signal-col-threshold);
 }
 
 .signal-table .col-name {

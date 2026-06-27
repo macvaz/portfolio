@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=92" />
+    <link rel="stylesheet" href="/static/style.css?v=99" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -256,9 +256,18 @@
             </section>
 
             <section class="table-panel">
-              <h3 class="table-subtitle">Activated alerts</h3>
               <div class="table-scroll table-scroll--signals">
-                <table class="fund-table signal-table" id="signals-alerts-activated-table">
+                <div class="signal-table-header-grid alerts-header">
+                  <h3 class="table-subtitle alerts-header-title">
+                    Alerts
+                    <span id="tactical-alerts-summary" class="alerts-summary"></span>
+                  </h3>
+                  <div class="alerts-legend" aria-label="Alert status legend">
+                    <span class="alert-name alert-name--active">Active</span>
+                    <span class="alert-name alert-name--inactive">Inactive</span>
+                  </div>
+                </div>
+                <table class="fund-table signal-table" id="signals-alerts-table">
                   <colgroup>
                     <col class="col-signal-code" />
                     <col class="col-signal-description" />
@@ -273,30 +282,7 @@
                       <th>Threshold</th>
                     </tr>
                   </thead>
-                  <tbody id="signals-alerts-activated-body"></tbody>
-                </table>
-              </div>
-            </section>
-
-            <section class="table-panel">
-              <h3 class="table-subtitle">Deactivated alerts</h3>
-              <div class="table-scroll table-scroll--signals">
-                <table class="fund-table signal-table" id="signals-alerts-deactivated-table">
-                  <colgroup>
-                    <col class="col-signal-code" />
-                    <col class="col-signal-description" />
-                    <col class="col-signal-value" />
-                    <col class="col-signal-threshold" />
-                  </colgroup>
-                  <thead>
-                    <tr>
-                      <th class="col-name">Alert</th>
-                      <th class="col-name col-description">Description</th>
-                      <th>Value</th>
-                      <th>Threshold</th>
-                    </tr>
-                  </thead>
-                  <tbody id="signals-alerts-deactivated-body"></tbody>
+                  <tbody id="signals-alerts-body"></tbody>
                 </table>
               </div>
             </section>
@@ -312,7 +298,7 @@
     <script src="/static/portfolios.js?v=11"></script>
     <script src="/static/management.js?v=73"></script>
     <script src="/static/risk.js?v=6"></script>
-    <script src="/static/tactical.js?v=7"></script>
+    <script src="/static/tactical.js?v=12"></script>
     <script src="/static/app.js?v=37"></script>
   </body>
 </html>
