@@ -122,7 +122,7 @@
 
     if (!hasData) {
       setTacticalContent(false);
-      setTacticalMessage("No tactical signals yet. Run the data job to compute them.");
+      setTacticalMessage("No tactical alerts yet. Run the data job to compute them.");
       renderTableBody("signals-series-body", [], renderSeriesRow);
       renderTableBody("signals-alerts-body", [], renderAlertRow);
       asOf.textContent = "";

@@ -49,6 +49,10 @@ main {
   color: #555;
 }
 
+#tactical-as-of {
+  margin-top: 1rem;
+}
+
 input,
 button,
 select {
@@ -572,7 +576,6 @@ button:disabled {
   background-color: rgba(255, 153, 0, 0.045);
 }
 
-.fund-table tbody tr:not(.summary-row) td.col-name:hover,
 .fund-table tbody tr:not(.summary-row) td:not(.col-name):hover {
   background-color: rgba(255, 153, 0, 0.085);
 }
@@ -796,6 +799,10 @@ button:disabled {
   font-size: 0.9rem;
   font-weight: 500;
   color: #555;
+}
+
+.table-title .alerts-summary {
+  margin-left: 0.5rem;
 }
 
 .alerts-legend {
