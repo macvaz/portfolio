@@ -1,0 +1,100 @@
+[
+  {
+    "isin": "ES0182527038",
+    "name": "Cartesio Y FI",
+    "fund_id": "F0GBR04VSJ",
+    "performance_id": "0P00000TIV",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00B03HCW31",
+    "name": "Vanguard U.S. Opportunities Fund Investor USD Accumulation",
+    "fund_id": "F0GBR04P0V",
+    "performance_id": "0P00000OB8",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00B42W3S00",
+    "name": "Vanguard Global Small-Cap Index Fund Investor EUR Accumulation",
+    "fund_id": "F00000T1HQ",
+    "performance_id": "0P00012I66",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00B55JMJ98",
+    "name": "Dodge & Cox Worldwide Global Stock Fund EUR Accumulating Class",
+    "fund_id": "F00000JNOU",
+    "performance_id": "0P0000POWJ",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00B579F325",
+    "name": "Invesco Physical Gold ETC",
+    "fund_id": "0P00019OGB",
+    "performance_id": "0P00019OGB",
+    "universe": "FE"
+  },
+  {
+    "isin": "IE00BF0GL329",
+    "name": "Polar Capital Funds PLC - Artificial Intelligence Fund I Acc",
+    "fund_id": "0P0001BO8Z",
+    "performance_id": "0P0001BO8Z",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00BYX5M476",
+    "name": "Fidelity MSCI Emerging Markets Index Fund EUR P Acc",
+    "fund_id": "F00000ZZMN",
+    "performance_id": "0P0001CJGK",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00BYX5MD61",
+    "name": "Fidelity MSCI Europe Index Fund EUR P Acc",
+    "fund_id": "F00000ZZMQ",
+    "performance_id": "0P0001CJGN",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00BYX5MX67",
+    "name": "Fidelity S&P 500 Index Fund EUR P Acc",
+    "fund_id": "F00001019G",
+    "performance_id": "0P0001CLDM",
+    "universe": "FO"
+  },
+  {
+    "isin": "IE00BYX5NX33",
+    "name": "Fidelity MSCI World Index Fund EUR P Acc",
+    "fund_id": "F00001019E",
+    "performance_id": "0P0001CLDK",
+    "universe": "FO"
+  },
+  {
+    "isin": "LU0267388220",
+    "name": "Fidelity Funds - Euro Short Term Bond Fund A-Acc-EUR",
+    "fund_id": "F000001A5X",
+    "performance_id": "0P0000AERX",
+    "universe": "FO"
+  },
+  {
+    "isin": "LU1303370156",
+    "name": "JPMorgan Funds - US Technology Fund C (acc) - EUR",
+    "fund_id": "F00000WH5Z",
+    "performance_id": "0P00016XFU",
+    "universe": "FO"
+  },
+  {
+    "isin": "LU2053353079",
+    "name": "JPMorgan Funds - Thematics - Genetic Therapies Fund A (acc) EUR (hedged)",
+    "fund_id": "F000014DDQ",
+    "performance_id": "0P0001INWP",
+    "universe": "FO"
+  },
+  {
+    "isin": "LU2596603865",
+    "name": "Goldman Sachs Global Future Economic Security Equity Portfolio R EUR Inc",
+    "fund_id": "F00001GFQG",
+    "performance_id": "0P0001R7XS",
+    "universe": "FO"
+  }
+]

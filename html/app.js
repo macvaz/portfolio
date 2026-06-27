@@ -81,7 +81,8 @@
 
   function updateToolbarForTab(tabName) {
     const isTactical = tabName === "tactical";
-    setLayoutHidden(document.querySelector(".toolbar-right"), isTactical);
+    setLayoutHidden(document.getElementById("portfolio-picker"), isTactical);
+    setLayoutHidden(document.getElementById("toolbar-alerts-legend"), !isTactical);
     setLayoutHidden(document.getElementById("add-fund-form"), isTactical);
 
     if (isTactical) {

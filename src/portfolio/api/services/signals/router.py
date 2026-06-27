@@ -8,5 +8,5 @@ router = APIRouter(prefix="/api/signals", tags=["signals"])
 
 @router.get("", response_model=SignalSnapshotResponse)
 def list_signals() -> SignalSnapshotResponse:
-    """Return the latest computed tactical signals."""
+    """Return the latest computed tactical alerts."""
     return fetch_latest_signal_snapshot()

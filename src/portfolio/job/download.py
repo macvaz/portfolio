@@ -36,7 +36,7 @@ def download(
         db_path=db_path,
     )
     if observation_date is not None:
-        print(f"Stored tactical signals for {observation_date.isoformat()}.")
+        print(f"Stored tactical alerts for {observation_date.isoformat()}.")
 
     print("\nDownloading fund NAVs from Morningstar...")
     store_fund_navs_from_db(

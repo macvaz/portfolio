@@ -45,7 +45,7 @@ portfolio/
 │   │       │   └── risk_report.py  # QuantStats risk report
 │   │       └── signals/
 │   │           ├── router.py       # /api/signals endpoints
-│   │           └── service.py      # Tactical signals service
+│   │           └── service.py      # Tactical alerts service
 │   ├── common/
 │   │   ├── navs.py                 # NAV CSV storage
 │   │   ├── metrics.py              # Fund/portfolio metric computation
@@ -152,7 +152,7 @@ Fund ISINs and portfolios are stored in `data/portfolio.db` (SQLite).
 uv run api.py
 ```
 
-Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, and tactical signals.
+Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, and tactical alerts.
 
 ### API endpoints
 

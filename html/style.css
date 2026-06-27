@@ -91,6 +91,22 @@ button:disabled {
   flex-shrink: 0;
 }
 
+.toolbar-right-slot {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  justify-items: end;
+  align-items: center;
+}
+
+.toolbar-right-slot > * {
+  grid-area: 1 / 1;
+}
+
+.toolbar-alerts-legend {
+  gap: 0.45rem;
+}
+
 .is-layout-hidden {
   visibility: hidden;
   pointer-events: none;
@@ -776,25 +792,6 @@ button:disabled {
   width: 100%;
 }
 
-.signal-table-header-grid {
-  display: grid;
-  grid-template-columns:
-    var(--signal-col-code)
-    minmax(0, 1fr)
-    var(--signal-col-value)
-    var(--signal-col-threshold);
-  align-items: center;
-  min-width: 800px;
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
-.alerts-header-title {
-  margin: 0;
-  padding-left: 0;
-  padding-right: 1.75rem;
-}
-
 .alerts-summary {
   font-size: 0.9rem;
   font-weight: 500;
@@ -805,7 +802,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding-right: 2rem;
+  flex-shrink: 0;
 }
 
 .alert-name {
