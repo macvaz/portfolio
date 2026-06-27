@@ -185,7 +185,7 @@
     setTacticalMessage("");
     setTacticalContent(true);
     asOf.textContent = snapshot.date
-      ? `— FRED series and thresholds · as of ${snapshot.date}`
+      ? `— FRED series and thresholds as of ${snapshot.date}`
       : "— FRED series and thresholds";
     summaryEl.textContent =
       alerts.length > 0 ? `— ${activeCount} of ${alerts.length} active` : "";
