@@ -85,11 +85,19 @@
     return `<span class="alert-name alert-name--${statusClass}">${content}</span>`;
   }
 
-  function renderAlertHistoryCell(cell) {
+  function formatSp500Value(value) {
+    if (!Number.isFinite(value)) {
+      return "-";
+    }
+    return Math.round(value).toLocaleString("en-US");
+  }
+
+  function renderAlertHistoryCell(cell, code) {
     if (!Number.isFinite(cell.value)) {
       return "-";
     }
-    const formatted = formatNumericValue(cell.value);
+    const formatted =
+      code === "SP500" ? formatSp500Value(cell.value) : formatNumericValue(cell.value);
     if (cell.active === null || cell.active === undefined) {
       return formatted;
     }
@@ -133,7 +141,7 @@
       <tr>
         <th class="col-month">Month</th>
         ${headerCells}
-        <th class="col-alert-active-count">Active</th>
+        <th class="col-alert-active-count">Risk level</th>
       </tr>`;
 
     tbody.innerHTML = rows
@@ -141,7 +149,7 @@
         const valueCells = columns
           .map((column, index) => {
             const cell = (row.values || [])[index] || {};
-            return `<td class="col-value">${renderAlertHistoryCell(cell)}</td>`;
+            return `<td class="col-value">${renderAlertHistoryCell(cell, column.code)}</td>`;
           })
           .join("");
         const activeCount = row.active_count ?? 0;

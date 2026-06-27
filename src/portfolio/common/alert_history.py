@@ -23,6 +23,7 @@ ALERT_HISTORY_COLUMN_ORDER = (
     "Unemployment_Rate",
     "Sahm_Rule_Indicator",
     "SP500_Death_Cross",
+    "SP500",
 )
 
 ALERT_HISTORY_COLUMN_LABELS = {
@@ -33,6 +34,14 @@ ALERT_HISTORY_COLUMN_LABELS = {
     "Unemployment_Rate": "Unemployment rate",
     "Sahm_Rule_Indicator": "Sahm rule",
     "SP500_Death_Cross": "SP500 death cross",
+    "SP500": "SP500",
+}
+
+HISTORY_DISPLAY_ONLY_COLUMNS: dict[str, dict[str, str | None]] = {
+    "SP500": {
+        "description": "S&P 500 index level: broad U.S. large-cap equity benchmark (index).",
+        "series_start": "1970-01-02",
+    },
 }
 
 
@@ -125,6 +134,17 @@ def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
     for code in ALERT_HISTORY_COLUMN_ORDER:
         row = fixture_by_code.get(code)
         if row is None:
+            display_only = HISTORY_DISPLAY_ONLY_COLUMNS.get(code)
+            if display_only is None:
+                continue
+            columns.append(
+                {
+                    "code": code,
+                    "label": ALERT_HISTORY_COLUMN_LABELS[code],
+                    "description": str(display_only["description"]),
+                    "series_start": display_only.get("series_start"),
+                }
+            )
             continue
         if row.get("threshold") is not None:
             columns.append(
@@ -148,6 +168,12 @@ def build_monthly_alert_history(
         return {"columns": columns, "rows": []}
 
     descriptions_by_code = {str(row["code"]): row for row in fixture}
+    for code, meta in HISTORY_DISPLAY_ONLY_COLUMNS.items():
+        descriptions_by_code[code] = {
+            "threshold": None,
+            "operator": None,
+            "series_start": meta.get("series_start"),
+        }
     monthly = market_df.resample("ME").last()
     month_ends = _history_month_ends(monthly.index.max())
     rows: list[dict] = []

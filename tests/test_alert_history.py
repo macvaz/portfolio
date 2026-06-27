@@ -57,6 +57,7 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         "Unemployment_Rate",
         "Sahm_Rule_Indicator",
         "SP500_Death_Cross",
+        "SP500",
     ]
     assert [column["label"] for column in history["columns"]] == [
         "High yield spread",
@@ -66,6 +67,7 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         "Unemployment rate",
         "Sahm rule",
         "SP500 death cross",
+        "SP500",
     ]
 
     assert len(history["rows"]) == 6
@@ -74,9 +76,11 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
 
     june_unemployment = history["rows"][0]["values"][columns.index("Unemployment_Rate")]
     june_curve = history["rows"][0]["values"][columns.index("Yield_Spread_10Y3M")]
+    june_sp500 = history["rows"][0]["values"][columns.index("SP500")]
     june_hy = history["rows"][0]["values"][columns.index("High_Yield_Spread")]
     assert june_unemployment == {"value": 4.1, "active": False}
     assert june_curve == {"value": -0.1, "active": True}
+    assert june_sp500 == {"value": 5100.0, "active": None}
     assert june_hy == {"value": None, "active": None}
     assert history["rows"][0]["active_count"] == 1
     assert history["rows"][0]["eligible_count"] == 7
@@ -163,4 +167,4 @@ def test_build_monthly_alert_history_returns_empty_rows_without_series(
     )
     history = build_monthly_alert_history(tmp_path)
     assert history["rows"] == []
-    assert len(history["columns"]) == 7
+    assert len(history["columns"]) == 8
