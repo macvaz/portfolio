@@ -41,16 +41,6 @@
     return value.toFixed(2);
   }
 
-  function formatSeriesValue(identifier, value) {
-    if (!Number.isFinite(value)) {
-      return "-";
-    }
-    if (identifier === "SP500") {
-      return value.toFixed(0);
-    }
-    return value.toFixed(2);
-  }
-
   function formatMonthLabel(month) {
     if (!month) {
       return "-";
@@ -59,7 +49,7 @@
     if (!year || !monthNumber) {
       return month;
     }
-    return new Date(year, monthNumber - 1, 1).toLocaleDateString(undefined, {
+    return new Date(year, monthNumber - 1, 1).toLocaleDateString("en-GB", {
       month: "short",
       year: "numeric",
     });
@@ -84,9 +74,9 @@
     return `
       <tr>
         <td class="col-name">${renderSeriesIdentifier(series)}</td>
-        <td class="col-name col-description">${series.description}</td>
+        <td class="col-name col-description" title="${escapeHtml(series.description)}">${escapeHtml(series.description)}</td>
         <td class="col-series-start">${formatSeriesStart(series.series_start)}</td>
-        <td>${formatThreshold(series.threshold)}</td>
+        <td class="col-alert-threshold">${formatThreshold(series.threshold)}</td>
       </tr>`;
   }
 
@@ -95,14 +85,11 @@
     return `<span class="alert-name alert-name--${statusClass}">${content}</span>`;
   }
 
-  function renderAlertHistoryCell(cell, code) {
+  function renderAlertHistoryCell(cell) {
     if (!Number.isFinite(cell.value)) {
       return "-";
     }
-    const formatted =
-      code === "SP500"
-        ? formatSeriesValue("SP500", cell.value)
-        : formatNumericValue(cell.value);
+    const formatted = formatNumericValue(cell.value);
     if (cell.active === null || cell.active === undefined) {
       return formatted;
     }
@@ -138,7 +125,7 @@
         if (column.series_start) {
           titleParts.push(`from ${column.series_start}`);
         }
-        return `<th class="col-alert-history" title="${escapeHtml(titleParts.join(" · "))}">${escapeHtml(column.code)}</th>`;
+        return `<th class="col-alert-history" title="${escapeHtml(titleParts.join(" · "))}">${escapeHtml(column.label || column.code)}</th>`;
       })
       .join("");
 
@@ -154,7 +141,7 @@
         const valueCells = columns
           .map((column, index) => {
             const cell = (row.values || [])[index] || {};
-            return `<td class="col-value">${renderAlertHistoryCell(cell, column.code)}</td>`;
+            return `<td class="col-value">${renderAlertHistoryCell(cell)}</td>`;
           })
           .join("");
         const activeCount = row.active_count ?? 0;
@@ -197,7 +184,9 @@
 
     setTacticalMessage("");
     setTacticalContent(true);
-    asOf.textContent = `Latest execution as of ${snapshot.date}`;
+    asOf.textContent = snapshot.date
+      ? `— FRED series and thresholds · as of ${snapshot.date}`
+      : "— FRED series and thresholds";
     summaryEl.textContent =
       alerts.length > 0 ? `— ${activeCount} of ${alerts.length} active` : "";
     renderTableBody("alerts-series-body", series, renderSeriesRow);

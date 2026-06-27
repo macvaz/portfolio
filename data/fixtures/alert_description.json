@@ -1,7 +1,7 @@
 [
   {
     "code": "Unemployment_Rate",
-    "description": "US unemployment rate",
+    "description": "Civilian unemployment rate: share of the labor force that is jobless and actively seeking work, seasonally adjusted (percent).",
     "source": "fred",
     "series_id": "UNRATE",
     "series_start": "1990-01-01",
@@ -10,7 +10,7 @@
   },
   {
     "code": "High_Yield_Spread",
-    "description": "ICE BofA US High Yield Index option-adjusted spread",
+    "description": "ICE BofA US High Yield OAS: option-adjusted spread of below-investment-grade corporates over comparable Treasuries (percent).",
     "source": "fred",
     "series_id": "BAMLH0A0HYM2EY",
     "series_start": "2023-06-27",
@@ -19,7 +19,7 @@
   },
   {
     "code": "Financial_Stress_Index",
-    "description": "St. Louis Fed Financial Stress Index",
+    "description": "St. Louis Fed Financial Stress Index: composite of Treasury, corporate, equity, and funding-market stress indicators (index).",
     "source": "fred",
     "series_id": "STLFSI4",
     "series_start": "1994-01-07",
@@ -28,7 +28,7 @@
   },
   {
     "code": "Yield_Spread_10Y3M",
-    "description": "10Y–3M Treasury yield spread (inverted when < 0)",
+    "description": "10-year minus 3-month Treasury constant-maturity spread: benchmark yield-curve slope and recession-risk gauge (percent).",
     "source": "fred",
     "series_id": "T10Y3M",
     "series_start": "1990-01-02",
@@ -37,7 +37,7 @@
   },
   {
     "code": "Real_Interest_Rates",
-    "description": "10-Year Treasury inflation-indexed security yield (TIPS real yield)",
+    "description": "10-year TIPS real yield: market yield on inflation-indexed U.S. Treasury securities, investment basis (percent).",
     "source": "fred",
     "series_id": "DFII10",
     "series_start": "2003-01-02",
@@ -46,7 +46,7 @@
   },
   {
     "code": "Sahm_Rule_Indicator",
-    "description": "Real-time Sahm Rule recession indicator (FRED)",
+    "description": "Real-time Sahm Rule recession indicator: triggers when the 3-month unemployment average rises 0.5 pp above its 12-month low (percentage points).",
     "source": "fred",
     "series_id": "SAHMREALTIME",
     "series_start": "1990-01-01",
@@ -54,17 +54,8 @@
     "operator": "gte"
   },
   {
-    "code": "SP500",
-    "description": "S&P 500 index level",
-    "source": "yfinance",
-    "series_id": "SP500",
-    "series_start": "1970-01-02",
-    "threshold": null,
-    "operator": null
-  },
-  {
     "code": "SP500_Death_Cross",
-    "description": "50-day SMA below 200-day SMA (SMA50/SMA200 ratio)",
+    "description": "S&P 500 death-cross signal: ratio of 50-day to 200-day moving average; below 1.0 indicates bearish crossover (ratio).",
     "source": "computed",
     "series_id": null,
     "series_start": "1970-01-02",

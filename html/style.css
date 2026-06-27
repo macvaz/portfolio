@@ -49,10 +49,6 @@ main {
   color: #555;
 }
 
-#tactical-as-of {
-  margin-top: 1rem;
-}
-
 input,
 button,
 select {
@@ -523,6 +519,10 @@ button:disabled {
   overflow: visible;
 }
 
+.table-panel--macro {
+  margin-bottom: 1rem;
+}
+
 .table-title {
   margin: 0 0 0.5rem;
   font-size: 1.35rem;
@@ -796,8 +796,14 @@ button:disabled {
 }
 
 .table-scroll--alerts-history {
-  max-height: min(65vh, 560px);
+  max-height: min(75vh, 680px);
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.table-scroll--alerts-history::-webkit-scrollbar {
+  display: none;
 }
 
 .table-scroll--alerts-history .alert-table {
@@ -840,6 +846,60 @@ button:disabled {
 
 .alert-table--history {
   min-width: 1100px;
+}
+
+.alert-table--series {
+  min-width: 0;
+}
+
+.alert-table--series col.col-alert-code {
+  width: 10.5rem;
+}
+
+.alert-table--series col.col-alert-start {
+  width: 6rem;
+}
+
+.alert-table--series col.col-alert-threshold {
+  width: 4.25rem;
+}
+
+.alert-table--series th.col-name:not(.col-description),
+.alert-table--series td.col-name:not(.col-description) {
+  min-width: 0;
+  max-width: 10.5rem;
+  padding-right: 0.65rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alert-table--series .col-description {
+  min-width: 0;
+  max-width: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+.alert-table--series .col-series-start,
+.alert-table--series th.col-series-start {
+  padding: 0.2rem 0.5rem;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.alert-table--series .col-alert-threshold,
+.alert-table--series th.col-alert-threshold {
+  padding: 0.2rem 0.35rem 0.2rem 0.5rem;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.alert-table--series thead th {
+  text-align: left;
 }
 
 .alert-table .col-month {
@@ -907,6 +967,7 @@ button:disabled {
 .alert-table .col-series-start {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  text-align: left;
 }
 
 .alert-table col.col-alert-code {
@@ -950,9 +1011,17 @@ button:disabled {
   padding-right: 2rem;
 }
 
-.alert-table th:not(.col-name):not(.col-description):not(.col-month),
-.alert-table td:not(.col-name):not(.col-description):not(.col-month) {
+.alert-table th:not(.col-name):not(.col-description):not(.col-month):not(.col-series-start):not(.col-alert-threshold),
+.alert-table td:not(.col-name):not(.col-description):not(.col-month):not(.col-series-start):not(.col-alert-threshold) {
   padding-left: 1rem;
+}
+
+.table-scroll--alerts-history .alert-table thead th {
+  padding-bottom: 0.6rem;
+}
+
+.table-scroll--alerts-history .alert-table tbody tr:first-child td {
+  padding-top: 0.6rem;
 }
 
 @media (max-width: 768px) {

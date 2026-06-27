@@ -774,7 +774,7 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
             else None
         )
 
-        if description.source in {"fred", "yfinance"}:
+        if description.source == "fred":
             series.append(
                 {
                     "code": description.code,

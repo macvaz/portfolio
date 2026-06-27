@@ -36,6 +36,7 @@ class AlertHistoryRow(BaseModel):
 
 class AlertHistoryColumn(BaseModel):
     code: str
+    label: str
     description: str
     series_start: str | None = None
 

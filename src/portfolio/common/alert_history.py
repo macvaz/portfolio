@@ -23,17 +23,21 @@ ALERT_HISTORY_COLUMN_ORDER = (
     "Unemployment_Rate",
     "Sahm_Rule_Indicator",
     "SP500_Death_Cross",
-    "SP500",
 )
 
-HISTORY_DISPLAY_ONLY_CODES = frozenset({"SP500"})
+ALERT_HISTORY_COLUMN_LABELS = {
+    "High_Yield_Spread": "High yield spread",
+    "Financial_Stress_Index": "Financial stress",
+    "Yield_Spread_10Y3M": "Curve inversion",
+    "Real_Interest_Rates": "Real interest rate",
+    "Unemployment_Rate": "Unemployment rate",
+    "Sahm_Rule_Indicator": "Sahm rule",
+    "SP500_Death_Cross": "SP500 death cross",
+}
 
 
-def _is_thresholded_alert(code: str, description: dict) -> bool:
-    return (
-        code not in HISTORY_DISPLAY_ONLY_CODES
-        and description.get("threshold") is not None
-    )
+def _is_thresholded_alert(description: dict) -> bool:
+    return description.get("threshold") is not None
 
 
 def _count_monthly_alerts(
@@ -47,7 +51,7 @@ def _count_monthly_alerts(
     for column, cell in zip(columns, values, strict=True):
         code = column["code"]
         description = descriptions_by_code[code]
-        if not _is_thresholded_alert(code, description):
+        if not _is_thresholded_alert(description):
             continue
         if _month_before_series_start(timestamp, description.get("series_start")):
             continue
@@ -87,8 +91,6 @@ def load_market_dataframe_from_series(
         if entry.get("source") != "fred" or not entry.get("series_id"):
             continue
         code = str(entry["code"])
-        if code == "SP500":
-            continue
         series_id = str(entry["series_id"])
         series = load_series_csv(series_id, root)
         if series.empty:
@@ -124,10 +126,11 @@ def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
         row = fixture_by_code.get(code)
         if row is None:
             continue
-        if row.get("threshold") is not None or code in HISTORY_DISPLAY_ONLY_CODES:
+        if row.get("threshold") is not None:
             columns.append(
                 {
                     "code": code,
+                    "label": ALERT_HISTORY_COLUMN_LABELS[code],
                     "description": str(row["description"]),
                     "series_start": row.get("series_start"),
                 }

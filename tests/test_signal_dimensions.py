@@ -22,9 +22,6 @@ def test_alert_description_fixture_matches_expected_catalog():
     assert rows["High_Yield_Spread"]["threshold"] == 9.0
     assert rows["Unemployment_Rate"]["threshold"] == 5.0
     assert rows["Real_Interest_Rates"]["threshold"] == 2.0
-    assert rows["SP500"]["threshold"] is None
-    assert rows["SP500"]["operator"] is None
-    assert rows["SP500"]["source"] == "yfinance"
     assert rows["SP500_Death_Cross"]["source"] == "computed"
     assert rows["SP500_Death_Cross"]["operator"] == "lt"
     assert rows["Unemployment_Rate"]["source"] == "fred"

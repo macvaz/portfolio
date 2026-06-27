@@ -30,7 +30,6 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
             "Financial_Stress_Index": 1.2,
             "Yield_Spread_10Y3M": -0.05,
             "Real_Interest_Rates": 2.1,
-            "SP500": 4800.0,
             "SP500_Death_Cross": 0.94,
             "Sahm_Rule_Indicator": 0.32,
         },
@@ -47,7 +46,7 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     assert "history" in payload
     assert isinstance(payload["history"]["columns"], list)
     assert isinstance(payload["history"]["rows"], list)
-    assert len(payload["series"]) == 7
+    assert len(payload["series"]) == 6
     assert len(payload["alerts"]) == 7
 
     series_codes = {item["code"] for item in payload["series"]}
@@ -58,7 +57,6 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
         "Yield_Spread_10Y3M",
         "Real_Interest_Rates",
         "Sahm_Rule_Indicator",
-        "SP500",
     }
     assert "SP500_Death_Cross" not in series_codes
 
@@ -72,9 +70,6 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     )
     assert unemployment["threshold"] == 5.0
     assert unemployment["series_start"] == "1990-01-01"
-    sp500 = next(item for item in payload["series"] if item["code"] == "SP500")
-    assert sp500["threshold"] is None
-    assert sp500["active"] is None
     assert unemployment["active"] is False
 
     active_codes = {item["code"] for item in payload["alerts"] if item["active"]}
