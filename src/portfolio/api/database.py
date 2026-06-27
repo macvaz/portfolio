@@ -8,7 +8,7 @@ from sqlmodel import Session, SQLModel, create_engine, delete, select
 from portfolio.api.models import Fund, Metric, Portfolio, Signal, SignalDimension, User
 from portfolio.common.signal_dimensions import (
     insert_signal_dimensions_from_fixture,
-    seed_signal_dimensions,
+    sync_signal_catalog_from_fixture,
 )
 
 CANONICAL_DB_PATH = Path("data/portfolio.db")
@@ -274,7 +274,6 @@ SIGNAL_CODE_RENAMES = {
     "Alert_Financial_Stress": "FINANCIAL_STRESS",
     "Sahm_Value": "SAHM_RULE",
     "SAHM_VALUE": "SAHM_RULE",
-    "Macro_Crisis_Votes": "MACRO_CRISIS_VOTES",
     "SP500_Death_Cross_Active": "SP500_DEATH_CROSS_ACTIVE",
     "SP500_Confirmed_Death_Cross": "SP500_CONFIRMED_DEATH_CROSS",
 }
@@ -376,6 +375,31 @@ def _migrate_signal_dimension_comparison_code(db_path: Path | None = None) -> No
         connection.commit()
 
 
+def _migrate_sahm_rule_indicator_signals(db_path: Path | None = None) -> None:
+    """Copy legacy SAHM_RULE readings into ``Sahm_Rule_Indicator`` when missing."""
+    with get_session(db_path) as session:
+        legacy_rows = session.exec(
+            select(Signal).where(Signal.code == "SAHM_RULE")
+        ).all()
+        for legacy in legacy_rows:
+            existing = session.exec(
+                select(Signal).where(
+                    Signal.code == "Sahm_Rule_Indicator",
+                    Signal.date == legacy.date,
+                )
+            ).first()
+            if existing is not None:
+                continue
+            session.add(
+                Signal(
+                    code="Sahm_Rule_Indicator",
+                    date=legacy.date,
+                    value=legacy.value,
+                )
+            )
+        session.commit()
+
+
 def reset_signal_tables_from_fixture(
     db_path: Path | None = None,
     fixture_path: Path | None = None,
@@ -408,8 +432,9 @@ def init_db(db_path: Path | None = None) -> None:
     _migrate_signal_alert_codes(db_path)
     _migrate_signal_dimension_comparison_code(db_path)
     with get_session(db_path) as session:
-        seed_signal_dimensions(session)
+        sync_signal_catalog_from_fixture(session)
         session.commit()
+    _migrate_sahm_rule_indicator_signals(db_path)
 
 
 def create_user(name: str, db_path: Path | None = None) -> User:

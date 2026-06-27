@@ -7,7 +7,7 @@ from portfolio.common.macro_constants import (
     FINANCIAL_STRESS,
     FINANCIAL_STRESS_INDEX,
     INVERTED_CURVE,
-    SAHM_VALUE,
+    SAHM_RULE_INDICATOR,
     SP500_CONFIRMED_DEATH_CROSS,
     SP500_DEATH_CROSS,
     SP500_DEATH_CROSS_ACTIVE,
@@ -114,7 +114,7 @@ def print_current_signals(df: pd.DataFrame):
         f"1. Curve Inversion (10Y-3M): {float(row[YIELD_SPREAD_10Y3M]):.2f}% -> {row[INVERTED_CURVE]}"
     )
     print(
-        f"2. Sahm Rule (Employment): {float(row[SAHM_VALUE]):.2f}% -> {row[SAHM_VALUE]}"
+        f"2. Sahm Rule (FRED SAHMREALTIME): {float(row[SAHM_RULE_INDICATOR]):.2f} pp"
     )
     print(
         f"3. Financial Stress Index: {float(row[FINANCIAL_STRESS_INDEX]):.2f} -> {row[FINANCIAL_STRESS]}"

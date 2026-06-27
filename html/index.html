@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=90" />
+    <link rel="stylesheet" href="/static/style.css?v=92" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -234,8 +234,14 @@
 
             <section class="table-panel">
               <h3 class="table-subtitle">Series</h3>
-              <div class="table-scroll">
+              <div class="table-scroll table-scroll--signals">
                 <table class="fund-table signal-table" id="signals-series-table">
+                  <colgroup>
+                    <col class="col-signal-code" />
+                    <col class="col-signal-description" />
+                    <col class="col-signal-value" />
+                    <col class="col-signal-threshold" />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th class="col-name">FRED ID</th>
@@ -251,8 +257,14 @@
 
             <section class="table-panel">
               <h3 class="table-subtitle">Activated alerts</h3>
-              <div class="table-scroll">
+              <div class="table-scroll table-scroll--signals">
                 <table class="fund-table signal-table" id="signals-alerts-activated-table">
+                  <colgroup>
+                    <col class="col-signal-code" />
+                    <col class="col-signal-description" />
+                    <col class="col-signal-value" />
+                    <col class="col-signal-threshold" />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th class="col-name">Alert</th>
@@ -268,8 +280,14 @@
 
             <section class="table-panel">
               <h3 class="table-subtitle">Deactivated alerts</h3>
-              <div class="table-scroll">
+              <div class="table-scroll table-scroll--signals">
                 <table class="fund-table signal-table" id="signals-alerts-deactivated-table">
+                  <colgroup>
+                    <col class="col-signal-code" />
+                    <col class="col-signal-description" />
+                    <col class="col-signal-value" />
+                    <col class="col-signal-threshold" />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th class="col-name">Alert</th>

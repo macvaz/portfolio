@@ -6,15 +6,11 @@ from dotenv import load_dotenv
 from portfolio.common.macro_constants import (
     FINANCIAL_STRESS_INDEX,
     HIGH_YIELD_SPREAD,
+    SAHM_RULE_INDICATOR,
     UNEMPLOYMENT_RATE,
     YIELD_SPREAD_10Y3M,
 )
-from portfolio.common.macro_signals import (
-    financial_stress,
-    inverted_curve,
-    macro_crisis_votes,
-    sahm_rule,
-)
+from portfolio.common.macro_signals import financial_stress, inverted_curve
 from portfolio.job.download import download
 
 FRED_SERIES = [
@@ -22,13 +18,12 @@ FRED_SERIES = [
     ("BAMLH0A0HYM2EY", HIGH_YIELD_SPREAD),
     ("STLFSI4", FINANCIAL_STRESS_INDEX),
     ("T10Y3M", YIELD_SPREAD_10Y3M),
+    ("SAHMREALTIME", SAHM_RULE_INDICATOR),
 ]
 
 MACRO_SIGNALS = [
     inverted_curve,
-    sahm_rule,
     financial_stress,
-    macro_crisis_votes,
 ]
 
 

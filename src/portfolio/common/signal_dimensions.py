@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
-from portfolio.api.models import SignalDimension
+from sqlmodel import delete, select
+
+from portfolio.api.models import Signal, SignalDimension
 
 DEFAULT_SIGNAL_DIMENSION_FIXTURE = Path("data/fixtures/signal_dimension.json")
 
@@ -23,6 +25,21 @@ def load_signal_dimension_fixture(
         raise ValueError(f"Expected a JSON array in {path}")
 
     return rows
+
+
+def sync_signal_catalog_from_fixture(
+    session,
+    fixture_path: Path | None = None,
+) -> None:
+    fixture_codes = {
+        str(row["code"]) for row in load_signal_dimension_fixture(fixture_path)
+    }
+    for dimension in session.exec(select(SignalDimension)).all():
+        if dimension.code in fixture_codes:
+            continue
+        session.exec(delete(Signal).where(Signal.code == dimension.code))
+        session.delete(dimension)
+    seed_signal_dimensions(session, fixture_path)
 
 
 def seed_signal_dimensions(

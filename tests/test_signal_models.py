@@ -42,7 +42,7 @@ def test_signal_dimension_and_signal_persist(tmp_path):
         dimension = session.get(SignalDimension, "SAHM_RULE")
         signal = session.exec(select(Signal)).first()
 
-    assert "unemployment" in dimension.description.lower()
+    assert dimension.comparison_code == "Sahm_Rule_Indicator"
     assert dimension.threshold == 0.5
     assert signal.code == "SAHM_RULE"
     assert signal.date == date(2026, 6, 1)

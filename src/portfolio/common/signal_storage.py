@@ -20,6 +20,19 @@ def extract_signal_values(row: pd.Series, codes: list[str]) -> dict[str, float]:
     return values
 
 
+def _propagate_alert_values(values: dict[str, float]) -> dict[str, float]:
+    for entry in load_signal_dimension_fixture():
+        if entry.get("kind") != "alert":
+            continue
+        alert_code = str(entry["code"])
+        comparison_code = entry.get("comparison_code")
+        if alert_code in values or not comparison_code:
+            continue
+        if comparison_code in values:
+            values[alert_code] = values[comparison_code]
+    return values
+
+
 def persist_latest_signals(
     market_df: pd.DataFrame,
     *,
@@ -37,7 +50,7 @@ def persist_latest_signals(
 
     row = market_df.loc[timestamp]
     codes = [str(entry["code"]) for entry in load_signal_dimension_fixture()]
-    values = extract_signal_values(row, codes)
+    values = _propagate_alert_values(extract_signal_values(row, codes))
     if not values:
         return None
 

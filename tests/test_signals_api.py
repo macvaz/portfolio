@@ -31,11 +31,10 @@ def test_list_signals_returns_latest_snapshot(tmp_path, monkeypatch):
             "Yield_Spread_10Y3M": -0.05,
             "SP500": 4800.0,
             "SP500_SMA_RATIO": 0.94,
+            "Sahm_Rule_Indicator": 0.32,
             "SAHM_RULE": 0.32,
             "INVERTED_CURVE": 1.0,
             "FINANCIAL_STRESS": 1.0,
-            "MACRO_CRISIS_VOTES": 2.0,
-            "MACRO_SYSTEM_LOCKED": 1.0,
             "SP500_DEATH_CROSS_ACTIVE": 1.0,
             "SP500_CONFIRMED_DEATH_CROSS": 1.0,
         },
@@ -49,7 +48,7 @@ def test_list_signals_returns_latest_snapshot(tmp_path, monkeypatch):
     assert response.status_code == 200
     payload = response.json()
     assert payload["date"] == "2024-06-04"
-    assert len(payload["series"]) == 5
+    assert len(payload["series"]) == 6
 
     activated_codes = {item["code"] for item in payload["alerts_activated"]}
     deactivated_codes = {item["code"] for item in payload["alerts_deactivated"]}
@@ -57,8 +56,6 @@ def test_list_signals_returns_latest_snapshot(tmp_path, monkeypatch):
     assert activated_codes == {
         "FINANCIAL_STRESS",
         "INVERTED_CURVE",
-        "MACRO_CRISIS_VOTES",
-        "MACRO_SYSTEM_LOCKED",
         "SP500_CONFIRMED_DEATH_CROSS",
         "SP500_DEATH_CROSS_ACTIVE",
     }

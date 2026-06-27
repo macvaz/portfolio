@@ -761,13 +761,58 @@ button:disabled {
 }
 
 .signal-table {
-  min-width: 720px;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 800px;
+}
+
+.table-scroll--signals {
+  --delete-tooltip-gutter: 0;
+  margin-left: 0;
+  padding-left: 0;
+  width: 100%;
+}
+
+.signal-table col.col-signal-code {
+  width: 16rem;
+}
+
+.signal-table col.col-signal-value,
+.signal-table col.col-signal-threshold {
+  width: 6.5rem;
+}
+
+.signal-table .col-name {
+  min-width: 0;
+  max-width: none;
 }
 
 .signal-table .col-description {
-  min-width: 280px;
-  max-width: 520px;
+  min-width: 0;
+  max-width: none;
   white-space: normal;
+}
+
+.signal-table th,
+.signal-table td {
+  vertical-align: top;
+  padding: 0.2rem 1.25rem;
+}
+
+.signal-table th.col-name,
+.signal-table td.col-name {
+  padding-left: 0;
+  padding-right: 1.75rem;
+}
+
+.signal-table th.col-description,
+.signal-table td.col-description {
+  padding-right: 2rem;
+}
+
+.signal-table th:not(.col-name):not(.col-description),
+.signal-table td:not(.col-name):not(.col-description) {
+  padding-left: 1rem;
 }
 
 @media (max-width: 768px) {

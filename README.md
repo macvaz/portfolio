@@ -122,15 +122,14 @@ The data job downloads macroeconomic series from FRED, aligns them to S&P 500 tr
 | Indicator | Input series | Alert / output |
 |-----------|--------------|----------------|
 | Inverted curve | 10Y–3M yield spread (`T10Y3M`) | `Alert_Inverted_Curve` when spread < 0 |
-| Sahm rule | Unemployment rate (`UNRATE`) | `Sahm_Value` and `Alert_Sahm` (informational) |
-| Financial stress | STL Financial Stress Index (`STLFSI4`) | `Alert_Financial_Stress` when index ≥ 1.0 |
-| Crisis votes | Selected alerts above | `Macro_Crisis_Votes` and `MACRO_SYSTEM_LOCKED` when ≥ 2 votes |
+| Sahm rule | FRED real-time indicator (`SAHMREALTIME`) | `SAHM_RULE` when indicator ≥ 0.5 pp |
+| Financial stress | STL Financial Stress Index (`STLFSI4`) | `FINANCIAL_STRESS` when index ≥ 1.0 |
 
-The Sahm rule is tracked but does not count toward crisis votes. Only inverted-curve and financial-stress alerts vote.
+The Sahm rule is tracked as an informational alert and does not gate other signals.
 
 **Files**
 
-- `macro_constants.py` — column names and `MACRO_VOTE_ALERTS` (single source of truth for string identifiers).
+- `macro_constants.py` — column names for macro and market signals.
 - `macro_signals.py` — one function per indicator; each takes a DataFrame and returns it with new columns via `.assign()`.
 - `job.py` — wires FRED series IDs to column names and lists the macro functions to run.
 
@@ -139,7 +138,7 @@ The Sahm rule is tracked but does not count toward crisis votes. Only inverted-c
 1. Add the column name(s) to `macro_constants.py`.
 2. If needed, add the FRED series to `FRED_SERIES` in `job.py`.
 3. Implement a function in `macro_signals.py` (e.g. `def my_signal(df): return df.assign(...)`).
-4. Append the function to `MACRO_SIGNALS` in `job.py`. To include it in crisis voting, add its alert column to `MACRO_VOTE_ALERTS` in `macro_constants.py`.
+4. Append the function to `MACRO_SIGNALS` in `job.py`.
 
 When the job runs, the latest macro and market signals are printed to the console.
 

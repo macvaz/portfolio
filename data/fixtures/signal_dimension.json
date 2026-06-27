@@ -64,33 +64,25 @@
     "comparison_code": "Financial_Stress_Index"
   },
   {
+    "code": "Sahm_Rule_Indicator",
+    "series_id": "SAHMREALTIME",
+    "description": "Real-time Sahm Rule recession indicator (FRED)",
+    "threshold": null,
+    "kind": "series",
+    "comparison_code": null
+  },
+  {
     "code": "SAHM_RULE",
     "series_id": null,
-    "description": "3-month average unemployment minus 12-month low (percentage points)",
+    "description": "Sahm Rule recession signal (≥0.5 percentage points)",
     "threshold": 0.5,
     "kind": "alert",
-    "comparison_code": "SAHM_RULE"
-  },
-  {
-    "code": "MACRO_CRISIS_VOTES",
-    "series_id": null,
-    "description": "Number of active macro crisis vote alerts (inverted curve and financial stress)",
-    "threshold": 2.0,
-    "kind": "alert",
-    "comparison_code": "MACRO_CRISIS_VOTES"
-  },
-  {
-    "code": "MACRO_SYSTEM_LOCKED",
-    "series_id": null,
-    "description": "Macro system locked when crisis vote count reaches the threshold",
-    "threshold": 2.0,
-    "kind": "alert",
-    "comparison_code": "MACRO_CRISIS_VOTES"
+    "comparison_code": "Sahm_Rule_Indicator"
   },
   {
     "code": "SP500_DEATH_CROSS_ACTIVE",
     "series_id": null,
-    "description": "S&P 500 50-day SMA is below the 200-day SMA",
+    "description": "50-day SMA is below the 200-day SMA (ratio of SMA50/SMA200 < 1)",
     "threshold": 1.0,
     "kind": "alert",
     "comparison_code": "SP500_SMA_RATIO"
@@ -98,7 +90,7 @@
   {
     "code": "SP500_CONFIRMED_DEATH_CROSS",
     "series_id": null,
-    "description": "S&P 500 death cross confirmed: 50-day SMA at least 5% below the 200-day SMA",
+    "description": "Death cross confirmed: SMA50/SMA200 ≤ 0.95 (at least 5% below)",
     "threshold": 0.95,
     "kind": "alert",
     "comparison_code": "SP500_SMA_RATIO"

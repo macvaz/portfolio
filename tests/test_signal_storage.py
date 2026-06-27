@@ -9,16 +9,18 @@ from portfolio.common.macro_constants import (
     FINANCIAL_STRESS,
     FINANCIAL_STRESS_INDEX,
     INVERTED_CURVE,
-    MACRO_CRISIS_VOTES,
-    MACRO_SYSTEM_LOCKED,
-    SAHM_VALUE,
+    SAHM_RULE_INDICATOR,
     SP500_CONFIRMED_DEATH_CROSS,
     SP500_DEATH_CROSS_ACTIVE,
     SP500_SMA_RATIO,
     YIELD_SPREAD_10Y3M,
 )
 from portfolio.common.series import latest_series_date, save_series_csv
-from portfolio.common.signal_storage import extract_signal_values, persist_latest_signals
+from portfolio.common.signal_storage import (
+    _propagate_alert_values,
+    extract_signal_values,
+    persist_latest_signals,
+)
 
 
 def test_latest_series_date_uses_last_row_in_file(tmp_path):
@@ -80,10 +82,8 @@ def test_persist_latest_signals_uses_series_file_date(tmp_path):
             "SP500": [4800.0],
             SP500_SMA_RATIO: [1.0],
             INVERTED_CURVE: [False],
-            SAHM_VALUE: [0.32],
+            SAHM_RULE_INDICATOR: [0.32],
             FINANCIAL_STRESS: [False],
-            MACRO_CRISIS_VOTES: [1],
-            MACRO_SYSTEM_LOCKED: [False],
             SP500_DEATH_CROSS_ACTIVE: [False],
             SP500_CONFIRMED_DEATH_CROSS: [False],
         },
@@ -104,15 +104,20 @@ def test_persist_latest_signals_uses_series_file_date(tmp_path):
             for signal in session.exec(select(Signal)).all()
         }
 
+    assert stored["Sahm_Rule_Indicator"] == 0.32
     assert stored["SAHM_RULE"] == 0.32
     assert stored["Unemployment_Rate"] == 3.8
     assert stored["INVERTED_CURVE"] == 0.0
-    assert stored["MACRO_CRISIS_VOTES"] == 1.0
-    assert stored["MACRO_SYSTEM_LOCKED"] == 0.0
+
+
+def test_propagate_alert_values_copies_comparison_metric():
+    values = _propagate_alert_values({"Sahm_Rule_Indicator": 0.32})
+
+    assert values == {"Sahm_Rule_Indicator": 0.32, "SAHM_RULE": 0.32}
 
 
 def test_extract_signal_values_skips_missing_columns():
-    row = pd.Series({SAHM_VALUE: 0.25})
-    values = extract_signal_values(row, ["SAHM_RULE", "INVERTED_CURVE"])
+    row = pd.Series({SAHM_RULE_INDICATOR: 0.25})
+    values = extract_signal_values(row, ["Sahm_Rule_Indicator", "INVERTED_CURVE"])
 
-    assert values == {"SAHM_RULE": 0.25}
+    assert values == {"Sahm_Rule_Indicator": 0.25}

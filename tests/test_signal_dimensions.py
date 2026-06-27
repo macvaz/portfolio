@@ -15,11 +15,10 @@ def test_signal_dimension_fixture_matches_hardcoded_thresholds():
 
     assert rows["Yield_Spread_10Y3M"]["threshold"] == 0.0
     assert rows["SAHM_RULE"]["threshold"] == 0.5
+    assert rows["Sahm_Rule_Indicator"]["series_id"] == "SAHMREALTIME"
     assert rows["Financial_Stress_Index"]["threshold"] == 1.0
     assert rows["INVERTED_CURVE"]["threshold"] == 0.0
     assert rows["FINANCIAL_STRESS"]["threshold"] == 1.0
-    assert rows["MACRO_CRISIS_VOTES"]["threshold"] == 2.0
-    assert rows["MACRO_SYSTEM_LOCKED"]["threshold"] == 2.0
     assert rows["Unemployment_Rate"]["series_id"] == "UNRATE"
     assert rows["Yield_Spread_10Y3M"]["series_id"] == "T10Y3M"
     assert rows["Unemployment_Rate"]["kind"] == "series"
