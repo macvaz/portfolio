@@ -779,17 +779,17 @@ button:disabled {
   font-weight: 600;
 }
 
-.signal-table {
+.alert-table {
   table-layout: fixed;
   width: 100%;
   min-width: 800px;
 }
 
-.table-scroll--signals {
+.table-scroll--alerts {
   --delete-tooltip-gutter: 0;
-  --signal-col-code: 16rem;
-  --signal-col-value: 6.5rem;
-  --signal-col-threshold: 6.5rem;
+  --alert-col-code: 16rem;
+  --alert-col-value: 6.5rem;
+  --alert-col-threshold: 6.5rem;
   margin-left: 0;
   padding-left: 0;
   width: 100%;
@@ -822,7 +822,48 @@ button:disabled {
   font-variant-numeric: tabular-nums;
 }
 
-.signal-table td.col-value {
+.alert-table--history {
+  min-width: 1100px;
+}
+
+.alert-table .col-month {
+  width: 6.5rem;
+  white-space: nowrap;
+  font-weight: 700;
+  text-align: left;
+  padding-left: 0;
+  padding-right: 1.25rem;
+}
+
+.alert-table th.col-month,
+.alert-table td.col-month {
+  padding-left: 0;
+}
+
+.alert-table .col-alert-active-count {
+  width: 4.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.alert-table--history tbody tr:not(.summary-row):has(td:not(.col-alert-active-count):hover) td:not(.col-alert-active-count) {
+  background-color: rgba(255, 153, 0, 0.045);
+}
+
+.alert-table--history tbody tr:not(.summary-row) td:not(.col-alert-active-count):hover {
+  background-color: rgba(255, 153, 0, 0.085);
+}
+
+.alert-table th.col-alert-history {
+  min-width: 8rem;
+  max-width: 14rem;
+  white-space: normal;
+  font-weight: 600;
+  color: inherit;
+  background: transparent;
+}
+
+.alert-table td.col-value {
   padding-left: 1rem;
 }
 
@@ -834,49 +875,59 @@ button:disabled {
   background: #4a7c59;
 }
 
-.signal-table col.col-signal-code {
-  width: var(--signal-col-code);
+.alert-name--moderate {
+  background: #e67e22;
 }
 
-.signal-table col.col-signal-value,
-.signal-table col.col-signal-threshold {
-  width: var(--signal-col-value);
+.alert-history-value--active {
+  color: #c0392b;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-.signal-table col.col-signal-threshold {
-  width: var(--signal-col-threshold);
+.alert-table col.col-alert-code {
+  width: var(--alert-col-code);
 }
 
-.signal-table .col-name {
+.alert-table col.col-alert-value,
+.alert-table col.col-alert-threshold {
+  width: var(--alert-col-value);
+}
+
+.alert-table col.col-alert-threshold {
+  width: var(--alert-col-threshold);
+}
+
+.alert-table .col-name {
   min-width: 0;
   max-width: none;
 }
 
-.signal-table .col-description {
+.alert-table .col-description {
   min-width: 0;
   max-width: none;
   white-space: normal;
 }
 
-.signal-table th,
-.signal-table td {
+.alert-table th,
+.alert-table td {
   vertical-align: top;
   padding: 0.2rem 1.25rem;
 }
 
-.signal-table th.col-name,
-.signal-table td.col-name {
+.alert-table th.col-name,
+.alert-table td.col-name {
   padding-left: 0;
   padding-right: 1.75rem;
 }
 
-.signal-table th.col-description,
-.signal-table td.col-description {
+.alert-table th.col-description,
+.alert-table td.col-description {
   padding-right: 2rem;
 }
 
-.signal-table th:not(.col-name):not(.col-description),
-.signal-table td:not(.col-name):not(.col-description) {
+.alert-table th:not(.col-name):not(.col-description):not(.col-month),
+.alert-table td:not(.col-name):not(.col-description):not(.col-month) {
   padding-left: 1rem;
 }
 

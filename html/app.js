@@ -116,7 +116,7 @@
     }
 
     if (activeTab === "tactical") {
-      await window.TacticalView.loadTacticalSignals();
+      await window.TacticalView.loadTacticalAlerts();
     }
   }
 
@@ -134,7 +134,7 @@
 
     if (tabName === "tactical") {
       showError("");
-      await window.TacticalView.loadTacticalSignals();
+      await window.TacticalView.loadTacticalAlerts();
       return;
     }
 

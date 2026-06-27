@@ -5,10 +5,10 @@ from pathlib import Path
 from sqlalchemy import func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
-from portfolio.api.models import Fund, Metric, Portfolio, Signal, SignalDimension, User
-from portfolio.common.signal_dimensions import (
-    insert_signal_dimensions_from_fixture,
-    sync_signal_catalog_from_fixture,
+from portfolio.api.models import Alert, AlertDescription, Fund, Metric, Portfolio, User
+from portfolio.common.alert_descriptions import (
+    insert_alert_descriptions_from_fixture,
+    sync_alert_catalog_from_fixture,
 )
 
 CANONICAL_DB_PATH = Path("data/portfolio.db")
@@ -270,12 +270,24 @@ def _migrate_signal_dimension_series_id(db_path: Path | None = None) -> None:
 
 
 SIGNAL_CODE_RENAMES = {
-    "Alert_Inverted_Curve": "INVERTED_CURVE",
-    "Alert_Financial_Stress": "FINANCIAL_STRESS",
-    "Sahm_Value": "SAHM_RULE",
-    "SAHM_VALUE": "SAHM_RULE",
-    "SP500_Death_Cross_Active": "SP500_DEATH_CROSS_ACTIVE",
-    "SP500_Confirmed_Death_Cross": "SP500_CONFIRMED_DEATH_CROSS",
+    "Alert_Inverted_Curve": "Yield_Spread_10Y3M",
+    "Alert_Financial_Stress": "Financial_Stress_Index",
+    "Sahm_Value": "Sahm_Rule_Indicator",
+    "SAHM_VALUE": "Sahm_Rule_Indicator",
+    "SAHM_RULE": "Sahm_Rule_Indicator",
+    "INVERTED_CURVE": "Yield_Spread_10Y3M",
+    "FINANCIAL_STRESS": "Financial_Stress_Index",
+    "HIGH_YIELD_SPREAD": "High_Yield_Spread",
+    "UNEMPLOYMENT_RATE": "Unemployment_Rate",
+    "UNEMPLOYMENT_HIGH": "Unemployment_Rate",
+    "REAL_RATES": "Real_Interest_Rates",
+    "REAL_YIELD_HIGH": "Real_Interest_Rates",
+    "Real_Yield_10Y": "Real_Interest_Rates",
+    "SP500_Death_Cross_Active": "SP500_Death_Cross",
+    "SP500_DEATH_CROSS_ACTIVE": "SP500_Death_Cross",
+    "SP500_Confirmed_Death_Cross": "SP500_Death_Cross",
+    "SP500_CONFIRMED_DEATH_CROSS": "SP500_Death_Cross",
+    "DEATH_CROSS": "SP500_Death_Cross",
 }
 
 
@@ -375,23 +387,112 @@ def _migrate_signal_dimension_comparison_code(db_path: Path | None = None) -> No
         connection.commit()
 
 
-def _migrate_sahm_rule_indicator_signals(db_path: Path | None = None) -> None:
+def _migrate_signal_dimension_unified(db_path: Path | None = None) -> None:
+    """Add ``source`` and ``operator`` to ``signal_dimension`` when upgrading."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "signal_dimension" not in tables:
+            return
+
+        columns = {
+            row[1]
+            for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
+        }
+        if "source" not in columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE signal_dimension "
+                    "ADD COLUMN source VARCHAR NOT NULL DEFAULT 'fred'"
+                )
+            )
+        if "operator" not in columns:
+            connection.execute(
+                text("ALTER TABLE signal_dimension ADD COLUMN operator VARCHAR")
+            )
+        connection.commit()
+
+
+def _migrate_alert_description_unified(db_path: Path | None = None) -> None:
+    """Add ``source`` and ``operator`` to ``alert_description`` when upgrading."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "alert_description" not in tables:
+            return
+
+        columns = {
+            row[1]
+            for row in connection.execute(text("PRAGMA table_info(alert_description)"))
+        }
+        if "source" not in columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE alert_description "
+                    "ADD COLUMN source VARCHAR NOT NULL DEFAULT 'fred'"
+                )
+            )
+        if "operator" not in columns:
+            connection.execute(
+                text("ALTER TABLE alert_description ADD COLUMN operator VARCHAR")
+            )
+        connection.commit()
+
+
+def _migrate_rename_signal_tables_to_alert(db_path: Path | None = None) -> None:
+    """Rename legacy ``signal`` tables to ``alert`` / ``alert_description``."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "signal_dimension" in tables and "alert_description" in tables:
+            connection.execute(text("DROP TABLE alert_description"))
+            connection.execute(
+                text("ALTER TABLE signal_dimension RENAME TO alert_description")
+            )
+        elif "signal_dimension" in tables:
+            connection.execute(
+                text("ALTER TABLE signal_dimension RENAME TO alert_description")
+            )
+        if "signal" in tables and "alert" in tables:
+            connection.execute(text("DROP TABLE alert"))
+            connection.execute(text("ALTER TABLE signal RENAME TO alert"))
+        elif "signal" in tables:
+            connection.execute(text("ALTER TABLE signal RENAME TO alert"))
+        connection.commit()
+
+
+def _migrate_sahm_rule_indicator_alerts(db_path: Path | None = None) -> None:
     """Copy legacy SAHM_RULE readings into ``Sahm_Rule_Indicator`` when missing."""
     with get_session(db_path) as session:
         legacy_rows = session.exec(
-            select(Signal).where(Signal.code == "SAHM_RULE")
+            select(Alert).where(Alert.code == "SAHM_RULE")
         ).all()
         for legacy in legacy_rows:
             existing = session.exec(
-                select(Signal).where(
-                    Signal.code == "Sahm_Rule_Indicator",
-                    Signal.date == legacy.date,
+                select(Alert).where(
+                    Alert.code == "Sahm_Rule_Indicator",
+                    Alert.date == legacy.date,
                 )
             ).first()
             if existing is not None:
                 continue
             session.add(
-                Signal(
+                Alert(
                     code="Sahm_Rule_Indicator",
                     date=legacy.date,
                     value=legacy.value,
@@ -400,20 +501,20 @@ def _migrate_sahm_rule_indicator_signals(db_path: Path | None = None) -> None:
         session.commit()
 
 
-def reset_signal_tables_from_fixture(
+def reset_alert_tables_from_fixture(
     db_path: Path | None = None,
     fixture_path: Path | None = None,
 ) -> None:
-    """Clear signal data and reload ``signal_dimension`` from the JSON fixture."""
+    """Clear alert data and reload ``alert_description`` from the JSON fixture."""
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
     SQLModel.metadata.create_all(engine)
 
     with get_session(db_path) as session:
-        session.exec(delete(Signal))
-        session.exec(delete(SignalDimension))
+        session.exec(delete(Alert))
+        session.exec(delete(AlertDescription))
         session.commit()
-        insert_signal_dimensions_from_fixture(session, fixture_path)
+        insert_alert_descriptions_from_fixture(session, fixture_path)
         session.commit()
 
 
@@ -431,10 +532,13 @@ def init_db(db_path: Path | None = None) -> None:
     _migrate_signal_dimension_series_id(db_path)
     _migrate_signal_alert_codes(db_path)
     _migrate_signal_dimension_comparison_code(db_path)
+    _migrate_signal_dimension_unified(db_path)
+    _migrate_rename_signal_tables_to_alert(db_path)
+    _migrate_alert_description_unified(db_path)
     with get_session(db_path) as session:
-        sync_signal_catalog_from_fixture(session)
+        sync_alert_catalog_from_fixture(session)
         session.commit()
-    _migrate_sahm_rule_indicator_signals(db_path)
+    _migrate_sahm_rule_indicator_alerts(db_path)
 
 
 def create_user(name: str, db_path: Path | None = None) -> User:
@@ -609,22 +713,22 @@ def save_fund_metrics(
         session.commit()
 
 
-def upsert_signals(
-    signals: dict[str, float],
+def upsert_alerts(
+    alerts: dict[str, float],
     observation_date: datetime.date,
     db_path: Path | None = None,
 ) -> None:
     with get_session(db_path) as session:
-        for code, value in signals.items():
+        for code, value in alerts.items():
             existing = session.exec(
-                select(Signal).where(
-                    Signal.code == code,
-                    Signal.date == observation_date,
+                select(Alert).where(
+                    Alert.code == code,
+                    Alert.date == observation_date,
                 )
             ).first()
             if existing is None:
                 session.add(
-                    Signal(code=code, date=observation_date, value=value)
+                    Alert(code=code, date=observation_date, value=value)
                 )
             else:
                 existing.value = value
@@ -632,70 +736,75 @@ def upsert_signals(
         session.commit()
 
 
-from portfolio.common.signal_dimensions import is_alert_active
+from portfolio.common.alert_descriptions import is_alert_active
 
 
-def get_latest_signals(db_path: Path | None = None) -> dict | None:
+def get_latest_alerts(db_path: Path | None = None) -> dict | None:
     init_db(db_path)
     with get_session(db_path) as session:
-        latest_date = session.exec(select(func.max(Signal.date))).one()
+        latest_date = session.exec(select(func.max(Alert.date))).one()
         if latest_date is None:
             return None
 
-        rows = session.exec(
-            select(Signal, SignalDimension)
-            .join(SignalDimension, Signal.code == SignalDimension.code)
-            .where(Signal.date == latest_date)
+        stored_alerts = session.exec(
+            select(Alert).where(Alert.date == latest_date)
         ).all()
+        descriptions = session.exec(select(AlertDescription)).all()
 
-    values_by_code = {signal.code: signal.value for signal, _dimension in rows}
+    values_by_code = {alert.code: alert.value for alert in stored_alerts}
     series: list[dict] = []
-    alerts_activated: list[dict] = []
-    alerts_deactivated: list[dict] = []
+    alerts: list[dict] = []
 
-    for signal, dimension in rows:
-        if dimension.kind == "series":
-            if dimension.series_id is None:
-                continue
+    for description in descriptions:
+        value = values_by_code.get(description.code)
+        if value is None:
+            continue
+
+        active = is_alert_active(
+            value, description.threshold, description.operator
+        )
+        identifier = description.series_id
+        source_url = (
+            f"https://fred.stlouisfed.org/series/{identifier}"
+            if identifier
+            else None
+        )
+
+        if description.source == "fred":
             series.append(
                 {
-                    "code": signal.code,
-                    "description": dimension.description,
-                    "threshold": dimension.threshold,
-                    "value": signal.value,
-                    "identifier": dimension.series_id,
-                    "source_url": (
-                        f"https://fred.stlouisfed.org/series/{dimension.series_id}"
-                    ),
+                    "code": description.code,
+                    "description": description.description,
+                    "value": value,
+                    "threshold": description.threshold,
+                    "active": active,
+                    "identifier": identifier,
+                    "source_url": source_url,
                 }
             )
-            continue
 
-        comparison_key = dimension.comparison_code or dimension.code
-        comparison_value = values_by_code.get(comparison_key)
-        if comparison_value is None:
-            continue
+        if active is not None:
+            alerts.append(
+                {
+                    "code": description.code,
+                    "description": description.description,
+                    "value": value,
+                    "threshold": description.threshold,
+                    "active": active,
+                    "identifier": identifier,
+                    "source_url": source_url,
+                }
+            )
 
-        item = {
-            "code": signal.code,
-            "description": dimension.description,
-            "threshold": dimension.threshold,
-            "value": comparison_value,
-        }
-        if is_alert_active(signal.code, comparison_value, dimension.threshold):
-            alerts_activated.append(item)
-        else:
-            alerts_deactivated.append(item)
-
-    series.sort(key=lambda item: item["identifier"])
-    alerts_activated.sort(key=lambda item: item["code"])
-    alerts_deactivated.sort(key=lambda item: item["code"])
+    series.sort(key=lambda item: item.get("identifier") or item["code"])
+    alerts.sort(
+        key=lambda item: (not item["active"], item.get("identifier") or item["code"])
+    )
 
     return {
         "date": latest_date.isoformat(),
         "series": series,
-        "alerts_activated": alerts_activated,
-        "alerts_deactivated": alerts_deactivated,
+        "alerts": alerts,
     }
 
 

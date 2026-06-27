@@ -42,22 +42,22 @@ class Portfolio(SQLModel, table=True):
     weighted_assets: float
 
 
-class SignalDimension(SQLModel, table=True):
-    __tablename__ = "signal_dimension"
+class AlertDescription(SQLModel, table=True):
+    __tablename__ = "alert_description"
 
     code: str = Field(primary_key=True)
     description: str
-    threshold: float | None = None
-    kind: str = Field(default="alert", index=True)
+    source: str = Field(default="fred", index=True)
     series_id: str | None = Field(default=None, index=True)
-    comparison_code: str | None = None
+    threshold: float | None = None
+    operator: str | None = None
 
 
-class Signal(SQLModel, table=True):
-    __tablename__ = "signal"
+class Alert(SQLModel, table=True):
+    __tablename__ = "alert"
     __table_args__ = (UniqueConstraint("code", "date"),)
 
     id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(foreign_key="signal_dimension.code", index=True)
+    code: str = Field(foreign_key="alert_description.code", index=True)
     date: datetime.date = Field(index=True)
     value: float

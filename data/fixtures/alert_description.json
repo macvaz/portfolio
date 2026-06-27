@@ -1,0 +1,66 @@
+[
+  {
+    "code": "Unemployment_Rate",
+    "description": "US unemployment rate",
+    "source": "fred",
+    "series_id": "UNRATE",
+    "threshold": 5.0,
+    "operator": "gte"
+  },
+  {
+    "code": "High_Yield_Spread",
+    "description": "ICE BofA US High Yield Index option-adjusted spread",
+    "source": "fred",
+    "series_id": "BAMLH0A0HYM2EY",
+    "threshold": 9.0,
+    "operator": "gte"
+  },
+  {
+    "code": "Financial_Stress_Index",
+    "description": "St. Louis Fed Financial Stress Index",
+    "source": "fred",
+    "series_id": "STLFSI4",
+    "threshold": 1.0,
+    "operator": "gte"
+  },
+  {
+    "code": "Yield_Spread_10Y3M",
+    "description": "10Y–3M Treasury yield spread (inverted when < 0)",
+    "source": "fred",
+    "series_id": "T10Y3M",
+    "threshold": 0.0,
+    "operator": "lt"
+  },
+  {
+    "code": "Real_Interest_Rates",
+    "description": "10-Year Treasury inflation-indexed security yield (TIPS real yield)",
+    "source": "fred",
+    "series_id": "DFII10",
+    "threshold": 2.0,
+    "operator": "gte"
+  },
+  {
+    "code": "Sahm_Rule_Indicator",
+    "description": "Real-time Sahm Rule recession indicator (FRED)",
+    "source": "fred",
+    "series_id": "SAHMREALTIME",
+    "threshold": 0.5,
+    "operator": "gte"
+  },
+  {
+    "code": "SP500",
+    "description": "S&P 500 index level",
+    "source": "fred",
+    "series_id": "SP500",
+    "threshold": null,
+    "operator": null
+  },
+  {
+    "code": "SP500_Death_Cross",
+    "description": "50-day SMA below 200-day SMA (SMA50/SMA200 ratio)",
+    "source": "computed",
+    "series_id": null,
+    "threshold": 1.0,
+    "operator": "lt"
+  }
+]

@@ -48,16 +48,17 @@ def test_migrate_signal_alert_codes_when_new_code_already_exists(tmp_path):
     connection = sqlite3.connect(db_path)
     dimensions = {
         row[0]
-        for row in connection.execute("SELECT code FROM signal_dimension").fetchall()
+        for row in connection.execute("SELECT code FROM alert_description").fetchall()
     }
-    signals = connection.execute(
-        "SELECT code, value FROM signal ORDER BY code"
+    alerts = connection.execute(
+        "SELECT code, value FROM alert ORDER BY code"
     ).fetchall()
     connection.close()
 
     assert "Alert_Inverted_Curve" not in dimensions
-    assert "INVERTED_CURVE" in dimensions
-    assert signals == [("INVERTED_CURVE", 0.0)]
+    assert "INVERTED_CURVE" not in dimensions
+    assert "Yield_Spread_10Y3M" in dimensions
+    assert alerts == [("Yield_Spread_10Y3M", 1.0)]
 
 
 def test_migrate_signal_alert_codes_renames_legacy_rows(tmp_path):
@@ -96,12 +97,12 @@ def test_migrate_signal_alert_codes_renames_legacy_rows(tmp_path):
 
     connection = sqlite3.connect(db_path)
     row = connection.execute(
-        "SELECT code FROM signal_dimension WHERE code = 'SAHM_RULE'"
+        "SELECT code FROM alert_description WHERE code = 'Sahm_Rule_Indicator'"
     ).fetchone()
-    signal = connection.execute(
-        "SELECT code FROM signal WHERE date = '2024-06-04'"
+    alert = connection.execute(
+        "SELECT code FROM alert WHERE date = '2024-06-04'"
     ).fetchone()
     connection.close()
 
-    assert row == ("SAHM_RULE",)
-    assert signal == ("SAHM_RULE",)
+    assert row == ("Sahm_Rule_Indicator",)
+    assert alert == ("Sahm_Rule_Indicator",)

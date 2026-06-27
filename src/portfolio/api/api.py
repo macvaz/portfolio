@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from portfolio.api.database import init_db
 from portfolio.api.services.portfolio.router import router as portfolio_router
-from portfolio.api.services.signals.router import router as signals_router
+from portfolio.api.services.alerts.router import router as alerts_router
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
 
@@ -28,7 +28,7 @@ def index() -> FileResponse:
 
 
 app.include_router(portfolio_router)
-app.include_router(signals_router)
+app.include_router(alerts_router)
 
 
 def main() -> None:

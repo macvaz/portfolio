@@ -3,26 +3,27 @@ import datetime
 from sqlmodel import select
 
 from portfolio.api.database import get_session, init_db
-from portfolio.api.models import Signal, SignalDimension
-from portfolio.common.signal_dimensions import load_signal_dimension_fixture
+from portfolio.api.models import Alert, AlertDescription
+from portfolio.common.alert_descriptions import load_alert_description_fixture
 
 
-def test_init_db_prunes_removed_signal_dimensions(tmp_path):
+def test_init_db_prunes_removed_alert_descriptions(tmp_path):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
 
     with get_session(db_path) as session:
         session.add(
-            SignalDimension(
+            AlertDescription(
                 code="MACRO_CRISIS_VOTES",
                 description="Legacy",
                 threshold=2.0,
-                kind="alert",
+                source="fred",
+                operator="gte",
             )
         )
         session.flush()
         session.add(
-            Signal(
+            Alert(
                 code="MACRO_CRISIS_VOTES",
                 date=datetime.date(2024, 6, 4),
                 value=0.0,
@@ -32,11 +33,11 @@ def test_init_db_prunes_removed_signal_dimensions(tmp_path):
 
     init_db(db_path)
 
-    fixture_codes = {row["code"] for row in load_signal_dimension_fixture()}
+    fixture_codes = {row["code"] for row in load_alert_description_fixture()}
     with get_session(db_path) as session:
-        dimensions = session.exec(select(SignalDimension)).all()
-        signals = session.exec(select(Signal)).all()
+        descriptions = session.exec(select(AlertDescription)).all()
+        alerts = session.exec(select(Alert)).all()
 
-    assert {dimension.code for dimension in dimensions} == fixture_codes
-    assert all(signal.code in fixture_codes for signal in signals)
-    assert "MACRO_CRISIS_VOTES" not in {dimension.code for dimension in dimensions}
+    assert {description.code for description in descriptions} == fixture_codes
+    assert all(alert.code in fixture_codes for alert in alerts)
+    assert "MACRO_CRISIS_VOTES" not in {description.code for description in descriptions}

@@ -3,24 +3,11 @@ import datetime
 import pandas as pd
 from sqlmodel import select
 
-from portfolio.api.database import get_session, init_db, upsert_signals
-from portfolio.api.models import Signal
-from portfolio.common.macro_constants import (
-    FINANCIAL_STRESS,
-    FINANCIAL_STRESS_INDEX,
-    INVERTED_CURVE,
-    SAHM_RULE_INDICATOR,
-    SP500_CONFIRMED_DEATH_CROSS,
-    SP500_DEATH_CROSS_ACTIVE,
-    SP500_SMA_RATIO,
-    YIELD_SPREAD_10Y3M,
-)
+from portfolio.api.database import get_session, init_db, upsert_alerts
+from portfolio.api.models import Alert
+from portfolio.common.alert_storage import extract_alert_values, persist_latest_alerts
+from portfolio.common.macro_constants import SP500_DEATH_CROSS, YIELD_SPREAD_10Y3M
 from portfolio.common.series import latest_series_date, save_series_csv
-from portfolio.common.signal_storage import (
-    _propagate_alert_values,
-    extract_signal_values,
-    persist_latest_signals,
-)
 
 
 def test_latest_series_date_uses_last_row_in_file(tmp_path):
@@ -34,34 +21,34 @@ def test_latest_series_date_uses_last_row_in_file(tmp_path):
     assert latest_series_date(series_dir) == datetime.date(2024, 6, 4)
 
 
-def test_upsert_signals_updates_existing_value(tmp_path):
+def test_upsert_alerts_updates_existing_value(tmp_path):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
     observation_date = datetime.date(2024, 6, 4)
 
-    upsert_signals(
-        {"SAHM_RULE": 0.32},
+    upsert_alerts(
+        {"Sahm_Rule_Indicator": 0.32},
         observation_date,
         db_path,
     )
-    upsert_signals(
-        {"SAHM_RULE": 0.41},
+    upsert_alerts(
+        {"Sahm_Rule_Indicator": 0.41},
         observation_date,
         db_path,
     )
 
     with get_session(db_path) as session:
         stored = session.exec(
-            select(Signal).where(
-                Signal.code == "SAHM_RULE",
-                Signal.date == observation_date,
+            select(Alert).where(
+                Alert.code == "Sahm_Rule_Indicator",
+                Alert.date == observation_date,
             )
         ).one()
 
     assert stored.value == 0.41
 
 
-def test_persist_latest_signals_uses_series_file_date(tmp_path):
+def test_persist_latest_alerts_uses_series_file_date(tmp_path):
     db_path = tmp_path / "portfolio.db"
     series_dir = tmp_path / "series"
     init_db(db_path)
@@ -79,18 +66,15 @@ def test_persist_latest_signals_uses_series_file_date(tmp_path):
             "High_Yield_Spread": [3.25],
             "Financial_Stress_Index": [0.4],
             YIELD_SPREAD_10Y3M: [0.12],
+            "Real_Interest_Rates": [1.8],
+            "Sahm_Rule_Indicator": [0.32],
             "SP500": [4800.0],
-            SP500_SMA_RATIO: [1.0],
-            INVERTED_CURVE: [False],
-            SAHM_RULE_INDICATOR: [0.32],
-            FINANCIAL_STRESS: [False],
-            SP500_DEATH_CROSS_ACTIVE: [False],
-            SP500_CONFIRMED_DEATH_CROSS: [False],
+            SP500_DEATH_CROSS: [1.02],
         },
         index=pd.to_datetime(["2024-06-04"]),
     )
 
-    observation_date = persist_latest_signals(
+    observation_date = persist_latest_alerts(
         market_df,
         series_dir=series_dir,
         db_path=db_path,
@@ -100,24 +84,17 @@ def test_persist_latest_signals_uses_series_file_date(tmp_path):
 
     with get_session(db_path) as session:
         stored = {
-            signal.code: signal.value
-            for signal in session.exec(select(Signal)).all()
+            alert.code: alert.value
+            for alert in session.exec(select(Alert)).all()
         }
 
     assert stored["Sahm_Rule_Indicator"] == 0.32
-    assert stored["SAHM_RULE"] == 0.32
     assert stored["Unemployment_Rate"] == 3.8
-    assert stored["INVERTED_CURVE"] == 0.0
+    assert stored[SP500_DEATH_CROSS] == 1.02
 
 
-def test_propagate_alert_values_copies_comparison_metric():
-    values = _propagate_alert_values({"Sahm_Rule_Indicator": 0.32})
-
-    assert values == {"Sahm_Rule_Indicator": 0.32, "SAHM_RULE": 0.32}
-
-
-def test_extract_signal_values_skips_missing_columns():
-    row = pd.Series({SAHM_RULE_INDICATOR: 0.25})
-    values = extract_signal_values(row, ["Sahm_Rule_Indicator", "INVERTED_CURVE"])
+def test_extract_alert_values_skips_missing_columns():
+    row = pd.Series({"Sahm_Rule_Indicator": 0.25})
+    values = extract_alert_values(row, ["Sahm_Rule_Indicator", SP500_DEATH_CROSS])
 
     assert values == {"Sahm_Rule_Indicator": 0.25}

@@ -3,92 +3,101 @@ import datetime
 from fastapi.testclient import TestClient
 
 from portfolio.api.api import app
-from portfolio.api.database import init_db, upsert_signals
-from portfolio.common.signal_dimensions import is_alert_active
+from portfolio.api.database import init_db, upsert_alerts
+from portfolio.common.alert_descriptions import is_alert_active
 
 
 def test_is_alert_active_uses_threshold_direction():
-    assert is_alert_active("INVERTED_CURVE", -0.05, 0.0) is True
-    assert is_alert_active("INVERTED_CURVE", 0.12, 0.0) is False
-    assert is_alert_active("FINANCIAL_STRESS", 1.2, 1.0) is True
-    assert is_alert_active("SAHM_RULE", 0.32, 0.5) is False
-    assert is_alert_active("SP500_DEATH_CROSS_ACTIVE", 0.98, 1.0) is True
-    assert is_alert_active("SP500_CONFIRMED_DEATH_CROSS", 0.94, 0.95) is True
+    assert is_alert_active(1.2, 1.0, "gte") is True
+    assert is_alert_active(0.8, 1.0, "gte") is False
+    assert is_alert_active(-0.05, 0.0, "lt") is True
+    assert is_alert_active(0.12, 0.0, "lt") is False
+    assert is_alert_active(0.98, 1.0, "lt") is True
+    assert is_alert_active(4800.0, None, None) is None
 
 
-def test_list_signals_returns_latest_snapshot(tmp_path, monkeypatch):
+def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 
     observation_date = datetime.date(2024, 6, 4)
-    upsert_signals(
+    upsert_alerts(
         {
             "Unemployment_Rate": 3.8,
             "High_Yield_Spread": 3.25,
             "Financial_Stress_Index": 1.2,
             "Yield_Spread_10Y3M": -0.05,
+            "Real_Interest_Rates": 2.1,
             "SP500": 4800.0,
-            "SP500_SMA_RATIO": 0.94,
+            "SP500_Death_Cross": 0.94,
             "Sahm_Rule_Indicator": 0.32,
-            "SAHM_RULE": 0.32,
-            "INVERTED_CURVE": 1.0,
-            "FINANCIAL_STRESS": 1.0,
-            "SP500_DEATH_CROSS_ACTIVE": 1.0,
-            "SP500_CONFIRMED_DEATH_CROSS": 1.0,
         },
         observation_date,
         db_path,
     )
 
     client = TestClient(app)
-    response = client.get("/api/signals")
+    response = client.get("/api/alerts")
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["date"] == "2024-06-04"
-    assert len(payload["series"]) == 6
+    assert "history" in payload
+    assert isinstance(payload["history"]["columns"], list)
+    assert isinstance(payload["history"]["rows"], list)
+    assert len(payload["series"]) == 7
+    assert len(payload["alerts"]) == 7
 
-    activated_codes = {item["code"] for item in payload["alerts_activated"]}
-    deactivated_codes = {item["code"] for item in payload["alerts_deactivated"]}
-
-    assert activated_codes == {
-        "FINANCIAL_STRESS",
-        "INVERTED_CURVE",
-        "SP500_CONFIRMED_DEATH_CROSS",
-        "SP500_DEATH_CROSS_ACTIVE",
+    series_codes = {item["code"] for item in payload["series"]}
+    assert series_codes == {
+        "Unemployment_Rate",
+        "High_Yield_Spread",
+        "Financial_Stress_Index",
+        "Yield_Spread_10Y3M",
+        "Real_Interest_Rates",
+        "Sahm_Rule_Indicator",
+        "SP500",
     }
-    assert deactivated_codes == {"SAHM_RULE"}
+    assert "SP500_Death_Cross" not in series_codes
 
-    inverted_curve = next(
-        item
-        for item in payload["alerts_activated"]
-        if item["code"] == "INVERTED_CURVE"
+    alerts_by_code = {item["code"]: item for item in payload["alerts"]}
+    assert alerts_by_code["SP500_Death_Cross"]["active"] is True
+    assert alerts_by_code["Yield_Spread_10Y3M"]["active"] is True
+    assert alerts_by_code["Unemployment_Rate"]["active"] is False
+
+    unemployment = next(
+        item for item in payload["series"] if item["code"] == "Unemployment_Rate"
     )
-    assert inverted_curve["value"] == -0.05
-    assert inverted_curve["threshold"] == 0.0
+    assert unemployment["threshold"] == 5.0
+    sp500 = next(item for item in payload["series"] if item["code"] == "SP500")
+    assert sp500["threshold"] is None
+    assert sp500["active"] is None
+    assert unemployment["active"] is False
 
-    sahm = next(
-        item for item in payload["alerts_deactivated"] if item["code"] == "SAHM_RULE"
-    )
-    assert sahm["value"] == 0.32
-    assert sahm["threshold"] == 0.5
+    active_codes = {item["code"] for item in payload["alerts"] if item["active"]}
+    assert active_codes == {
+        "SP500_Death_Cross",
+        "Financial_Stress_Index",
+        "Real_Interest_Rates",
+        "Yield_Spread_10Y3M",
+    }
 
 
-def test_list_signals_returns_empty_snapshot_when_no_data(tmp_path, monkeypatch):
+def test_list_alerts_returns_empty_snapshot_when_no_data(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 
     client = TestClient(app)
-    response = client.get("/api/signals")
+    response = client.get("/api/alerts")
 
     assert response.status_code == 200
-    assert response.json() == {
-        "date": None,
-        "series": [],
-        "alerts_activated": [],
-        "alerts_deactivated": [],
-    }
+    payload = response.json()
+    assert payload["date"] is None
+    assert payload["series"] == []
+    assert payload["alerts"] == []
+    assert "columns" in payload["history"]
+    assert "rows" in payload["history"]

@@ -243,14 +243,14 @@
             <p id="tactical-as-of" class="subtitle"></p>
 
             <section class="table-panel">
-              <h2 class="table-title">Federal Reserve Macro Series</h2>
-              <div class="table-scroll table-scroll--signals">
-                <table class="fund-table signal-table" id="signals-series-table">
+              <h2 class="table-title">Federal Reserve macro series</h2>
+              <div class="table-scroll table-scroll--alerts">
+                <table class="fund-table alert-table" id="alerts-series-table">
                   <colgroup>
-                    <col class="col-signal-code" />
-                    <col class="col-signal-description" />
-                    <col class="col-signal-value" />
-                    <col class="col-signal-threshold" />
+                    <col class="col-alert-code" />
+                    <col class="col-alert-description" />
+                    <col class="col-alert-value" />
+                    <col class="col-alert-threshold" />
                   </colgroup>
                   <thead>
                     <tr>
@@ -260,33 +260,24 @@
                       <th>Threshold</th>
                     </tr>
                   </thead>
-                  <tbody id="signals-series-body"></tbody>
+                  <tbody id="alerts-series-body"></tbody>
                 </table>
               </div>
             </section>
 
             <section class="table-panel">
               <h2 class="table-title">
-                Alerts
+                Tactical alerts
                 <span id="tactical-alerts-summary" class="alerts-summary"></span>
               </h2>
-              <div class="table-scroll table-scroll--signals">
-                <table class="fund-table signal-table" id="signals-alerts-table">
-                  <colgroup>
-                    <col class="col-signal-code" />
-                    <col class="col-signal-description" />
-                    <col class="col-signal-value" />
-                    <col class="col-signal-threshold" />
-                  </colgroup>
-                  <thead>
+              <div class="table-scroll table-scroll--alerts">
+                <table class="fund-table alert-table alert-table--history" id="alerts-status-table">
+                  <thead id="alerts-status-head">
                     <tr>
-                      <th class="col-name">Alert</th>
-                      <th class="col-name col-description">Description</th>
-                      <th>Value</th>
-                      <th>Threshold</th>
+                      <th class="col-month">Month</th>
                     </tr>
                   </thead>
-                  <tbody id="signals-alerts-body"></tbody>
+                  <tbody id="alerts-status-body"></tbody>
                 </table>
               </div>
             </section>
@@ -298,11 +289,11 @@
       <p id="error" class="error" hidden></p>
     </main>
 
-    <script src="/static/api.js?v=13"></script>
+    <script src="/static/api.js?v=14"></script>
     <script src="/static/portfolios.js?v=11"></script>
     <script src="/static/management.js?v=73"></script>
     <script src="/static/risk.js?v=6"></script>
-    <script src="/static/tactical.js?v=12"></script>
-    <script src="/static/app.js?v=38"></script>
+    <script src="/static/tactical.js?v=27"></script>
+    <script src="/static/app.js?v=39"></script>
   </body>
 </html>

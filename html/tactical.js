@@ -15,6 +15,15 @@
     messageEl.hidden = !message;
   }
 
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
   function formatThreshold(threshold) {
     if (threshold === null || threshold === undefined || !Number.isFinite(threshold)) {
       return "—";
@@ -42,49 +51,46 @@
     return value.toFixed(2);
   }
 
-  function renderSeriesIdentifier(signal) {
-    const identifier = signal.identifier || signal.code;
-    if (signal.source_url) {
-      return `<a href="${signal.source_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${identifier}</a>`;
+  function formatMonthLabel(month) {
+    if (!month) {
+      return "—";
+    }
+    const [year, monthNumber] = month.split("-").map(Number);
+    if (!year || !monthNumber) {
+      return month;
+    }
+    return new Date(year, monthNumber - 1, 1).toLocaleDateString(undefined, {
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  function renderSeriesIdentifier(series) {
+    const identifier = series.identifier || series.code;
+    if (series.source_url) {
+      return `<a href="${series.source_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${identifier}</a>`;
     }
     return identifier;
   }
 
-  function renderSeriesRow(signal) {
-    const identifier = signal.identifier || signal.code;
+  function renderSeriesValue(series) {
+    const identifier = series.identifier || series.code;
+    const formatted = formatSeriesValue(identifier, series.value);
+    if (series.active === null || series.active === undefined) {
+      return formatted;
+    }
+    return renderAlertBadge(formatted, series.active);
+  }
+
+  function renderSeriesRow(series) {
+    const identifier = series.identifier || series.code;
     return `
       <tr>
-        <td class="col-name">${renderSeriesIdentifier(signal)}</td>
-        <td class="col-name col-description">${signal.description}</td>
-        <td>${formatSeriesValue(identifier, signal.value)}</td>
-        <td>${formatThreshold(signal.threshold)}</td>
+        <td class="col-name">${renderSeriesIdentifier(series)}</td>
+        <td class="col-name col-description">${series.description}</td>
+        <td class="col-value">${renderSeriesValue(series)}</td>
+        <td>${formatThreshold(series.threshold)}</td>
       </tr>`;
-  }
-
-  function mergeAlerts(snapshot) {
-    const activated = (snapshot.alerts_activated || []).map((alert) => ({
-      ...alert,
-      active: true,
-    }));
-    const inactive = (snapshot.alerts_deactivated || []).map((alert) => ({
-      ...alert,
-      active: false,
-    }));
-    return [...activated, ...inactive].sort((left, right) => {
-      if (left.active !== right.active) {
-        return left.active ? -1 : 1;
-      }
-      return left.code.localeCompare(right.code);
-    });
-  }
-
-  const ALERT_DISPLAY_NAMES = {
-    SP500_DEATH_CROSS_ACTIVE: "SP500_DEATH_CROSS",
-    SP500_CONFIRMED_DEATH_CROSS: "SP500_DEATH_CROSS_C",
-  };
-
-  function formatAlertDisplayName(code) {
-    return ALERT_DISPLAY_NAMES[code] || code;
   }
 
   function renderAlertBadge(content, active) {
@@ -92,18 +98,70 @@
     return `<span class="alert-name alert-name--${statusClass}">${content}</span>`;
   }
 
-  function renderAlertName(alert) {
-    return renderAlertBadge(formatAlertDisplayName(alert.code), alert.active);
+  function renderAlertHistoryCell(cell, code) {
+    if (!Number.isFinite(cell.value)) {
+      return "—";
+    }
+    const formatted =
+      code === "SP500"
+        ? formatSeriesValue("SP500", cell.value)
+        : formatNumericValue(cell.value);
+    if (cell.active === null || cell.active === undefined) {
+      return formatted;
+    }
+    if (cell.active) {
+      return `<span class="alert-history-value--active">${formatted}</span>`;
+    }
+    return formatted;
   }
 
-  function renderAlertRow(alert) {
-    return `
+  function renderActiveCountLabel(count) {
+    let statusClass = "inactive";
+    if (count > 2) {
+      statusClass = "active";
+    } else if (count === 2) {
+      statusClass = "moderate";
+    }
+    return `<span class="alert-name alert-name--${statusClass}">${count}</span>`;
+  }
+
+  function renderAlertHistory(history) {
+    const columns = history?.columns || [];
+    const rows = history?.rows || [];
+    const thead = document.getElementById("alerts-status-head");
+    const tbody = document.getElementById("alerts-status-body");
+
+    const headerCells = columns
+      .map(
+        (column) =>
+          `<th class="col-alert-history" title="${escapeHtml(column.description)}">${escapeHtml(column.code)}</th>`,
+      )
+      .join("");
+
+    thead.innerHTML = `
       <tr>
-        <td class="col-name">${renderAlertName(alert)}</td>
-        <td class="col-name col-description">${alert.description}</td>
-        <td class="col-value">${renderAlertBadge(formatNumericValue(alert.value), alert.active)}</td>
-        <td>${formatThreshold(alert.threshold)}</td>
+        <th class="col-month">Month</th>
+        ${headerCells}
+        <th class="col-alert-active-count">Active</th>
       </tr>`;
+
+    tbody.innerHTML = rows
+      .map((row) => {
+        const valueCells = columns
+          .map((column, index) => {
+            const cell = (row.values || [])[index] || {};
+            return `<td class="col-value">${renderAlertHistoryCell(cell, column.code)}</td>`;
+          })
+          .join("");
+        const activeCount = row.active_count ?? 0;
+        return `
+          <tr>
+            <td class="col-month">${escapeHtml(formatMonthLabel(row.month))}</td>
+            ${valueCells}
+            <td class="col-alert-active-count">${renderActiveCountLabel(activeCount)}</td>
+          </tr>`;
+      })
+      .join("");
   }
 
   function renderTableBody(containerId, rows, renderRow) {
@@ -111,20 +169,22 @@
     tbody.innerHTML = rows.map((row) => renderRow(row)).join("");
   }
 
-  function renderSignals(snapshot) {
+  function renderAlerts(snapshot) {
     const asOf = document.getElementById("tactical-as-of");
     const summaryEl = document.getElementById("tactical-alerts-summary");
-    const alerts = mergeAlerts(snapshot);
+    const series = snapshot.series || [];
+    const alerts = snapshot.alerts || [];
+    const history = snapshot.history || { columns: [], rows: [] };
     const activeCount = alerts.filter((alert) => alert.active).length;
     const hasData =
       snapshot.date &&
-      ((snapshot.series && snapshot.series.length) || alerts.length);
+      (series.length > 0 || alerts.length > 0 || history.rows.length > 0);
 
     if (!hasData) {
       setTacticalContent(false);
       setTacticalMessage("No tactical alerts yet. Run the data job to compute them.");
-      renderTableBody("signals-series-body", [], renderSeriesRow);
-      renderTableBody("signals-alerts-body", [], renderAlertRow);
+      renderTableBody("alerts-series-body", [], renderSeriesRow);
+      renderAlertHistory({ columns: [], rows: [] });
       asOf.textContent = "";
       summaryEl.textContent = "";
       return;
@@ -135,17 +195,17 @@
     asOf.textContent = `Latest execution as of ${snapshot.date}`;
     summaryEl.textContent =
       alerts.length > 0 ? `— ${activeCount} of ${alerts.length} active` : "";
-    renderTableBody("signals-series-body", snapshot.series || [], renderSeriesRow);
-    renderTableBody("signals-alerts-body", alerts, renderAlertRow);
+    renderTableBody("alerts-series-body", series, renderSeriesRow);
+    renderAlertHistory(history);
   }
 
-  async function loadTacticalSignals() {
+  async function loadTacticalAlerts() {
     setTacticalLoading(true);
     setTacticalMessage("");
 
     try {
-      const snapshot = await api.fetchJson(api.SIGNALS_API);
-      renderSignals(snapshot);
+      const snapshot = await api.fetchJson(api.ALERTS_API);
+      renderAlerts(snapshot);
     } catch (error) {
       setTacticalContent(false);
       setTacticalMessage(error.message);
@@ -155,6 +215,7 @@
   }
 
   window.TacticalView = {
-    loadTacticalSignals,
+    loadTacticalAlerts,
+    loadTacticalSignals: loadTacticalAlerts,
   };
 })();
