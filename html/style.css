@@ -795,6 +795,22 @@ button:disabled {
   width: 100%;
 }
 
+.table-scroll--alerts-history {
+  max-height: min(65vh, 560px);
+  overflow-y: auto;
+}
+
+.table-scroll--alerts-history .alert-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-scroll--alerts-history .alert-table th {
+  background: #fcf9eb;
+  z-index: 2;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
 .alerts-summary {
   font-size: 0.9rem;
   font-weight: 500;
@@ -860,7 +876,6 @@ button:disabled {
   white-space: normal;
   font-weight: 600;
   color: inherit;
-  background: transparent;
 }
 
 .alert-table td.col-value {
