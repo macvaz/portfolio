@@ -9,6 +9,7 @@ class SeriesItem(BaseModel):
     active: bool | None = None
     identifier: str | None = None
     source_url: str | None = None
+    series_start: str | None = None
 
 
 class AlertItem(BaseModel):
@@ -30,11 +31,13 @@ class AlertHistoryRow(BaseModel):
     month: str
     values: list[AlertHistoryCell]
     active_count: int = 0
+    eligible_count: int = 0
 
 
 class AlertHistoryColumn(BaseModel):
     code: str
     description: str
+    series_start: str | None = None
 
 
 class AlertHistory(BaseModel):

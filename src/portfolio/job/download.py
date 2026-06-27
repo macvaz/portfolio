@@ -18,6 +18,9 @@ def download(
     db_path: Path = DEFAULT_DB_PATH,
     funds_dir: Path = DEFAULT_FUNDS_DIR,
     series_dir: Path = DEFAULT_SERIES_DIR,
+    *,
+    backtest: bool = False,
+    backtest_sp500_path: Path | None = None,
 ):
     print("Downloading FRED series...")
     market_df = compute_signals(
@@ -26,6 +29,8 @@ def download(
         start_date,
         end_date,
         series_dir=series_dir,
+        backtest=backtest,
+        backtest_sp500_path=backtest_sp500_path,
     )
     observation_date = persist_latest_alerts(
         market_df,

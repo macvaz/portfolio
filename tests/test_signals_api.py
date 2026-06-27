@@ -71,6 +71,7 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
         item for item in payload["series"] if item["code"] == "Unemployment_Rate"
     )
     assert unemployment["threshold"] == 5.0
+    assert unemployment["series_start"] == "1990-01-01"
     sp500 = next(item for item in payload["series"] if item["code"] == "SP500")
     assert sp500["threshold"] is None
     assert sp500["active"] is None

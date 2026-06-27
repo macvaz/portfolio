@@ -1,3 +1,4 @@
+import datetime
 import json
 from pathlib import Path
 
@@ -39,11 +40,16 @@ def sync_alert_catalog_from_fixture(
 def _description_from_row(row: dict) -> AlertDescription:
     threshold = row.get("threshold")
     operator = row.get("operator")
+    raw_series_start = row.get("series_start")
+    series_start = None
+    if raw_series_start:
+        series_start = datetime.date.fromisoformat(str(raw_series_start))
     return AlertDescription(
         code=str(row["code"]),
         description=str(row["description"]),
         source=str(row.get("source", "fred")),
         series_id=row.get("series_id"),
+        series_start=series_start,
         threshold=None if threshold is None else float(threshold),
         operator=None if operator is None else str(operator),
     )

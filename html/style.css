@@ -841,7 +841,7 @@ button:disabled {
 }
 
 .alert-table .col-alert-active-count {
-  width: 4.5rem;
+  width: 5.5rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
@@ -882,6 +882,15 @@ button:disabled {
 .alert-history-value--active {
   color: #c0392b;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.alert-table col.col-alert-start {
+  width: 6.5rem;
+}
+
+.alert-table .col-series-start {
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 

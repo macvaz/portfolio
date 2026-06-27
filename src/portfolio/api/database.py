@@ -446,6 +446,10 @@ def _migrate_alert_description_unified(db_path: Path | None = None) -> None:
             connection.execute(
                 text("ALTER TABLE alert_description ADD COLUMN operator VARCHAR")
             )
+        if "series_start" not in columns:
+            connection.execute(
+                text("ALTER TABLE alert_description ADD COLUMN series_start DATE")
+            )
         connection.commit()
 
 
@@ -766,11 +770,11 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
         identifier = description.series_id
         source_url = (
             f"https://fred.stlouisfed.org/series/{identifier}"
-            if identifier
+            if description.source == "fred" and identifier
             else None
         )
 
-        if description.source == "fred":
+        if description.source in {"fred", "yfinance"}:
             series.append(
                 {
                     "code": description.code,
@@ -780,6 +784,11 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
                     "active": active,
                     "identifier": identifier,
                     "source_url": source_url,
+                    "series_start": (
+                        description.series_start.isoformat()
+                        if description.series_start
+                        else None
+                    ),
                 }
             )
 

@@ -26,7 +26,7 @@
 
   function formatThreshold(threshold) {
     if (threshold === null || threshold === undefined || !Number.isFinite(threshold)) {
-      return "—";
+      return "-";
     }
     if (Number.isInteger(threshold)) {
       return String(threshold);
@@ -36,14 +36,14 @@
 
   function formatNumericValue(value) {
     if (!Number.isFinite(value)) {
-      return "—";
+      return "-";
     }
     return value.toFixed(2);
   }
 
   function formatSeriesValue(identifier, value) {
     if (!Number.isFinite(value)) {
-      return "—";
+      return "-";
     }
     if (identifier === "SP500") {
       return value.toFixed(0);
@@ -53,7 +53,7 @@
 
   function formatMonthLabel(month) {
     if (!month) {
-      return "—";
+      return "-";
     }
     const [year, monthNumber] = month.split("-").map(Number);
     if (!year || !monthNumber) {
@@ -73,22 +73,19 @@
     return identifier;
   }
 
-  function renderSeriesValue(series) {
-    const identifier = series.identifier || series.code;
-    const formatted = formatSeriesValue(identifier, series.value);
-    if (series.active === null || series.active === undefined) {
-      return formatted;
+  function formatSeriesStart(seriesStart) {
+    if (!seriesStart) {
+      return "-";
     }
-    return renderAlertBadge(formatted, series.active);
+    return seriesStart;
   }
 
   function renderSeriesRow(series) {
-    const identifier = series.identifier || series.code;
     return `
       <tr>
         <td class="col-name">${renderSeriesIdentifier(series)}</td>
         <td class="col-name col-description">${series.description}</td>
-        <td class="col-value">${renderSeriesValue(series)}</td>
+        <td class="col-series-start">${formatSeriesStart(series.series_start)}</td>
         <td>${formatThreshold(series.threshold)}</td>
       </tr>`;
   }
@@ -100,7 +97,7 @@
 
   function renderAlertHistoryCell(cell, code) {
     if (!Number.isFinite(cell.value)) {
-      return "—";
+      return "-";
     }
     const formatted =
       code === "SP500"
@@ -115,14 +112,18 @@
     return formatted;
   }
 
-  function renderActiveCountLabel(count) {
+  function renderActiveCountLabel(activeCount, eligibleCount) {
+    if (!eligibleCount) {
+      return "-";
+    }
+    const label = `${activeCount ?? 0} of ${eligibleCount}`;
     let statusClass = "inactive";
-    if (count > 2) {
+    if (activeCount > 2) {
       statusClass = "active";
-    } else if (count === 2) {
+    } else if (activeCount === 2) {
       statusClass = "moderate";
     }
-    return `<span class="alert-name alert-name--${statusClass}">${count}</span>`;
+    return `<span class="alert-name alert-name--${statusClass}">${label}</span>`;
   }
 
   function renderAlertHistory(history) {
@@ -132,10 +133,13 @@
     const tbody = document.getElementById("alerts-status-body");
 
     const headerCells = columns
-      .map(
-        (column) =>
-          `<th class="col-alert-history" title="${escapeHtml(column.description)}">${escapeHtml(column.code)}</th>`,
-      )
+      .map((column) => {
+        const titleParts = [column.description];
+        if (column.series_start) {
+          titleParts.push(`from ${column.series_start}`);
+        }
+        return `<th class="col-alert-history" title="${escapeHtml(titleParts.join(" · "))}">${escapeHtml(column.code)}</th>`;
+      })
       .join("");
 
     thead.innerHTML = `
@@ -154,11 +158,12 @@
           })
           .join("");
         const activeCount = row.active_count ?? 0;
+        const eligibleCount = row.eligible_count ?? 0;
         return `
           <tr>
             <td class="col-month">${escapeHtml(formatMonthLabel(row.month))}</td>
             ${valueCells}
-            <td class="col-alert-active-count">${renderActiveCountLabel(activeCount)}</td>
+            <td class="col-alert-active-count">${renderActiveCountLabel(activeCount, eligibleCount)}</td>
           </tr>`;
       })
       .join("");

@@ -4,6 +4,7 @@
     "description": "US unemployment rate",
     "source": "fred",
     "series_id": "UNRATE",
+    "series_start": "1990-01-01",
     "threshold": 5.0,
     "operator": "gte"
   },
@@ -12,6 +13,7 @@
     "description": "ICE BofA US High Yield Index option-adjusted spread",
     "source": "fred",
     "series_id": "BAMLH0A0HYM2EY",
+    "series_start": "2023-06-27",
     "threshold": 9.0,
     "operator": "gte"
   },
@@ -20,6 +22,7 @@
     "description": "St. Louis Fed Financial Stress Index",
     "source": "fred",
     "series_id": "STLFSI4",
+    "series_start": "1994-01-07",
     "threshold": 1.0,
     "operator": "gte"
   },
@@ -28,6 +31,7 @@
     "description": "10Y–3M Treasury yield spread (inverted when < 0)",
     "source": "fred",
     "series_id": "T10Y3M",
+    "series_start": "1990-01-02",
     "threshold": 0.0,
     "operator": "lt"
   },
@@ -36,6 +40,7 @@
     "description": "10-Year Treasury inflation-indexed security yield (TIPS real yield)",
     "source": "fred",
     "series_id": "DFII10",
+    "series_start": "2003-01-02",
     "threshold": 2.0,
     "operator": "gte"
   },
@@ -44,14 +49,16 @@
     "description": "Real-time Sahm Rule recession indicator (FRED)",
     "source": "fred",
     "series_id": "SAHMREALTIME",
+    "series_start": "1990-01-01",
     "threshold": 0.5,
     "operator": "gte"
   },
   {
     "code": "SP500",
     "description": "S&P 500 index level",
-    "source": "fred",
+    "source": "yfinance",
     "series_id": "SP500",
+    "series_start": "1970-01-02",
     "threshold": null,
     "operator": null
   },
@@ -60,6 +67,7 @@
     "description": "50-day SMA below 200-day SMA (SMA50/SMA200 ratio)",
     "source": "computed",
     "series_id": null,
+    "series_start": "1970-01-02",
     "threshold": 1.0,
     "operator": "lt"
   }

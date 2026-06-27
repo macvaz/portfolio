@@ -16,6 +16,28 @@ from portfolio.common.alert_descriptions import (
     load_alert_description_fixture,
 )
 from portfolio.datasources.fred import download_fred_data, init_client
+from portfolio.datasources.sp500 import (
+    download_sp500_from_yfinance,
+    load_backtest_sp500_csv,
+)
+
+
+def _load_sp500_series(
+    start_date: str,
+    end_date: str,
+    *,
+    backtest: bool,
+    backtest_sp500_path: Path | None,
+) -> pd.DataFrame:
+    if backtest:
+        print("Using backtest SP500 history from data/backtest/sp500.csv")
+        return load_backtest_sp500_csv(
+            backtest_sp500_path,
+            start_date=start_date,
+            end_date=end_date,
+        )
+    print("Downloading SP500 history from Yahoo Finance (^GSPC)")
+    return download_sp500_from_yfinance(start_date, end_date)
 
 
 def compute_signals(
@@ -24,9 +46,18 @@ def compute_signals(
     start_date: str,
     end_date: str,
     series_dir: Path | None = None,
+    *,
+    backtest: bool = False,
+    backtest_sp500_path: Path | None = None,
 ) -> pd.DataFrame:
     data_df = download_data(
-        fred_api_key, fred_series, start_date, end_date, series_dir=series_dir
+        fred_api_key,
+        fred_series,
+        start_date,
+        end_date,
+        series_dir=series_dir,
+        backtest=backtest,
+        backtest_sp500_path=backtest_sp500_path,
     )
     market_df = calculate_market_signals(data_df)
     print_current_signals(market_df)
@@ -39,6 +70,9 @@ def download_data(
     start_date: str,
     end_date: str,
     series_dir: Path | None = None,
+    *,
+    backtest: bool = False,
+    backtest_sp500_path: Path | None = None,
 ) -> pd.DataFrame:
     fred = init_client(fred_api_key)
     root = series_dir or DEFAULT_SERIES_DIR
@@ -53,19 +87,26 @@ def download_data(
         )
         macro_series_data.append(series_df)
 
-    sp500 = download_fred_data(fred, "SP500", "SP500", start_date, end_date)
+    sp500 = _load_sp500_series(
+        start_date,
+        end_date,
+        backtest=backtest,
+        backtest_sp500_path=backtest_sp500_path,
+    )
     save_series_csv("SP500", sp500, column_name="SP500", series_dir=root)
 
     df = pd.DataFrame(index=sp500.index)
     df = df.join(macro_series_data, how="left")
     df.ffill(inplace=True)
     df.bfill(inplace=True)
-    df["SP500"] = sp500
+    df["SP500"] = sp500["SP500"]
 
     return df
 
 
 def calculate_market_signals(df: pd.DataFrame) -> pd.DataFrame:
+    if "SP500" not in df.columns:
+        return df
     sma50 = df["SP500"].rolling(window=50, min_periods=1).mean()
     sma200 = df["SP500"].rolling(window=200, min_periods=1).mean()
     df[SP500_DEATH_CROSS] = sma50 / sma200
