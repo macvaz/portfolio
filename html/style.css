@@ -509,6 +509,12 @@ button:disabled {
   font-weight: 600;
 }
 
+.table-subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
 .table-scroll {
   --delete-tooltip-gutter: 1.75rem;
   overflow-x: auto;
@@ -609,12 +615,12 @@ button:disabled {
   pointer-events: none;
 }
 
-.fund-table tr.row-actions-visible .weight-cell-slot > .weight-display {
+.fund-table tr.row-weight-visible .weight-cell-slot > .weight-display {
   visibility: hidden;
   pointer-events: none;
 }
 
-.fund-table tr.row-actions-visible .weight-cell-slot > .weight-input {
+.fund-table tr.row-weight-visible .weight-cell-slot > .weight-input {
   visibility: visible;
   pointer-events: auto;
   border-color: #c8d0da;
@@ -675,7 +681,8 @@ button:disabled {
 
 .fund-name-wrap {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
   max-width: 100%;
 }
 
@@ -702,8 +709,7 @@ button:disabled {
   pointer-events: none;
 }
 
-.fund-table tr.row-actions-visible .fund-delete-popup,
-.fund-name-wrap:hover .fund-delete-popup,
+.fund-table tbody tr[data-isin] td.col-name:hover .fund-delete-popup,
 .fund-delete-popup:hover {
   display: block;
   pointer-events: auto;
@@ -752,6 +758,16 @@ button:disabled {
 
 .summary-row .weight-cell-slot > .weight-display {
   font-weight: 600;
+}
+
+.signal-table {
+  min-width: 720px;
+}
+
+.signal-table .col-description {
+  min-width: 280px;
+  max-width: 520px;
+  white-space: normal;
 }
 
 @media (max-width: 768px) {

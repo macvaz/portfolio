@@ -1,3 +1,5 @@
+import datetime
+
 from sqlmodel import Field, SQLModel, UniqueConstraint
 
 
@@ -38,3 +40,24 @@ class Portfolio(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", index=True)
     isin: str = Field(foreign_key="fund.isin", index=True)
     weighted_assets: float
+
+
+class SignalDimension(SQLModel, table=True):
+    __tablename__ = "signal_dimension"
+
+    code: str = Field(primary_key=True)
+    description: str
+    threshold: float | None = None
+    kind: str = Field(default="alert", index=True)
+    series_id: str | None = Field(default=None, index=True)
+    comparison_code: str | None = None
+
+
+class Signal(SQLModel, table=True):
+    __tablename__ = "signal"
+    __table_args__ = (UniqueConstraint("code", "date"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    code: str = Field(foreign_key="signal_dimension.code", index=True)
+    date: datetime.date = Field(index=True)
+    value: float

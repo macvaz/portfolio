@@ -4,6 +4,8 @@ from portfolio.api.database import DEFAULT_DB_PATH
 from portfolio.common.macro_signals import MacroSignalFn
 from portfolio.common.metrics import update_all_fund_metrics
 from portfolio.common.navs import DEFAULT_FUNDS_DIR, store_fund_navs_from_db
+from portfolio.common.series import DEFAULT_SERIES_DIR
+from portfolio.common.signal_storage import persist_latest_signals
 from portfolio.common.signals import compute_signals
 from portfolio.datasources.morningstar import import_isins
 
@@ -17,9 +19,24 @@ def download(
     currency: str = "EUR",
     db_path: Path = DEFAULT_DB_PATH,
     funds_dir: Path = DEFAULT_FUNDS_DIR,
+    series_dir: Path = DEFAULT_SERIES_DIR,
 ):
     print("Downloading FRED series...")
-    compute_signals(fred_api_key, fred_series, macro_signals, start_date, end_date)
+    market_df = compute_signals(
+        fred_api_key,
+        fred_series,
+        macro_signals,
+        start_date,
+        end_date,
+        series_dir=series_dir,
+    )
+    observation_date = persist_latest_signals(
+        market_df,
+        series_dir=series_dir,
+        db_path=db_path,
+    )
+    if observation_date is not None:
+        print(f"Stored tactical signals for {observation_date.isoformat()}.")
 
     print("\nDownloading fund NAVs from Morningstar...")
     store_fund_navs_from_db(

@@ -111,6 +111,11 @@
     if (activeTab === "risk") {
       window.RiskView.resetRiskAnalysis();
       await window.RiskView.loadRiskAnalysis({ force: true });
+      return;
+    }
+
+    if (activeTab === "tactical") {
+      await window.TacticalView.loadTacticalSignals();
     }
   }
 
@@ -128,6 +133,7 @@
 
     if (tabName === "tactical") {
       showError("");
+      await window.TacticalView.loadTacticalSignals();
       return;
     }
 

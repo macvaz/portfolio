@@ -1,10 +1,15 @@
 from collections.abc import Generator
+import datetime
 from pathlib import Path
 
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
-from portfolio.api.models import Fund, Metric, Portfolio, User
+from portfolio.api.models import Fund, Metric, Portfolio, Signal, SignalDimension, User
+from portfolio.common.signal_dimensions import (
+    insert_signal_dimensions_from_fixture,
+    seed_signal_dimensions,
+)
 
 CANONICAL_DB_PATH = Path("data/portfolio.db")
 DEFAULT_DB_PATH = CANONICAL_DB_PATH
@@ -184,6 +189,210 @@ def _migrate_user_is_default(db_path: Path | None = None) -> None:
             connection.commit()
 
 
+def _migrate_signal_dimension_metadata(db_path: Path | None = None) -> None:
+    """Add ``kind`` and nullable ``threshold`` to ``signal_dimension`` when upgrading."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "signal_dimension" not in tables:
+            return
+
+        columns = {
+            row[1]: row[3]
+            for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
+        }
+        if "kind" in columns and columns.get("threshold") == 0:
+            return
+
+        connection.execute(
+            text(
+                "CREATE TABLE signal_dimension_new ("
+                "code VARCHAR NOT NULL PRIMARY KEY, "
+                "description VARCHAR NOT NULL, "
+                "threshold REAL, "
+                "kind VARCHAR NOT NULL DEFAULT 'alert'"
+                ")"
+            )
+        )
+        connection.execute(
+            text(
+                "INSERT INTO signal_dimension_new (code, description, threshold, kind) "
+                "SELECT code, description, threshold, 'alert' FROM signal_dimension"
+            )
+        )
+        connection.execute(text("DROP TABLE signal_dimension"))
+        connection.execute(
+            text("ALTER TABLE signal_dimension_new RENAME TO signal_dimension")
+        )
+        connection.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_signal_dimension_kind "
+                "ON signal_dimension (kind)"
+            )
+        )
+        connection.commit()
+
+
+def _migrate_signal_dimension_series_id(db_path: Path | None = None) -> None:
+    """Add ``series_id`` to ``signal_dimension`` when upgrading an existing database."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "signal_dimension" not in tables:
+            return
+
+        columns = {
+            row[1] for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
+        }
+        if "series_id" in columns:
+            return
+
+        connection.execute(
+            text("ALTER TABLE signal_dimension ADD COLUMN series_id VARCHAR")
+        )
+        connection.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_signal_dimension_series_id "
+                "ON signal_dimension (series_id)"
+            )
+        )
+        connection.commit()
+
+
+SIGNAL_CODE_RENAMES = {
+    "Alert_Inverted_Curve": "INVERTED_CURVE",
+    "Alert_Financial_Stress": "FINANCIAL_STRESS",
+    "Sahm_Value": "SAHM_RULE",
+    "SAHM_VALUE": "SAHM_RULE",
+    "Macro_Crisis_Votes": "MACRO_CRISIS_VOTES",
+    "SP500_Death_Cross_Active": "SP500_DEATH_CROSS_ACTIVE",
+    "SP500_Confirmed_Death_Cross": "SP500_CONFIRMED_DEATH_CROSS",
+}
+
+
+def _migrate_signal_alert_codes(db_path: Path | None = None) -> None:
+    """Rename legacy alert codes to the uppercase convention without ``Alert_``."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "signal_dimension" not in tables:
+            return
+
+        connection.execute(text("PRAGMA foreign_keys = OFF"))
+        for old_code, new_code in SIGNAL_CODE_RENAMES.items():
+            old_exists = connection.execute(
+                text("SELECT 1 FROM signal_dimension WHERE code = :code"),
+                {"code": old_code},
+            ).fetchone()
+            if old_exists is None:
+                continue
+
+            new_exists = connection.execute(
+                text("SELECT 1 FROM signal_dimension WHERE code = :code"),
+                {"code": new_code},
+            ).fetchone()
+
+            if new_exists is not None:
+                old_signals = connection.execute(
+                    text("SELECT id, date FROM signal WHERE code = :code"),
+                    {"code": old_code},
+                ).fetchall()
+                for signal_id, signal_date in old_signals:
+                    duplicate = connection.execute(
+                        text(
+                            "SELECT 1 FROM signal "
+                            "WHERE code = :new_code AND date = :signal_date"
+                        ),
+                        {"new_code": new_code, "signal_date": signal_date},
+                    ).fetchone()
+                    if duplicate is not None:
+                        connection.execute(
+                            text("DELETE FROM signal WHERE id = :signal_id"),
+                            {"signal_id": signal_id},
+                        )
+                    else:
+                        connection.execute(
+                            text("UPDATE signal SET code = :new_code WHERE id = :id"),
+                            {"new_code": new_code, "id": signal_id},
+                        )
+                connection.execute(
+                    text("DELETE FROM signal_dimension WHERE code = :code"),
+                    {"code": old_code},
+                )
+                continue
+
+            connection.execute(
+                text("UPDATE signal SET code = :new_code WHERE code = :old_code"),
+                {"old_code": old_code, "new_code": new_code},
+            )
+            connection.execute(
+                text(
+                    "UPDATE signal_dimension SET code = :new_code "
+                    "WHERE code = :old_code"
+                ),
+                {"old_code": old_code, "new_code": new_code},
+            )
+        connection.execute(text("PRAGMA foreign_keys = ON"))
+        connection.commit()
+
+
+def _migrate_signal_dimension_comparison_code(db_path: Path | None = None) -> None:
+    """Add ``comparison_code`` to ``signal_dimension`` when upgrading."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "signal_dimension" not in tables:
+            return
+
+        columns = {
+            row[1] for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
+        }
+        if "comparison_code" in columns:
+            return
+
+        connection.execute(
+            text("ALTER TABLE signal_dimension ADD COLUMN comparison_code VARCHAR")
+        )
+        connection.commit()
+
+
+def reset_signal_tables_from_fixture(
+    db_path: Path | None = None,
+    fixture_path: Path | None = None,
+) -> None:
+    """Clear signal data and reload ``signal_dimension`` from the JSON fixture."""
+    path = _resolve_db_path(db_path)
+    engine = get_engine(path)
+    SQLModel.metadata.create_all(engine)
+
+    with get_session(db_path) as session:
+        session.exec(delete(Signal))
+        session.exec(delete(SignalDimension))
+        session.commit()
+        insert_signal_dimensions_from_fixture(session, fixture_path)
+        session.commit()
+
+
 def init_db(db_path: Path | None = None) -> None:
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
@@ -194,6 +403,13 @@ def init_db(db_path: Path | None = None) -> None:
     _migrate_drop_user_password(db_path)
     _migrate_user_email_to_name(db_path)
     _migrate_user_is_default(db_path)
+    _migrate_signal_dimension_metadata(db_path)
+    _migrate_signal_dimension_series_id(db_path)
+    _migrate_signal_alert_codes(db_path)
+    _migrate_signal_dimension_comparison_code(db_path)
+    with get_session(db_path) as session:
+        seed_signal_dimensions(session)
+        session.commit()
 
 
 def create_user(name: str, db_path: Path | None = None) -> User:
@@ -366,6 +582,96 @@ def save_fund_metrics(
             )
         )
         session.commit()
+
+
+def upsert_signals(
+    signals: dict[str, float],
+    observation_date: datetime.date,
+    db_path: Path | None = None,
+) -> None:
+    with get_session(db_path) as session:
+        for code, value in signals.items():
+            existing = session.exec(
+                select(Signal).where(
+                    Signal.code == code,
+                    Signal.date == observation_date,
+                )
+            ).first()
+            if existing is None:
+                session.add(
+                    Signal(code=code, date=observation_date, value=value)
+                )
+            else:
+                existing.value = value
+                session.add(existing)
+        session.commit()
+
+
+from portfolio.common.signal_dimensions import is_alert_active
+
+
+def get_latest_signals(db_path: Path | None = None) -> dict | None:
+    init_db(db_path)
+    with get_session(db_path) as session:
+        latest_date = session.exec(select(func.max(Signal.date))).one()
+        if latest_date is None:
+            return None
+
+        rows = session.exec(
+            select(Signal, SignalDimension)
+            .join(SignalDimension, Signal.code == SignalDimension.code)
+            .where(Signal.date == latest_date)
+        ).all()
+
+    values_by_code = {signal.code: signal.value for signal, _dimension in rows}
+    series: list[dict] = []
+    alerts_activated: list[dict] = []
+    alerts_deactivated: list[dict] = []
+
+    for signal, dimension in rows:
+        if dimension.kind == "series":
+            if dimension.series_id is None:
+                continue
+            series.append(
+                {
+                    "code": signal.code,
+                    "description": dimension.description,
+                    "threshold": dimension.threshold,
+                    "value": signal.value,
+                    "identifier": dimension.series_id,
+                    "source_url": (
+                        f"https://fred.stlouisfed.org/series/{dimension.series_id}"
+                    ),
+                }
+            )
+            continue
+
+        comparison_key = dimension.comparison_code or dimension.code
+        comparison_value = values_by_code.get(comparison_key)
+        if comparison_value is None:
+            continue
+
+        item = {
+            "code": signal.code,
+            "description": dimension.description,
+            "threshold": dimension.threshold,
+            "value": comparison_value,
+        }
+        if is_alert_active(signal.code, comparison_value, dimension.threshold):
+            alerts_activated.append(item)
+        else:
+            alerts_deactivated.append(item)
+
+    series.sort(key=lambda item: item["identifier"])
+    alerts_activated.sort(key=lambda item: item["code"])
+    alerts_deactivated.sort(key=lambda item: item["code"])
+
+    return {
+        "date": latest_date.isoformat(),
+        "series": series,
+        "alerts_activated": alerts_activated,
+        "alerts_deactivated": alerts_deactivated,
+    }
 
 
 def delete_fund(isin: str, db_path: Path | None = None) -> bool:

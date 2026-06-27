@@ -335,33 +335,47 @@
 
   function bindRowActions() {
     document.querySelectorAll("tr[data-isin]").forEach((row) => {
-      const nameCell = row.querySelector(".col-name");
       const weightCell = row.querySelector(".col-weight-editable");
       const weightInput = row.querySelector(".weight-input");
 
-      function showActions(focusWeight = false) {
-        row.classList.add("row-actions-visible");
+      function showWeightEdit(focusWeight = false) {
+        row.classList.add("row-weight-visible");
         if (focusWeight && weightInput && document.activeElement !== weightInput) {
           weightInput.focus({ preventScroll: true });
           weightInput.select();
         }
       }
 
-      function hideActions() {
-        row.classList.remove("row-actions-visible");
+      function hideWeightEdit() {
+        row.classList.remove("row-weight-visible");
       }
 
-      nameCell?.addEventListener("mouseenter", () => showActions(true));
-      weightCell?.addEventListener("mouseenter", () => showActions(true));
+      weightCell?.addEventListener("mouseenter", () => showWeightEdit(true));
+
+      weightCell?.addEventListener("mouseleave", (event) => {
+        if (weightCell.contains(event.relatedTarget)) {
+          return;
+        }
+        if (document.activeElement === weightInput) {
+          return;
+        }
+        hideWeightEdit();
+      });
 
       row.addEventListener("mouseleave", (event) => {
         if (!row.contains(event.relatedTarget)) {
           weightInput?.blur();
-          hideActions();
+          hideWeightEdit();
         }
       });
 
-      weightInput?.addEventListener("focus", () => showActions(false));
+      weightInput?.addEventListener("focus", () => showWeightEdit(false));
+
+      weightInput?.addEventListener("blur", () => {
+        if (!weightCell?.matches(":hover")) {
+          hideWeightEdit();
+        }
+      });
     });
   }
 

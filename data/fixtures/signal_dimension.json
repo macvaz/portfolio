@@ -1,0 +1,106 @@
+[
+  {
+    "code": "Unemployment_Rate",
+    "series_id": "UNRATE",
+    "description": "US unemployment rate",
+    "threshold": null,
+    "kind": "series",
+    "comparison_code": null
+  },
+  {
+    "code": "High_Yield_Spread",
+    "series_id": "BAMLH0A0HYM2EY",
+    "description": "ICE BofA US High Yield Index option-adjusted spread",
+    "threshold": null,
+    "kind": "series",
+    "comparison_code": null
+  },
+  {
+    "code": "Financial_Stress_Index",
+    "series_id": "STLFSI4",
+    "description": "St. Louis Fed Financial Stress Index",
+    "threshold": 1.0,
+    "kind": "series",
+    "comparison_code": null
+  },
+  {
+    "code": "Yield_Spread_10Y3M",
+    "series_id": "T10Y3M",
+    "description": "10Y–3M Treasury yield spread",
+    "threshold": 0.0,
+    "kind": "series",
+    "comparison_code": null
+  },
+  {
+    "code": "SP500",
+    "series_id": "SP500",
+    "description": "S&P 500 index level",
+    "threshold": null,
+    "kind": "series",
+    "comparison_code": null
+  },
+  {
+    "code": "SP500_SMA_RATIO",
+    "series_id": null,
+    "description": "S&P 500 50-day SMA divided by 200-day SMA",
+    "threshold": null,
+    "kind": "series",
+    "comparison_code": null
+  },
+  {
+    "code": "INVERTED_CURVE",
+    "series_id": null,
+    "description": "10Y–3M Treasury yield spread is inverted (recession indicator)",
+    "threshold": 0.0,
+    "kind": "alert",
+    "comparison_code": "Yield_Spread_10Y3M"
+  },
+  {
+    "code": "FINANCIAL_STRESS",
+    "series_id": null,
+    "description": "St. Louis Fed Financial Stress Index is elevated",
+    "threshold": 1.0,
+    "kind": "alert",
+    "comparison_code": "Financial_Stress_Index"
+  },
+  {
+    "code": "SAHM_RULE",
+    "series_id": null,
+    "description": "3-month average unemployment minus 12-month low (percentage points)",
+    "threshold": 0.5,
+    "kind": "alert",
+    "comparison_code": "SAHM_RULE"
+  },
+  {
+    "code": "MACRO_CRISIS_VOTES",
+    "series_id": null,
+    "description": "Number of active macro crisis vote alerts (inverted curve and financial stress)",
+    "threshold": 2.0,
+    "kind": "alert",
+    "comparison_code": "MACRO_CRISIS_VOTES"
+  },
+  {
+    "code": "MACRO_SYSTEM_LOCKED",
+    "series_id": null,
+    "description": "Macro system locked when crisis vote count reaches the threshold",
+    "threshold": 2.0,
+    "kind": "alert",
+    "comparison_code": "MACRO_CRISIS_VOTES"
+  },
+  {
+    "code": "SP500_DEATH_CROSS_ACTIVE",
+    "series_id": null,
+    "description": "S&P 500 50-day SMA is below the 200-day SMA",
+    "threshold": 1.0,
+    "kind": "alert",
+    "comparison_code": "SP500_SMA_RATIO"
+  },
+  {
+    "code": "SP500_CONFIRMED_DEATH_CROSS",
+    "series_id": null,
+    "description": "S&P 500 death cross confirmed: 50-day SMA at least 5% below the 200-day SMA",
+    "threshold": 0.95,
+    "kind": "alert",
+    "comparison_code": "SP500_SMA_RATIO"
+  }
+]

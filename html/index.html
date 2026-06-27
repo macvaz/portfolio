@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=86" />
+    <link rel="stylesheet" href="/static/style.css?v=90" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -226,16 +226,75 @@
           ></iframe>
         </div>
 
-        <div id="tactical-panel" class="app-panel" hidden></div>
+        <div id="tactical-panel" class="app-panel" hidden>
+          <div id="tactical-loading" class="management-loading">Loading tactical signals…</div>
+          <div id="tactical-content" hidden>
+            <h2 class="table-title">Tactical signals</h2>
+            <p id="tactical-as-of" class="subtitle"></p>
+
+            <section class="table-panel">
+              <h3 class="table-subtitle">Series</h3>
+              <div class="table-scroll">
+                <table class="fund-table signal-table" id="signals-series-table">
+                  <thead>
+                    <tr>
+                      <th class="col-name">FRED ID</th>
+                      <th class="col-name col-description">Description</th>
+                      <th>Value</th>
+                      <th>Threshold</th>
+                    </tr>
+                  </thead>
+                  <tbody id="signals-series-body"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="table-panel">
+              <h3 class="table-subtitle">Activated alerts</h3>
+              <div class="table-scroll">
+                <table class="fund-table signal-table" id="signals-alerts-activated-table">
+                  <thead>
+                    <tr>
+                      <th class="col-name">Alert</th>
+                      <th class="col-name col-description">Description</th>
+                      <th>Value</th>
+                      <th>Threshold</th>
+                    </tr>
+                  </thead>
+                  <tbody id="signals-alerts-activated-body"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="table-panel">
+              <h3 class="table-subtitle">Deactivated alerts</h3>
+              <div class="table-scroll">
+                <table class="fund-table signal-table" id="signals-alerts-deactivated-table">
+                  <thead>
+                    <tr>
+                      <th class="col-name">Alert</th>
+                      <th class="col-name col-description">Description</th>
+                      <th>Value</th>
+                      <th>Threshold</th>
+                    </tr>
+                  </thead>
+                  <tbody id="signals-alerts-deactivated-body"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+          <p id="tactical-message" class="risk-message" hidden></p>
+        </div>
       </section>
 
       <p id="error" class="error" hidden></p>
     </main>
 
-    <script src="/static/api.js?v=12"></script>
+    <script src="/static/api.js?v=13"></script>
     <script src="/static/portfolios.js?v=11"></script>
-    <script src="/static/management.js?v=72"></script>
+    <script src="/static/management.js?v=73"></script>
     <script src="/static/risk.js?v=6"></script>
-    <script src="/static/app.js?v=36"></script>
+    <script src="/static/tactical.js?v=7"></script>
+    <script src="/static/app.js?v=37"></script>
   </body>
 </html>
