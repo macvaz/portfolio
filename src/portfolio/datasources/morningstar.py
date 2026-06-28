@@ -28,7 +28,48 @@ MORNINGSTAR_ETF_QUOTE_URL = (
 BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon"
 MS_SERIES_SUFFIX = "]2]1]"
 
-__all__ = ["import_isins", "download_navs", "morningstar_quote_url"]
+__all__ = ["import_isins", "download_navs", "morningstar_quote_url", "parse_morningstar_search"]
+
+
+def parse_morningstar_search(payload: dict) -> dict:
+    """Parse a Morningstar legacy-search JSON payload into fund metadata."""
+    results = payload.get("results")
+    if not results:
+        raise ValueError("Morningstar response has no results")
+
+    result = results[0]
+    fields = result.get("fields") or {}
+    meta = result.get("meta") or {}
+
+    name = (fields.get("name") or {}).get("value")
+    isin = (fields.get("isin") or {}).get("value")
+    security_id = meta.get("securityID")
+    performance_id = meta.get("performanceID")
+    universe = meta.get("universe")
+
+    missing = [
+        label
+        for label, value in [
+            ("name", name),
+            ("isin", isin),
+            ("securityID", security_id),
+            ("performanceID", performance_id),
+        ]
+        if not value
+    ]
+    if missing:
+        raise ValueError(
+            "Morningstar response is missing required fields: "
+            + ", ".join(missing)
+        )
+
+    return {
+        "isin": str(isin).upper(),
+        "name": str(name),
+        "security_id": str(security_id),
+        "performance_id": str(performance_id),
+        "universe": str(universe) if universe else None,
+    }
 
 
 async def _search_isin_async(isin: str) -> Optional[Dict]:

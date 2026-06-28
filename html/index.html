@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=116" />
+    <link rel="stylesheet" href="/static/style.css?v=119" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -290,11 +290,62 @@
       <p id="error" class="error" hidden></p>
     </main>
 
+    <div id="add-fund-screen" class="add-fund-screen" hidden>
+      <div class="add-fund-card" role="dialog" aria-modal="true" aria-labelledby="add-fund-title">
+        <h2 id="add-fund-title" class="add-fund-title">Add fund</h2>
+        <p class="add-fund-lead">
+          Look up the ISIN on Morningstar in your browser, then paste the JSON response below.
+        </p>
+        <form id="add-fund-import-form" class="add-fund-form">
+          <label class="add-fund-label" for="add-fund-isin">ISIN</label>
+          <input
+            id="add-fund-isin"
+            type="text"
+            maxlength="12"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          />
+
+          <div class="add-fund-link-row">
+            <span class="add-fund-label">Morningstar legacy search</span>
+            <p id="add-fund-ms-link-placeholder" class="add-fund-hint">
+              Enter a valid 12-character ISIN to generate the search URL.
+            </p>
+            <a
+              id="add-fund-ms-link"
+              class="fund-link add-fund-ms-link"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              hidden
+            ></a>
+          </div>
+
+          <label class="add-fund-label" for="add-fund-json">Morningstar JSON response</label>
+          <textarea
+            id="add-fund-json"
+            class="add-fund-json"
+            rows="14"
+            spellcheck="false"
+            placeholder='Paste the JSON from Morningstar here (the response should contain a "results" array).'
+            required
+          ></textarea>
+
+          <div class="add-fund-actions">
+            <button type="button" class="secondary" id="add-fund-cancel">Cancel</button>
+            <button type="submit" id="add-fund-submit">Add fund</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script src="/static/api.js?v=14"></script>
     <script src="/static/portfolios.js?v=11"></script>
     <script src="/static/management.js?v=73"></script>
     <script src="/static/risk.js?v=6"></script>
     <script src="/static/tactical.js?v=43"></script>
-    <script src="/static/app.js?v=39"></script>
+    <script src="/static/add-fund.js?v=4"></script>
+    <script src="/static/app.js?v=42"></script>
   </body>
 </html>

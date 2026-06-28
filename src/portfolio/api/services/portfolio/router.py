@@ -35,12 +35,41 @@ from portfolio.api.services.portfolio.schemas import (
     require_portfolio,
     validate_positions,
 )
-from portfolio.datasources.morningstar import import_isins, morningstar_quote_url
+from portfolio.datasources.morningstar import (
+    import_isins,
+    morningstar_quote_url,
+    parse_morningstar_search,
+)
 from portfolio.common.metrics import refresh_fund_metrics
 from portfolio.common.navs import delete_fund_nav_csv, download_and_store_fund_nav
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 NAV_START_DATE = "2000-01-01"
+
+
+def _register_fund(fund: dict) -> dict:
+    save_fund(
+        fund["isin"],
+        fund["name"],
+        fund["security_id"],
+        fund.get("performance_id"),
+        fund.get("universe"),
+    )
+    download_and_store_fund_nav(
+        fund["isin"],
+        fund["security_id"],
+        start_date=NAV_START_DATE,
+        end_date=date.today().isoformat(),
+    )
+    refresh_fund_metrics(fund["isin"])
+    return {
+        "isin": fund["isin"],
+        "name": fund["name"],
+        "fund_id": fund["security_id"],
+        "morningstar_url": morningstar_quote_url(
+            fund.get("performance_id"), fund.get("universe")
+        ),
+    }
 
 
 @router.get("/portfolios", response_model=list[PortfolioListItem])
@@ -90,6 +119,16 @@ def get_funds() -> list[dict]:
     ]
 
 
+@router.post("/funds/import", response_model=FundResponse)
+def import_fund_from_morningstar(body: dict) -> dict:
+    """Import a fund from a Morningstar legacy-search JSON payload."""
+    try:
+        fund = parse_morningstar_search(body)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _register_fund(fund)
+
+
 @router.post("/funds", response_model=FundResponse)
 def create_fund(body: FundCreate) -> dict:
     fund = import_isins(body.isin.upper())
@@ -97,28 +136,7 @@ def create_fund(body: FundCreate) -> dict:
         raise HTTPException(
             status_code=404, detail=f"No fund found for ISIN {body.isin}"
         )
-    save_fund(
-        fund["isin"],
-        fund["name"],
-        fund["security_id"],
-        fund.get("performance_id"),
-        fund.get("universe"),
-    )
-    download_and_store_fund_nav(
-        fund["isin"],
-        fund["security_id"],
-        start_date=NAV_START_DATE,
-        end_date=date.today().isoformat(),
-    )
-    refresh_fund_metrics(fund["isin"])
-    return {
-        "isin": fund["isin"],
-        "name": fund["name"],
-        "fund_id": fund["security_id"],
-        "morningstar_url": morningstar_quote_url(
-            fund.get("performance_id"), fund.get("universe")
-        ),
-    }
+    return _register_fund(fund)
 
 
 @router.delete("/funds/{isin}", status_code=204)

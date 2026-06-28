@@ -1024,6 +1024,107 @@ button:disabled {
   padding-top: 0.6rem;
 }
 
+.add-isin-form input:focus {
+  outline: none;
+}
+
+body.is-add-fund-open {
+  overflow: hidden;
+}
+
+.add-fund-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: rgba(26, 26, 26, 0.45);
+  overflow-y: auto;
+}
+
+.add-fund-screen[hidden] {
+  display: none !important;
+}
+
+.add-fund-card {
+  width: min(720px, 100%);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
+  padding: 1.5rem 1.75rem 1.75rem;
+}
+
+.add-fund-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.add-fund-lead {
+  margin: 0 0 1.25rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.add-fund-form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.add-fund-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.add-fund-link-row {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.add-fund-ms-link {
+  display: block;
+  font-weight: 500;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.add-fund-ms-link[hidden] {
+  display: none !important;
+}
+
+.add-fund-hint {
+  color: #666;
+  font-size: 0.92rem;
+}
+
+.add-fund-json {
+  width: 100%;
+  min-height: 240px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #c8d0da;
+}
+
+.add-fund-json:focus {
+  outline: 2px solid rgba(31, 94, 255, 0.25);
+  border-color: #1f5eff;
+}
+
+.add-fund-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
   main {
     padding: 1rem 0.5rem 2rem;

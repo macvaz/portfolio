@@ -260,35 +260,14 @@
     }
   }
 
-  async function addFund(event) {
-    event.preventDefault();
-    showError("");
+  function openAddFundFromHeader() {
     const input = document.getElementById("isin-input");
     const isin = input.value.trim().toUpperCase();
     if (!isin) {
       return;
     }
-
-    input.disabled = true;
-    try {
-      await api.fetchJson(`${api.PORTFOLIO_API}/funds`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isin }),
-      });
-      input.value = "";
-      if (activeTab === "management") {
-        await window.ManagementView.loadManagement();
-      } else if (activeTab === "risk") {
-        window.RiskView.resetRiskAnalysis();
-        await window.RiskView.loadRiskAnalysis({ force: true });
-      }
-    } catch (err) {
-      showError(err.message);
-    } finally {
-      input.disabled = false;
-      input.focus();
-    }
+    showError("");
+    window.AddFundView.open(isin, reloadActiveTab);
   }
 
   async function submitNewPortfolioName() {
@@ -378,7 +357,8 @@
   });
 
   document.getElementById("add-fund-form").addEventListener("submit", (event) => {
-    addFund(event).catch((err) => showError(err.message));
+    event.preventDefault();
+    openAddFundFromHeader();
   });
   document.querySelectorAll(".app-tab").forEach((button) => {
     button.addEventListener("click", () => {
