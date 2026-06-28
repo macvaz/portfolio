@@ -6,19 +6,16 @@ Public API:
 - download_navs: download NAV time series for a fund or portfolio
 """
 
-import asyncio
 import json
-import re
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Dict, Optional
 
 import pandas as pd
 import requests
-from playwright.async_api import async_playwright
 
 from portfolio.api.database import get_fund, list_funds, save_fund
 
-DOMAIN = "https://global.morningstar.com"
 MORNINGSTAR_FUND_QUOTE_URL = (
     "https://global.morningstar.com/es/inversiones/fondos/{performance_id}/cotizacion"
 )
@@ -29,6 +26,10 @@ BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon
 MS_SERIES_SUFFIX = "]2]1]"
 
 __all__ = ["import_isins", "download_navs", "morningstar_quote_url", "parse_morningstar_search"]
+
+
+def _is_isin(identifier: str) -> bool:
+    return len(identifier) == 12 and identifier.isalnum()
 
 
 def parse_morningstar_search(payload: dict) -> dict:
@@ -72,95 +73,38 @@ def parse_morningstar_search(payload: dict) -> dict:
     }
 
 
-async def _search_isin_async(isin: str) -> Optional[Dict]:
-    """Search for a fund by ISIN using Morningstar's API with Playwright."""
-    query = f"((isin+~%3D+%22{isin}%22))"
-    url = f"{DOMAIN}/api/v1/es/legacy-search/securities?fields=isin,name&query={query}&sort=_score"
-
-    async with async_playwright() as p:
-        print("[*] Launching headless browser (Playwright)...")
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            viewport={"width": 1920, "height": 1080},
-            ignore_https_errors=True,
-        )
-
-        await context.add_init_script("""
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => false,
-            });
-        """)
-
-        page = await context.new_page()
-        await page.set_extra_http_headers(
-            {
-                "Accept": "application/json, text/plain, */*",
-                "Accept-Language": "en-US,en;q=0.9",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Referer": "https://global.morningstar.com/",
-                "Origin": "https://global.morningstar.com",
-            }
-        )
-
-        try:
-            print(f"[*] Visiting domain: {DOMAIN}")
-            await page.goto(DOMAIN, wait_until="networkidle", timeout=30000)
-            await page.wait_for_timeout(2000)
-
-            print(f"[*] Searching for ISIN: {isin}")
-            await page.goto(url, wait_until="networkidle", timeout=30000)
-            await page.wait_for_timeout(1000)
-
-            page_content = await page.content()
-
-            try:
-                data = json.loads(page_content)
-                print(f"[+] Successfully retrieved search results for {isin}")
-                return data
-            except json.JSONDecodeError:
-                match = re.search(r"<pre[^>]*>({.*})</pre>", page_content, re.DOTALL)
-                if match:
-                    data = json.loads(match.group(1))
-                    print(f"[+] Successfully retrieved search results for {isin}")
-                    return data
-
-                json_match = re.search(r"({.*})", page_content, re.DOTALL)
-                if json_match:
-                    try:
-                        data = json.loads(json_match.group(1))
-                        print(f"[+] Successfully retrieved search results for {isin}")
-                        return data
-                    except Exception:
-                        pass
-
-                print(f"[-] Could not extract search results for {isin}")
-                return None
-
-        except Exception as e:
-            print(f"[-] Error searching for ISIN {isin}: {e}")
-            return None
-
-        finally:
-            await context.close()
-            await browser.close()
+def _has_isin_nav_data(
+    isin: str, currency: str = "EUR", timeout: int = 15
+) -> bool:
+    end = date.today()
+    start = end - timedelta(days=30)
+    params = _compute_params(isin, currency, start.isoformat(), end.isoformat())
+    try:
+        response = requests.get(BASE_URL, params=params, timeout=timeout)
+        response.raise_for_status()
+        payload = response.json()
+    except (requests.RequestException, ValueError):
+        return False
+    return isinstance(payload, list) and len(payload) > 0
 
 
 def _search_by_isin(isin: str) -> Dict | None:
-    """Look up a single ISIN on Morningstar."""
-    response = asyncio.run(_search_isin_async(isin))
-    if response is None:
+    """Look up a single ISIN using Morningstar's tools API."""
+    print(f"[*] Looking up ISIN: {isin}")
+    if not _has_isin_nav_data(isin):
+        print(f"[-] No Morningstar NAV data found for ISIN {isin}")
+        print(
+            "[-] Import the fund via the add-fund screen using JSON "
+            "from the Morningstar legacy-search URL in your browser."
+        )
         return None
-    results = response["results"][0]
-    security_name = results["fields"]["name"]["value"]
-    security_id = results["meta"]["securityID"]
-    performance_id = results["meta"]["performanceID"]
-    universe = results["meta"].get("universe")
+
+    print(f"[+] Resolved {isin}")
     return {
-        "security_id": security_id,
-        "performance_id": performance_id,
-        "universe": universe,
-        "name": security_name,
+        "security_id": isin,
+        "performance_id": None,
+        "universe": None,
+        "name": isin,
         "isin": isin,
     }
 
@@ -236,6 +180,17 @@ def _compute_params(
     fund_id: str, currency: str, start: str, end: str
 ) -> dict[str, str]:
     """Build query params for the Morningstar timeseries endpoint."""
+    if _is_isin(fund_id):
+        return {
+            "id": fund_id,
+            "currencyId": currency,
+            "idtype": "ISIN",
+            "frequency": "daily",
+            "startDate": start,
+            "endDate": end,
+            "performanceType": "",
+            "outputType": "COMPACTJSON",
+        }
     return {
         "id": f"{fund_id}{MS_SERIES_SUFFIX}",
         "currencyId": currency,

@@ -182,7 +182,7 @@ Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, a
 
 ## Docker
 
-One image holds Python dependencies and Playwright; **application code is mounted from the host** at runtime (`src/`, `html/`, `api.py`, `job.py`, and `data/`). Rebuild the image only when dependencies change.
+One image holds Python dependencies; **application code is mounted from the host** at runtime (`src/`, `html/`, `api.py`, `job.py`, and `data/`). Rebuild the image only when dependencies change.
 
 Pass `api` or `job` as the command (default is `api`).
 
@@ -251,8 +251,7 @@ uv run pytest -q
 
 - Python 3.12+
 - pandas — dataframes and date handling
-- requests — HTTP client for Morningstar price API
+- requests — HTTP client for Morningstar API
 - fredapi — FRED API client (macroeconomic series)
-- playwright — browser automation for Morningstar ISIN search
 - quantstats — HTML performance reports
 - fastapi / uvicorn — REST API and web UI

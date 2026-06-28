@@ -8,7 +8,6 @@ dependencies = [
     "python-dotenv",
     "pandas>=3.0.3",
     "fredapi>=0.5.2",
-    "playwright>=1.60.0",
     "requests>=2.34.2",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.34.0",

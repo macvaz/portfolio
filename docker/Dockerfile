@@ -28,9 +28,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libgomp1 \
-    && playwright install-deps chromium \
     && rm -rf /var/lib/apt/lists/* \
-    && playwright install chromium \
     && mkdir -p data \
     && chmod +x /app/docker/entrypoint.sh
 
