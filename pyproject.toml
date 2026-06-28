@@ -35,10 +35,7 @@ testpaths = ["tests"]
 [dependency-groups]
 dev = [
     "ruff>=0.15.17",
-]
-
-[project.optional-dependencies]
-dev = [
+    "ty>=0.0.55",
     "pytest>=7.0",
     "httpx>=0.28.0",
 ]

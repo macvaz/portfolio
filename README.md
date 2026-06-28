@@ -79,11 +79,7 @@ Install dependencies with [uv](https://docs.astral.sh/uv/):
 uv sync
 ```
 
-For development (tests):
-
-```bash
-uv sync --extra dev
-```
+This installs runtime dependencies plus dev tools (ruff, ty, pytest, httpx).
 
 ## Data job
 
