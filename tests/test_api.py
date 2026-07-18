@@ -125,15 +125,6 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
 
-    def mock_resolve(isin, db_path=None):
-        return {
-            "isin": isin,
-            "name": "Test Fund",
-            "security_id": "F0GBR04KHC",
-            "performance_id": "0P000068Z4",
-            "universe": "FO",
-        }
-
     def mock_download(*, fund_id, start, end, currency, timeout=30):
         import pandas as pd
 
@@ -143,9 +134,6 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
         )
 
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.router.import_isins", mock_resolve
-    )
-    monkeypatch.setattr(
         "portfolio.common.navs.download_navs",
         mock_download,
     )
@@ -153,8 +141,22 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     client = TestClient(app)
 
     response = client.post(
-        "/api/portfolio/funds",
-        json={"isin": "ES0182527038"},
+        "/api/portfolio/funds/import",
+        json={
+            "results": [
+                {
+                    "fields": {
+                        "name": {"value": "Test Fund"},
+                        "isin": {"value": "ES0182527038"},
+                    },
+                    "meta": {
+                        "securityID": "F0GBR04KHC",
+                        "performanceID": "0P000068Z4",
+                        "universe": "FO",
+                    },
+                }
+            ]
+        },
     )
     assert response.status_code == 200
     assert response.json() == {
@@ -218,10 +220,6 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr(
-        "portfolio.api.services.portfolio.metrics.import_isins",
-        lambda isin, db_path=None: None,
-    )
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
@@ -276,10 +274,6 @@ def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypa
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
-    monkeypatch.setattr(
-        "portfolio.api.services.portfolio.metrics.import_isins",
-        lambda isin, db_path=None: None,
-    )
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)

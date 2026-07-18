@@ -24,7 +24,6 @@ from portfolio.api.services.portfolio.risk_report import (
     build_user_risk_report_html,
 )
 from portfolio.api.services.portfolio.schemas import (
-    FundCreate,
     FundResponse,
     PortfolioCreate,
     PortfolioListItem,
@@ -36,7 +35,6 @@ from portfolio.api.services.portfolio.schemas import (
     validate_positions,
 )
 from portfolio.datasources.morningstar import (
-    import_isins,
     morningstar_quote_url,
     parse_morningstar_search,
 )
@@ -126,16 +124,6 @@ def import_fund_from_morningstar(body: dict) -> dict:
         fund = parse_morningstar_search(body)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return _register_fund(fund)
-
-
-@router.post("/funds", response_model=FundResponse)
-def create_fund(body: FundCreate) -> dict:
-    fund = import_isins(body.isin.upper())
-    if fund is None:
-        raise HTTPException(
-            status_code=404, detail=f"No fund found for ISIN {body.isin}"
-        )
     return _register_fund(fund)
 
 

@@ -2,22 +2,15 @@ from pathlib import Path
 
 import pandas as pd
 
-from portfolio.common.macro_constants import (
-    SP500_DEATH_CROSS,
-    FINANCIAL_STRESS_INDEX,
-    HIGH_YIELD_SPREAD,
-    SAHM_RULE_INDICATOR,
-    UNEMPLOYMENT_RATE,
-    YIELD_SPREAD_10Y3M,
-)
+from portfolio.common.macro_constants import SP500_DEATH_CROSS
 from portfolio.common.series import DEFAULT_SERIES_DIR, save_series_csv
 from portfolio.common.alert_descriptions import (
     is_alert_active,
     load_alert_description_fixture,
 )
 from portfolio.datasources.fred import download_fred_data, init_client
-from portfolio.datasources.sp500 import (
-    download_sp500_from_yfinance,
+from portfolio.job.sp500 import (
+    download_sp500,
     load_backtest_sp500_csv,
 )
 
@@ -36,8 +29,8 @@ def _load_sp500_series(
             start_date=start_date,
             end_date=end_date,
         )
-    print("Downloading SP500 history from Yahoo Finance (^GSPC)")
-    return download_sp500_from_yfinance(start_date, end_date)
+    print("Downloading SP500 history from Morningstar")
+    return download_sp500(start_date, end_date)
 
 
 def compute_signals(

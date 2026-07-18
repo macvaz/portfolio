@@ -13,7 +13,7 @@ from portfolio.common.macro_constants import (
     UNEMPLOYMENT_RATE,
     YIELD_SPREAD_10Y3M,
 )
-from portfolio.datasources.sp500 import DEFAULT_BACKTEST_SP500_PATH
+from portfolio.job.sp500 import DEFAULT_BACKTEST_SP500_PATH
 from portfolio.job.download import download
 
 FRED_SERIES = [
@@ -37,7 +37,7 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help=(
             "Use data/backtest/sp500.csv for SP500 and death-cross signals "
-            "instead of downloading SP500 from Yahoo Finance."
+            "instead of downloading SP500 from Morningstar."
         ),
     )
     parser.add_argument(

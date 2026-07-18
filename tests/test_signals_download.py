@@ -17,7 +17,7 @@ def test_download_data_stores_fred_series(tmp_path):
     with patch(
         "portfolio.common.signals.download_fred_data", side_effect=fake_download
     ), patch(
-        "portfolio.common.signals.download_sp500_from_yfinance",
+        "portfolio.common.signals.download_sp500",
         return_value=pd.DataFrame(
             {"SP500": [4800.0]},
             index=pd.to_datetime(["2024-01-02"]),
@@ -61,7 +61,7 @@ def test_download_data_uses_backtest_sp500_when_enabled(tmp_path):
     with patch(
         "portfolio.common.signals.download_fred_data", side_effect=fake_download
     ), patch(
-        "portfolio.common.signals.download_sp500_from_yfinance",
+        "portfolio.common.signals.download_sp500",
         return_value=pd.DataFrame(
             {"SP500": [4800.0]},
             index=pd.to_datetime(["2024-01-02"]),

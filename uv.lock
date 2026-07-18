@@ -938,7 +938,6 @@ dependencies = [
     { name = "requests" },
     { name = "sqlmodel" },
     { name = "uvicorn", extra = ["standard"] },
-    { name = "yfinance" },
 ]
 
 [package.dev-dependencies]
@@ -959,7 +958,6 @@ requires-dist = [
     { name = "requests", specifier = ">=2.34.2" },
     { name = "sqlmodel", specifier = ">=0.0.24" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.34.0" },
-    { name = "yfinance", specifier = ">=1.4.1" },
 ]
 
 [package.metadata.requires-dev]

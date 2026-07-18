@@ -3,27 +3,8 @@
 from datetime import date
 
 from portfolio.api.database import get_fund_metrics, list_funds, list_user_portfolio
-from portfolio.datasources.morningstar import import_isins, morningstar_quote_url
+from portfolio.datasources.morningstar import morningstar_quote_url
 from portfolio.common.metrics import compute_portfolio_metrics
-
-
-def _morningstar_link(
-    isin: str,
-    performance_id: str | None,
-    universe: str | None,
-    db_path=None,
-) -> str | None:
-    if performance_id and universe:
-        return morningstar_quote_url(performance_id, universe)
-    if db_path is None:
-        return morningstar_quote_url(performance_id, universe)
-    resolved = import_isins(isin, db_path=db_path)
-    if resolved is None:
-        return morningstar_quote_url(performance_id, universe)
-    return morningstar_quote_url(
-        resolved.get("performance_id") or performance_id,
-        resolved.get("universe") or universe,
-    )
 
 
 def _fund_row(
@@ -39,7 +20,7 @@ def _fund_row(
         "isin": isin,
         "name": name,
         "weight": weight,
-        "morningstar_url": _morningstar_link(isin, performance_id, universe, db_path),
+        "morningstar_url": morningstar_quote_url(performance_id, universe),
         **get_fund_metrics(isin, db_path),
     }
 

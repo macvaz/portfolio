@@ -6,8 +6,6 @@ from portfolio.common.navs import DEFAULT_FUNDS_DIR, store_fund_navs_from_db
 from portfolio.common.series import DEFAULT_SERIES_DIR
 from portfolio.common.alert_storage import persist_latest_alerts
 from portfolio.common.signals import compute_signals
-from portfolio.datasources.morningstar import import_isins
-
 
 def download(
     fred_api_key: str | None,
@@ -48,10 +46,6 @@ def download(
         db_path=db_path,
         funds_dir=funds_dir,
     )
-
-    print("\nBackfilling Morningstar fund links...")
-    linked = import_isins(db_path=db_path)
-    print(f"Done. Linked {linked} fund(s).")
 
     print("\nComputing fund metrics...")
     updated = update_all_fund_metrics(db_path, funds_dir)

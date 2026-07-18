@@ -91,8 +91,8 @@ def store_fund_navs_from_db(
     funds = list_funds(db_path)
     if not funds:
         print(
-            "No funds found in database. Add funds via the API "
-            "(POST /api/portfolio/funds) before running get-data."
+            "No funds found in database. Add funds via the web UI "
+            "(Morningstar JSON import) before running get-data."
         )
         return []
 

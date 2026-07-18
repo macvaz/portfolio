@@ -1,45 +1,46 @@
-"""Download S&P 500 index history from Yahoo Finance (^GSPC)."""
+"""Download S&P 500 index history from Morningstar."""
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
-import yfinance as yf
+
+from portfolio.datasources.morningstar import download_navs
 
 DEFAULT_BACKTEST_SP500_PATH = Path("data/backtest/sp500.csv")
-YFINANCE_SP500_TICKER = "^GSPC"
+# Morningstar security ID for the S&P 500 price index (long-term daily history).
+SP500_SECURITY_ID = "XIUSA000OA"
 
 
-def _download_yfinance_sp500_closes(
+def _download_sp500_closes(
     start_date: str | None = None,
     end_date: str | None = None,
 ) -> pd.Series:
-    history = yf.download(
-        YFINANCE_SP500_TICKER,
-        start=start_date,
-        end=end_date,
-        progress=False,
-        auto_adjust=True,
+    start = start_date or "1950-01-01"
+    end = end_date or date.today().isoformat()
+    history = download_navs(
+        fund_id=SP500_SECURITY_ID,
+        start=start,
+        end=end,
+        currency="USD",
     )
-    if history.empty:
+    if history.empty or "value" not in history.columns:
         return pd.Series(dtype=float, name="SP500")
 
-    close = history["Close"]
-    if isinstance(close, pd.DataFrame):
-        close = close.iloc[:, 0]
-    close = close.copy()
+    close = history["value"].copy()
     close.name = "SP500"
     close.index = pd.to_datetime(close.index).tz_localize(None).normalize()
     return close.sort_index()
 
 
-def download_sp500_from_yfinance(
+def download_sp500(
     start_date: str,
     end_date: str,
 ) -> pd.DataFrame:
     """Download daily S&P 500 close levels for the signals pipeline."""
-    return _download_yfinance_sp500_closes(start_date, end_date).to_frame()
+    return _download_sp500_closes(start_date, end_date).to_frame()
 
 
 def download_sp500_history(
@@ -48,7 +49,7 @@ def download_sp500_history(
     end_date: str | None = None,
 ) -> pd.DataFrame:
     """Download daily S&P 500 close levels as a ``value`` column."""
-    series = _download_yfinance_sp500_closes(start_date, end_date)
+    series = _download_sp500_closes(start_date, end_date)
     return series.rename("value").to_frame()
 
 

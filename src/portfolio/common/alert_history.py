@@ -8,7 +8,7 @@ from portfolio.common.alert_descriptions import (
 )
 from portfolio.common.series import DEFAULT_SERIES_DIR, load_series_csv
 from portfolio.common.signals import calculate_market_signals
-from portfolio.datasources.sp500 import (
+from portfolio.job.sp500 import (
     DEFAULT_BACKTEST_SP500_PATH,
     load_backtest_sp500_csv,
 )

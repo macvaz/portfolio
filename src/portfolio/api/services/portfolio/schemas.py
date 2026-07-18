@@ -14,10 +14,6 @@ class PortfolioListItem(BaseModel):
     is_default: bool = False
 
 
-class FundCreate(BaseModel):
-    isin: str = Field(min_length=12, max_length=12)
-
-
 class FundResponse(BaseModel):
     isin: str
     name: str
