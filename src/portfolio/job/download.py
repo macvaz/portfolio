@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from portfolio.api.database import DEFAULT_DB_PATH
+from portfolio.storage.database import DEFAULT_DB_PATH
 from portfolio.common.navs import DEFAULT_FUNDS_DIR
 from portfolio.common.series import DEFAULT_SERIES_DIR
 from portfolio.job.alert_storage import persist_latest_alerts

@@ -3,8 +3,8 @@ import json
 
 from sqlmodel import select
 
-from portfolio.api.database import get_session, init_db
-from portfolio.api.models import AlertDescription
+from portfolio.storage.database import get_session, init_db
+from portfolio.storage.models import AlertDescription
 from portfolio.common.alert_descriptions import (
     DEFAULT_ALERT_DESCRIPTION_FIXTURE,
     load_alert_description_fixture,

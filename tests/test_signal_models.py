@@ -3,8 +3,8 @@ from datetime import date
 
 from sqlmodel import select
 
-from portfolio.api.database import get_session, init_db
-from portfolio.api.models import Alert, AlertDescription
+from portfolio.storage.database import get_session, init_db
+from portfolio.storage.models import Alert, AlertDescription
 
 
 def test_alert_tables_are_created(tmp_path):

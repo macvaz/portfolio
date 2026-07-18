@@ -26,14 +26,17 @@ portfolio/
 │   └── fixtures/                   # Alert catalog JSON fixture
 ├── html/                           # Web UI (served by FastAPI)
 ├── src/portfolio/
-│   ├── api/                        # HTTP app + persistence
+│   ├── storage/                    # Shared persistence (models + DB)
+│   │   ├── models.py               # SQLModel tables
+│   │   ├── database.py             # Engine, migrations, CRUD
+│   │   └── fixtures/
+│   │       └── alerts.py           # Seed/sync alert descriptions
+│   ├── api/                        # HTTP app only
 │   │   ├── api.py                  # FastAPI app shell
-│   │   ├── database.py             # SQLModel storage and queries
-│   │   ├── models.py               # ORM tables
 │   │   └── services/
 │   │       ├── portfolio/          # Funds, positions, curve, metrics, risk
 │   │       └── alerts/             # Tactical alerts + history
-│   ├── common/                     # Shared pure helpers (no api/job imports)
+│   ├── common/                     # Shared pure helpers (no api/job/storage imports)
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
 │   │   ├── series.py               # Macro series CSV I/O
 │   │   ├── equity.py               # Buy-and-hold / benchmark returns
@@ -60,18 +63,18 @@ Package dependencies flow **inward** toward shared code. Arrows mean “imports 
 
 ```
 datasources  ←  common  ←  job
-                 ↑
-                api
+                 ↑         ↑
+                api     storage
+                 ↑_________/
 ```
 
 Rules:
 
-- **`datasources/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`job` imports.
-- **`common/`** — pure helpers and CSV I/O. May use `datasources`. Must **not** import `api` or `job`.
-- **`job/`** — batch orchestration (download signals, NAVs, refresh metrics, store alerts). May use `common`, `datasources`, and `api.database` for persistence.
-- **`api/`** — FastAPI app, SQLModel models/DB, and HTTP services. May use `common` and `datasources`. Must **not** import `job`.
-
-Persistence still lives under `api/database.py`, so the job imports that module for paths and CRUD. That is intentional for now; `common` stays free of both `api` and `job`.
+- **`datasources/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`job`/`storage` imports.
+- **`common/`** — pure helpers and CSV I/O. May use `datasources`. Must **not** import `api`, `job`, or `storage`.
+- **`storage/`** — SQLModel models, SQLite access, migrations, and alert-catalog seeding. Shared by `api` and `job`. Must **not** import `api` or `job`.
+- **`job/`** — batch orchestration (download signals, NAVs, refresh metrics, store alerts). May use `common`, `datasources`, and `storage`. Must **not** import `api`.
+- **`api/`** — FastAPI app and HTTP services. May use `common`, `datasources`, and `storage`. Must **not** import `job`.
 
 ## Install
 

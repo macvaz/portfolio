@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from portfolio.api.database import list_funds, save_fund_metrics
+from portfolio.storage.database import list_funds, save_fund_metrics
 from portfolio.common.metrics import compute_fund_metrics
 
 

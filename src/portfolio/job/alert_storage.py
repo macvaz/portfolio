@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from portfolio.api.database import init_db, upsert_alerts
+from portfolio.storage.database import init_db, upsert_alerts
 from portfolio.common.alert_descriptions import load_alert_description_fixture
 from portfolio.common.series import latest_series_date
 

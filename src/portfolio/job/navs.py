@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from portfolio.api.database import list_funds
+from portfolio.storage.database import list_funds
 from portfolio.common.navs import download_and_store_fund_nav
 
 

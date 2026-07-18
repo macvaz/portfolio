@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
 
-from portfolio.api.database import get_fund, get_user
+from portfolio.storage.database import get_fund, get_user
 
 
 class PortfolioCreate(BaseModel):

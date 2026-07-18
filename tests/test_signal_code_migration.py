@@ -1,6 +1,6 @@
 import sqlite3
 
-from portfolio.api.database import init_db
+from portfolio.storage.database import init_db
 
 
 def test_migrate_signal_alert_codes_when_new_code_already_exists(tmp_path):

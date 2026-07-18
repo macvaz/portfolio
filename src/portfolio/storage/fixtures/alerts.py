@@ -5,7 +5,7 @@ from pathlib import Path
 
 from sqlmodel import delete, select
 
-from portfolio.api.models import Alert, AlertDescription
+from portfolio.storage.models import Alert, AlertDescription
 from portfolio.common.alert_descriptions import load_alert_description_fixture
 
 

@@ -3,7 +3,7 @@ import datetime
 from fastapi.testclient import TestClient
 
 from portfolio.api.api import app
-from portfolio.api.database import init_db, upsert_alerts
+from portfolio.storage.database import init_db, upsert_alerts
 from portfolio.common.alert_descriptions import is_alert_active
 
 
@@ -18,7 +18,7 @@ def test_is_alert_active_uses_threshold_direction():
 
 def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 
@@ -83,7 +83,7 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
 
 def test_list_alerts_returns_empty_snapshot_when_no_data(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 

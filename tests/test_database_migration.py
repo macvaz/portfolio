@@ -1,6 +1,6 @@
 import sqlite3
 
-from portfolio.api.database import init_db, list_funds
+from portfolio.storage.database import init_db, list_funds
 
 
 def test_migrate_legacy_funds_table(tmp_path):

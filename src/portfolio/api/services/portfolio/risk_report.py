@@ -9,7 +9,7 @@ from portfolio.common.equity import (
     build_portfolio_daily_returns,
     load_benchmark_daily_returns,
 )
-from portfolio.api.database import list_user_portfolio
+from portfolio.storage.database import list_user_portfolio
 
 
 def build_risk_report_html(

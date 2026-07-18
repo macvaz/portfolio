@@ -1,4 +1,4 @@
-from portfolio.api.database import (
+from portfolio.storage.database import (
     create_user,
     init_db,
     list_user_portfolio,
@@ -6,8 +6,8 @@ from portfolio.api.database import (
     save_fund,
     save_user_portfolio,
 )
-from portfolio.api.models import User
-from portfolio.api.database import get_session
+from portfolio.storage.models import User
+from portfolio.storage.database import get_session
 
 
 def test_save_user_portfolio_persists_positions(tmp_path):
@@ -68,7 +68,7 @@ def test_list_users_includes_default_flag(tmp_path):
 
 def test_user_is_default_migration_sets_miguel_agresiva(tmp_path):
     db_path = tmp_path / "portfolio.db"
-    from portfolio.api.database import get_engine
+    from portfolio.storage.database import get_engine
 
     engine = get_engine(db_path)
     with engine.connect() as connection:

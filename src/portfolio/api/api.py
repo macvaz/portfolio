@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from portfolio.api.database import init_db
+from portfolio.storage.database import init_db
 from portfolio.api.services.portfolio.router import router as portfolio_router
 from portfolio.api.services.alerts.router import router as alerts_router
 

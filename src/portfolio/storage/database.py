@@ -5,8 +5,8 @@ from pathlib import Path
 from sqlalchemy import func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
-from portfolio.api.models import Alert, AlertDescription, Fund, Metric, Portfolio, User
-from portfolio.api.services.alerts.catalog import (
+from portfolio.storage.models import Alert, AlertDescription, Fund, Metric, Portfolio, User
+from portfolio.storage.fixtures.alerts import (
     insert_alert_descriptions_from_fixture,
     sync_alert_catalog_from_fixture,
 )

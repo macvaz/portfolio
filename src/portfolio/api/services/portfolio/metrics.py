@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from portfolio.api.database import get_fund_metrics, list_funds, list_user_portfolio
+from portfolio.storage.database import get_fund_metrics, list_funds, list_user_portfolio
 from portfolio.datasources.morningstar import morningstar_quote_url
 from portfolio.common.metrics import compute_portfolio_metrics
 

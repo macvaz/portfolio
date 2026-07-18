@@ -3,8 +3,8 @@ import datetime
 import pandas as pd
 from sqlmodel import select
 
-from portfolio.api.database import get_session, init_db, upsert_alerts
-from portfolio.api.models import Alert
+from portfolio.storage.database import get_session, init_db, upsert_alerts
+from portfolio.storage.models import Alert
 from portfolio.job.alert_storage import extract_alert_values, persist_latest_alerts
 from portfolio.common.macro_constants import SP500_DEATH_CROSS, YIELD_SPREAD_10Y3M
 from portfolio.common.series import latest_series_date, save_series_csv

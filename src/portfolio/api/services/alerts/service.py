@@ -1,4 +1,4 @@
-from portfolio.api.database import get_latest_alerts
+from portfolio.storage.database import get_latest_alerts
 from portfolio.api.services.alerts.schemas import AlertHistory, AlertSnapshotResponse
 from portfolio.api.services.alerts.history import build_monthly_alert_history
 

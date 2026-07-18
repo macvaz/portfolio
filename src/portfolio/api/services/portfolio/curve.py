@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from portfolio.api.database import list_user_portfolio
+from portfolio.storage.database import list_user_portfolio
 from portfolio.common.equity import (
     BENCHMARK_ISIN,
     BENCHMARK_NAME,

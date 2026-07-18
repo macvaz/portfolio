@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from sqlmodel import Session, select
 
-from portfolio.api.database import (
+from portfolio.storage.database import (
     delete_fund,
     delete_user,
     get_db,
@@ -17,7 +17,7 @@ from portfolio.api.database import (
     save_user_portfolio,
     set_default_user,
 )
-from portfolio.api.models import User
+from portfolio.storage.models import User
 from portfolio.api.services.portfolio.curve import build_user_equity_curve
 from portfolio.api.services.portfolio.metrics import get_portfolio_metrics
 from portfolio.api.services.portfolio.risk_report import (

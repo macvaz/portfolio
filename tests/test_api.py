@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from portfolio.api.api import app
-from portfolio.api.database import (
+from portfolio.storage.database import (
     create_user,
     get_fund_metrics,
     init_db,
@@ -17,7 +17,7 @@ def _create_user(db_path, name: str = "Growth") -> int:
 
 def test_list_and_delete_funds(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
@@ -43,7 +43,7 @@ def test_list_and_delete_funds(tmp_path, monkeypatch):
 
 def test_create_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
 
     client = TestClient(app)
@@ -59,7 +59,7 @@ def test_create_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
 
 def test_get_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
 
     client = TestClient(app)
@@ -75,7 +75,7 @@ def test_get_risk_report_rejects_empty_portfolio(tmp_path, monkeypatch):
 def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
@@ -121,7 +121,7 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
 def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
 
@@ -177,7 +177,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
 def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
     init_db(db_path)
@@ -218,7 +218,7 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
 
 def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
@@ -272,7 +272,7 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
 
 def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
@@ -306,7 +306,7 @@ def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypa
 
 def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
@@ -325,7 +325,7 @@ def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
 
 def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
@@ -373,7 +373,7 @@ def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
 
 def test_delete_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
@@ -400,7 +400,7 @@ def test_delete_portfolio(tmp_path, monkeypatch):
 
 def test_delete_portfolio_not_found(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 
@@ -411,7 +411,7 @@ def test_delete_portfolio_not_found(tmp_path, monkeypatch):
 
 def test_set_default_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
-    monkeypatch.setattr("portfolio.api.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 

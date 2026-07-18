@@ -1,4 +1,4 @@
-from portfolio.api.database import get_fund, init_db, list_funds, save_fund
+from portfolio.storage.database import get_fund, init_db, list_funds, save_fund
 from portfolio.datasources.morningstar import (
     morningstar_quote_url,
     parse_morningstar_search,

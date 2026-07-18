@@ -2,8 +2,8 @@ import datetime
 
 from sqlmodel import select
 
-from portfolio.api.database import get_session, init_db
-from portfolio.api.models import Alert, AlertDescription
+from portfolio.storage.database import get_session, init_db
+from portfolio.storage.models import Alert, AlertDescription
 from portfolio.common.alert_descriptions import load_alert_description_fixture
 
 

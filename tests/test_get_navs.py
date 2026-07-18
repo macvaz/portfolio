@@ -1,4 +1,4 @@
-from portfolio.api.database import init_db, save_fund
+from portfolio.storage.database import init_db, save_fund
 from portfolio.job.navs import store_fund_navs_from_db
 
 
