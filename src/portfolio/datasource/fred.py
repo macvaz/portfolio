@@ -16,7 +16,7 @@ def download_fred_data(
     if series_id in FRED_DEPRECATED_SERIES_IDS:
         raise ValueError(
             f"FRED series {series_id!r} is deprecated. "
-            "Use portfolio.job.sp500 for S&P 500 history."
+            "Use portfolio.batch.sp500 for S&P 500 history."
         )
     try:
         series = fred_client.get_series(

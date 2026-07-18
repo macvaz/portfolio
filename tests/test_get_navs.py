@@ -1,5 +1,5 @@
 from portfolio.storage.database import init_db, save_fund
-from portfolio.job.navs import store_fund_navs_from_db
+from portfolio.batch.navs import store_fund_navs_from_db
 
 
 def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):

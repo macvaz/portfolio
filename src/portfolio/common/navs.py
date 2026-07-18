@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from portfolio.datasources.morningstar import download_navs
+from portfolio.datasource.morningstar import download_navs
 
 DEFAULT_FUNDS_DIR = Path("data/funds")
 

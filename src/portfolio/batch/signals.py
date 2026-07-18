@@ -10,29 +10,8 @@ from portfolio.common.alert_descriptions import (
 )
 from portfolio.common.series import DEFAULT_SERIES_DIR, save_series_csv
 from portfolio.common.signals import calculate_market_signals
-from portfolio.datasources.fred import download_fred_data, init_client
-from portfolio.job.sp500 import (
-    download_sp500,
-    load_backtest_sp500_csv,
-)
-
-
-def _load_sp500_series(
-    start_date: str,
-    end_date: str,
-    *,
-    backtest: bool,
-    backtest_sp500_path: Path | None,
-) -> pd.DataFrame:
-    if backtest:
-        print("Using backtest SP500 history from data/backtest/sp500.csv")
-        return load_backtest_sp500_csv(
-            backtest_sp500_path,
-            start_date=start_date,
-            end_date=end_date,
-        )
-    print("Downloading SP500 history from Morningstar")
-    return download_sp500(start_date, end_date)
+from portfolio.datasource.fred import download_fred_data, init_client
+from portfolio.batch.sp500 import download_sp500
 
 
 def compute_signals(
@@ -41,9 +20,6 @@ def compute_signals(
     start_date: str,
     end_date: str,
     series_dir: Path | None = None,
-    *,
-    backtest: bool = False,
-    backtest_sp500_path: Path | None = None,
 ) -> pd.DataFrame:
     data_df = download_data(
         fred_api_key,
@@ -51,8 +27,6 @@ def compute_signals(
         start_date,
         end_date,
         series_dir=series_dir,
-        backtest=backtest,
-        backtest_sp500_path=backtest_sp500_path,
     )
     market_df = calculate_market_signals(data_df)
     print_current_signals(market_df)
@@ -65,9 +39,6 @@ def download_data(
     start_date: str,
     end_date: str,
     series_dir: Path | None = None,
-    *,
-    backtest: bool = False,
-    backtest_sp500_path: Path | None = None,
 ) -> pd.DataFrame:
     fred = init_client(fred_api_key)
     root = series_dir or DEFAULT_SERIES_DIR
@@ -82,12 +53,8 @@ def download_data(
         )
         macro_series_data.append(series_df)
 
-    sp500 = _load_sp500_series(
-        start_date,
-        end_date,
-        backtest=backtest,
-        backtest_sp500_path=backtest_sp500_path,
-    )
+    print("Downloading SP500 history from Morningstar")
+    sp500 = download_sp500(start_date, end_date)
     save_series_csv("SP500", sp500, column_name="SP500", series_dir=root)
 
     df = pd.DataFrame(index=sp500.index)

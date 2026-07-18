@@ -2,7 +2,7 @@
 #   docker build -f docker/Dockerfile -t portfolio .
 #
 # Application code is mounted at runtime (see docker-compose.yml).
-# Run via compose or ./bin/api.sh and ./bin/job.sh.
+# Run via compose or ./bin/api.sh and ./bin/batch.sh.
 
 FROM python:3.12-slim-bookworm AS builder
 

@@ -7,8 +7,7 @@ A small Python library to download and process time series (fund prices) from Mo
 ```
 portfolio/
 ├── api.py                          # Wrapper to start the API server
-├── job.py                          # Data job entry point
-├── job/download_sp500.py           # Backtest SP500 CSV download helper
+├── batch.py                        # Batch pipeline entry point
 ├── bin/
 │   ├── api.sh                      # Start API via Docker Compose
 │   └── job.sh                      # Run data job via Docker Compose
@@ -22,7 +21,6 @@ portfolio/
 │   ├── portfolio.db                # SQLite storage (created at runtime)
 │   ├── funds/                      # NAV CSV files ({ISIN}.csv)
 │   ├── series/                     # Macro / SP500 series CSVs
-│   ├── backtest/                   # Long-term SP500 history for backtests
 │   └── fixtures/                   # Alert catalog JSON fixture
 ├── html/                           # Web UI (served by FastAPI)
 ├── src/portfolio/
@@ -36,7 +34,7 @@ portfolio/
 │   │   └── services/
 │   │       ├── portfolio/          # Funds, positions, curve, metrics, risk
 │   │       └── alerts/             # Tactical alerts + history
-│   ├── common/                     # Shared pure helpers (no api/job/storage imports)
+│   ├── common/                     # Shared pure helpers (no api/batch/storage imports)
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
 │   │   ├── series.py               # Macro series CSV I/O
 │   │   ├── equity.py               # Buy-and-hold / benchmark returns
@@ -44,11 +42,11 @@ portfolio/
 │   │   ├── signals.py              # Death-cross calculation
 │   │   ├── macro_constants.py      # Alert / series column names
 │   │   └── alert_descriptions.py   # Fixture load + threshold helpers
-│   ├── datasources/                # External vendors (no DB)
+│   ├── datasource/                # External vendors (no DB)
 │   │   ├── fred.py
 │   │   └── morningstar.py
-│   └── job/                        # Batch pipeline
-│       ├── download.py             # Job orchestration
+│   └── batch/                      # Offline / batch pipeline
+│       ├── download.py             # Pipeline orchestration
 │       ├── signals.py              # FRED + SP500 download pipeline
 │       ├── sp500.py                # Long-term SP500 via Morningstar
 │       ├── navs.py                 # Bulk NAV download from DB funds
@@ -62,19 +60,21 @@ portfolio/
 Package dependencies flow **inward** toward shared code. Arrows mean “imports / depends on”:
 
 ```
-datasources  ←  common  ←  job
-                 ↑         ↑
-                api     storage
-                 ↑_________/
+datasource   ←  common  ←  batch
+                 ↑          ↑
+                api      storage
+                 ↑__________/
 ```
 
 Rules:
 
-- **`datasources/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`job`/`storage` imports.
-- **`common/`** — pure helpers and CSV I/O. May use `datasources`. Must **not** import `api`, `job`, or `storage`.
-- **`storage/`** — SQLModel models, SQLite access, migrations, and alert-catalog seeding. Shared by `api` and `job`. Must **not** import `api` or `job`.
-- **`job/`** — batch orchestration (download signals, NAVs, refresh metrics, store alerts). May use `common`, `datasources`, and `storage`. Must **not** import `api`.
-- **`api/`** — FastAPI app and HTTP services. May use `common`, `datasources`, and `storage`. Must **not** import `job`.
+- **`datasource/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`batch`/`storage` imports.
+- **`common/`** — pure helpers and CSV I/O. May use `datasource`. Must **not** import `api`, `batch`, or `storage`.
+- **`storage/`** — SQLModel models, SQLite access, migrations, and alert-catalog seeding. Shared by `api` and `batch`. Must **not** import `api` or `batch`.
+- **`batch/`** — offline pipeline (download signals, NAVs, refresh metrics, store alerts). May use `common`, `datasource`, and `storage`. Must **not** import `api`.
+- **`api/`** — FastAPI app and HTTP services. May use `common`, `datasource`, and `storage`. Must **not** import `batch`.
+
+The CLI entrypoint is `batch.py` / `bin/batch.sh`; they call into `portfolio.batch`.
 
 ## Install
 
@@ -86,9 +86,9 @@ uv sync
 
 This installs runtime dependencies plus dev tools (ruff, ty, pytest, httpx).
 
-## Data job
+## Batch pipeline
 
-`job.py` downloads macro signals from FRED, fund NAVs from Morningstar, backfills fund metadata, and recomputes stored fund metrics for all funds in the database.
+`batch.py` downloads macro signals from FRED, fund NAVs from Morningstar, and recomputes stored fund metrics for all funds in the database.
 
 **Environment**
 
@@ -98,23 +98,23 @@ Create a `.env` file in the project root with your FRED API key:
 FRED_API_KEY=your_key_here
 ```
 
-If `FRED_API_KEY` is not set, the job skips the macro signals step and continues with fund NAV downloads.
+If `FRED_API_KEY` is not set, the batch pipeline skips the macro signals step and continues with fund NAV downloads.
 
-**Run the data job:**
+**Run the batch pipeline:**
 
 ```bash
-uv run job.py
+uv run batch.py
 ```
 
-Fund NAV files are written to `data/funds/{ISIN}.csv`. Add funds first via the web UI or `POST /api/portfolio/funds` before running the job.
+Fund NAV files are written to `data/funds/{ISIN}.csv`. Add funds first via the web UI or Morningstar JSON import before running the batch pipeline.
 
 ## Macro signals
 
-The data job downloads macroeconomic series from FRED, aligns them to S&P 500 trading days, and runs a metadata-driven pipeline of indicator functions.
+The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 500 trading days, and runs a metadata-driven pipeline of indicator functions.
 
 **Pipeline**
 
-1. `job.py` defines which FRED series to download (`FRED_SERIES`) and which macro functions to run (`MACRO_SIGNALS`).
+1. `batch.py` defines which FRED series to download (`FRED_SERIES`).
 2. `signals.py` downloads the series, forward-fills gaps on the SP500 calendar, and pipes the DataFrame through each macro function.
 3. Market signals (SP500 moving averages and death cross) are computed on top of the macro output.
 
@@ -131,17 +131,16 @@ The Sahm rule is tracked as an informational alert and does not gate other signa
 **Files**
 
 - `macro_constants.py` — column names for macro and market signals.
-- `macro_signals.py` — one function per indicator; each takes a DataFrame and returns it with new columns via `.assign()`.
-- `job.py` — wires FRED series IDs to column names and lists the macro functions to run.
+- `batch.py` — wires FRED series IDs to column names.
+- `data/fixtures/alert_description.json` — alert thresholds and metadata.
 
-**Adding a new macro signal**
+**Adding a new FRED series / alert**
 
-1. Add the column name(s) to `macro_constants.py`.
-2. If needed, add the FRED series to `FRED_SERIES` in `job.py`.
-3. Implement a function in `macro_signals.py` (e.g. `def my_signal(df): return df.assign(...)`).
-4. Append the function to `MACRO_SIGNALS` in `job.py`.
+1. Add the column name to `macro_constants.py`.
+2. Add the FRED series to `FRED_SERIES` in `batch.py`.
+3. Add the alert definition to `data/fixtures/alert_description.json`.
 
-When the job runs, the latest macro and market signals are printed to the console.
+When the batch pipeline runs, the latest macro and market signals are printed to the console.
 
 ## API and web UI
 
@@ -187,15 +186,15 @@ Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, a
 
 ## Docker
 
-One image holds Python dependencies; **application code is mounted from the host** at runtime (`src/`, `html/`, `api.py`, `job.py`, and `data/`). Rebuild the image only when dependencies change.
+One image holds Python dependencies; **application code is mounted from the host** at runtime (`src/`, `html/`, `api.py`, `batch.py`, and `data/`). Rebuild the image only when dependencies change.
 
-Pass `api` or `job` as the command (default is `api`).
+Pass `api` or `batch` as the command (default is `api`).
 
 **Scripts** (from the repository root):
 
 ```bash
 ./bin/api.sh          # start API on http://localhost:8000
-./bin/job.sh          # run data job once
+./bin/batch.sh        # run batch pipeline once
 ```
 
 Build the image:
@@ -208,7 +207,7 @@ docker build -f docker/Dockerfile -t portfolio .
 
 ```bash
 docker compose -f docker/docker-compose.yml up --build
-docker compose -f docker/docker-compose.yml --profile job run --rm job
+docker compose -f docker/docker-compose.yml --profile batch run --rm batch
 ```
 
 **Plain `docker run`** — mount code and data explicitly:
@@ -218,7 +217,7 @@ docker run -p 8000:8000 \
   -v "$(pwd)/src:/app/src:ro" \
   -v "$(pwd)/html:/app/html:ro" \
   -v "$(pwd)/api.py:/app/api.py:ro" \
-  -v "$(pwd)/job.py:/app/job.py:ro" \
+  -v "$(pwd)/batch.py:/app/batch.py:ro" \
   -v "$(pwd)/data:/app/data" \
   portfolio api
 
@@ -226,19 +225,19 @@ docker run \
   -v "$(pwd)/src:/app/src:ro" \
   -v "$(pwd)/html:/app/html:ro" \
   -v "$(pwd)/api.py:/app/api.py:ro" \
-  -v "$(pwd)/job.py:/app/job.py:ro" \
+  -v "$(pwd)/batch.py:/app/batch.py:ro" \
   -v "$(pwd)/data:/app/data" \
   --env-file .env \
-  portfolio job
+  portfolio batch
 ```
 
 Open http://localhost:8000 for the API.
 
 ### Environment variables
 
-Compose and `docker run --env-file .env` inject variables into the container environment. The job reads `FRED_API_KEY` from there (`job.py` also calls `load_dotenv()`, which is only needed when a `.env` file is present on disk).
+Compose and `docker run --env-file .env` inject variables into the container environment. The batch pipeline reads `FRED_API_KEY` from there (`batch.py` also calls `load_dotenv()`, which is only needed when a `.env` file is present on disk).
 
-The API does not use `.env` today. The job requires `FRED_API_KEY` for the macro signals step; without it, the job skips FRED and continues with fund NAV downloads.
+The API does not use `.env` today. The batch pipeline requires `FRED_API_KEY` for the macro signals step; without it, the batch pipeline skips FRED and continues with fund NAV downloads.
 
 Create `.env` in the project root:
 

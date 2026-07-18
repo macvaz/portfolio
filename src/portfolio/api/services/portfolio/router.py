@@ -35,7 +35,7 @@ from portfolio.api.services.portfolio.schemas import (
     require_portfolio,
     validate_positions,
 )
-from portfolio.datasources.morningstar import (
+from portfolio.datasource.morningstar import (
     morningstar_quote_url,
     parse_morningstar_search,
 )

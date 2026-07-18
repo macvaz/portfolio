@@ -1,5 +1,5 @@
 from portfolio.storage.database import get_fund, init_db, list_funds, save_fund
-from portfolio.datasources.morningstar import (
+from portfolio.datasource.morningstar import (
     morningstar_quote_url,
     parse_morningstar_search,
 )

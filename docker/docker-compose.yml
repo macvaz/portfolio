@@ -2,7 +2,7 @@ x-app-volumes: &app-volumes
   - ../src:/app/src:ro
   - ../html:/app/html:ro
   - ../api.py:/app/api.py:ro
-  - ../job.py:/app/job.py:ro
+  - ../batch.py:/app/batch.py:ro
   - ../data:/app/data
 
 services:
@@ -17,14 +17,14 @@ services:
     env_file:
       - ../.env
 
-  job:
+  batch:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    command: job
+    command: batch
     volumes: *app-volumes
     env_file:
       - ../.env
     profiles:
-      - job
+      - batch
     restart: "no"

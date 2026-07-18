@@ -3,10 +3,11 @@ from pathlib import Path
 from portfolio.storage.database import DEFAULT_DB_PATH
 from portfolio.common.navs import DEFAULT_FUNDS_DIR
 from portfolio.common.series import DEFAULT_SERIES_DIR
-from portfolio.job.alert_storage import persist_latest_alerts
-from portfolio.job.metrics import update_all_fund_metrics
-from portfolio.job.navs import store_fund_navs_from_db
-from portfolio.job.signals import compute_signals
+from portfolio.batch.alert_storage import persist_latest_alerts
+from portfolio.batch.metrics import update_all_fund_metrics
+from portfolio.batch.navs import store_fund_navs_from_db
+from portfolio.batch.signals import compute_signals
+
 
 def download(
     fred_api_key: str | None,
@@ -17,9 +18,6 @@ def download(
     db_path: Path = DEFAULT_DB_PATH,
     funds_dir: Path = DEFAULT_FUNDS_DIR,
     series_dir: Path = DEFAULT_SERIES_DIR,
-    *,
-    backtest: bool = False,
-    backtest_sp500_path: Path | None = None,
 ):
     print("Downloading FRED series...")
     market_df = compute_signals(
@@ -28,8 +26,6 @@ def download(
         start_date,
         end_date,
         series_dir=series_dir,
-        backtest=backtest,
-        backtest_sp500_path=backtest_sp500_path,
     )
     observation_date = persist_latest_alerts(
         market_df,

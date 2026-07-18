@@ -1,6 +1,6 @@
 import pytest
 
-from portfolio.datasources.fred import download_fred_data
+from portfolio.datasource.fred import download_fred_data
 
 
 def test_download_fred_data_rejects_deprecated_sp500():
