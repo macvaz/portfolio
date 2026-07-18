@@ -8,12 +8,9 @@ from portfolio.common.alert_descriptions import (
 )
 from portfolio.common.series import DEFAULT_SERIES_DIR, load_series_csv
 from portfolio.common.signals import calculate_market_signals
-from portfolio.job.sp500 import (
-    DEFAULT_BACKTEST_SP500_PATH,
-    load_backtest_sp500_csv,
-)
 
 HISTORY_START_DATE = pd.Timestamp("1995-01-01")
+DEFAULT_BACKTEST_SP500_PATH = Path("data/backtest/sp500.csv")
 
 ALERT_HISTORY_COLUMN_ORDER = (
     "High_Yield_Spread",
@@ -72,9 +69,14 @@ def _count_monthly_alerts(
 
 def _load_sp500_for_history(series_dir: Path) -> pd.DataFrame:
     if DEFAULT_BACKTEST_SP500_PATH.exists():
-        return load_backtest_sp500_csv(
-            start_date=HISTORY_START_DATE.strftime("%Y-%m-%d"),
+        df = (
+            pd.read_csv(DEFAULT_BACKTEST_SP500_PATH, parse_dates=["date"])
+            .set_index("date")
+            .sort_index()
         )
+        df = df.rename(columns={"value": "SP500"})
+        df = df.loc[df.index >= HISTORY_START_DATE]
+        return df[["SP500"]]
     series = load_series_csv("SP500", series_dir)
     if series.empty:
         return series

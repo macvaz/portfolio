@@ -8,68 +8,70 @@ A small Python library to download and process time series (fund prices) from Mo
 portfolio/
 ├── api.py                          # Wrapper to start the API server
 ├── job.py                          # Data job entry point
+├── job/download_sp500.py           # Backtest SP500 CSV download helper
 ├── bin/
 │   ├── api.sh                      # Start API via Docker Compose
 │   └── job.sh                      # Run data job via Docker Compose
 ├── docker/
-│   ├── Dockerfile                  # API + job image
-│   ├── docker-compose.yml          # Local API / job stack
-│   └── entrypoint.sh               # Dispatches api vs job command
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── entrypoint.sh
 ├── pyproject.toml
 ├── uv.lock
-├── docs/
-│   └── portfolio_performance.png   # Screenshot of the QuantStats report output
 ├── data/
 │   ├── portfolio.db                # SQLite storage (created at runtime)
-│   └── funds/                      # NAV CSV files ({ISIN}.csv)
-├── html/                           # Web UI (HTML/CSS/JS served by FastAPI)
-│   ├── index.html
-│   ├── app.js
-│   ├── api.js
-│   ├── management.js
-│   ├── portfolios.js
-│   ├── risk.js
-│   └── style.css
+│   ├── funds/                      # NAV CSV files ({ISIN}.csv)
+│   ├── series/                     # Macro / SP500 series CSVs
+│   ├── backtest/                   # Long-term SP500 history for backtests
+│   └── fixtures/                   # Alert catalog JSON fixture
+├── html/                           # Web UI (served by FastAPI)
 ├── src/portfolio/
-│   ├── __init__.py
-│   ├── api/
+│   ├── api/                        # HTTP app + persistence
 │   │   ├── api.py                  # FastAPI app shell
 │   │   ├── database.py             # SQLModel storage and queries
-│   │   ├── models.py               # User, Fund, Portfolio tables
+│   │   ├── models.py               # ORM tables
 │   │   └── services/
-│   │       ├── portfolio/
-│   │       │   ├── router.py       # /api/portfolio/* endpoints
-│   │       │   ├── schemas.py      # Request/response models
-│   │       │   ├── curve.py        # Equity curve
-│   │       │   ├── metrics.py      # Dashboard metrics payload
-│   │       │   └── risk_report.py  # QuantStats risk report
-│   │       └── signals/
-│   │           ├── router.py       # /api/signals endpoints
-│   │           └── service.py      # Tactical alerts service
-│   ├── common/
-│   │   ├── navs.py                 # NAV CSV storage
-│   │   ├── metrics.py              # Fund/portfolio metric computation
-│   │   ├── quantstats.py           # QuantStats HTML reports
-│   │   ├── returns.py              # Buy-and-hold return calculation
-│   │   ├── macro_constants.py      # FRED series and macro column names
-│   │   ├── macro_signals.py        # Macro indicator functions (metadata-driven)
-│   │   └── signals.py              # FRED download and signal pipeline
-│   ├── datasources/
-│   │   ├── fred.py                 # FRED time series download
-│   │   └── morningstar.py          # ISIN lookup and NAV download
-│   └── job/
-│       └── download.py             # Data job orchestration
+│   │       ├── portfolio/          # Funds, positions, curve, metrics, risk
+│   │       └── alerts/             # Tactical alerts + history
+│   ├── common/                     # Shared pure helpers (no api/job imports)
+│   │   ├── navs.py                 # NAV CSV I/O + single-fund download
+│   │   ├── series.py               # Macro series CSV I/O
+│   │   ├── equity.py               # Buy-and-hold / benchmark returns
+│   │   ├── metrics.py              # Metric computation only
+│   │   ├── signals.py              # Death-cross calculation
+│   │   ├── macro_constants.py      # Alert / series column names
+│   │   └── alert_descriptions.py   # Fixture load + threshold helpers
+│   ├── datasources/                # External vendors (no DB)
+│   │   ├── fred.py
+│   │   └── morningstar.py
+│   └── job/                        # Batch pipeline
+│       ├── download.py             # Job orchestration
+│       ├── signals.py              # FRED + SP500 download pipeline
+│       ├── sp500.py                # Long-term SP500 via Morningstar
+│       ├── navs.py                 # Bulk NAV download from DB funds
+│       ├── metrics.py              # Persist computed fund metrics
+│       └── alert_storage.py        # Persist latest tactical alerts
 └── tests/
-    ├── test_api.py
-    ├── test_curve.py
-    ├── test_funds.py
-    ├── test_get_navs.py
-    ├── test_metrics.py
-    ├── test_nav_files.py
-    ├── test_portfolio.py
-    ├── test_portfolio_model.py
-    └── test_database_migration.py
 ```
+
+## Architecture
+
+Package dependencies flow **inward** toward shared code. Arrows mean “imports / depends on”:
+
+```
+datasources  ←  common  ←  job
+                 ↑
+                api
+```
+
+Rules:
+
+- **`datasources/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`job` imports.
+- **`common/`** — pure helpers and CSV I/O. May use `datasources`. Must **not** import `api` or `job`.
+- **`job/`** — batch orchestration (download signals, NAVs, refresh metrics, store alerts). May use `common`, `datasources`, and `api.database` for persistence.
+- **`api/`** — FastAPI app, SQLModel models/DB, and HTTP services. May use `common` and `datasources`. Must **not** import `job`.
+
+Persistence still lives under `api/database.py`, so the job imports that module for paths and CRUD. That is intentional for now; `common` stays free of both `api` and `job`.
 
 ## Install
 

@@ -1,7 +1,5 @@
-from pathlib import Path
-
 from portfolio.api.database import init_db, save_fund
-from portfolio.common.navs import store_fund_navs_from_db
+from portfolio.job.navs import store_fund_navs_from_db
 
 
 def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):

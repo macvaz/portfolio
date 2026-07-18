@@ -1,6 +1,6 @@
 import pandas as pd
 
-from portfolio.common.alert_history import (
+from portfolio.api.services.alerts.history import (
     HISTORY_START_DATE,
     build_monthly_alert_history,
 )
@@ -15,11 +15,11 @@ def _write_monthly_series(tmp_path, series_id: str, values: dict[str, float]) ->
 
 def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "portfolio.common.alert_history.DEFAULT_BACKTEST_SP500_PATH",
+        "portfolio.api.services.alerts.history.DEFAULT_BACKTEST_SP500_PATH",
         tmp_path / "missing-sp500.csv",
     )
     monkeypatch.setattr(
-        "portfolio.common.alert_history.HISTORY_START_DATE",
+        "portfolio.api.services.alerts.history.HISTORY_START_DATE",
         pd.Timestamp("2024-01-01"),
     )
     _write_monthly_series(
@@ -88,11 +88,11 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
 
 def test_build_monthly_alert_history_fills_missing_months_from_1995(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "portfolio.common.alert_history.DEFAULT_BACKTEST_SP500_PATH",
+        "portfolio.api.services.alerts.history.DEFAULT_BACKTEST_SP500_PATH",
         tmp_path / "missing-sp500.csv",
     )
     monkeypatch.setattr(
-        "portfolio.common.alert_history.HISTORY_START_DATE",
+        "portfolio.api.services.alerts.history.HISTORY_START_DATE",
         pd.Timestamp("1995-01-01"),
     )
     _write_monthly_series(
@@ -130,11 +130,11 @@ def test_build_monthly_alert_history_fills_missing_months_from_1995(tmp_path, mo
 
 def test_build_monthly_alert_history_honors_series_start(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "portfolio.common.alert_history.DEFAULT_BACKTEST_SP500_PATH",
+        "portfolio.api.services.alerts.history.DEFAULT_BACKTEST_SP500_PATH",
         tmp_path / "missing-sp500.csv",
     )
     monkeypatch.setattr(
-        "portfolio.common.alert_history.HISTORY_START_DATE",
+        "portfolio.api.services.alerts.history.HISTORY_START_DATE",
         pd.Timestamp("2023-01-01"),
     )
     _write_monthly_series(
@@ -162,7 +162,7 @@ def test_build_monthly_alert_history_returns_empty_rows_without_series(
     tmp_path, monkeypatch
 ):
     monkeypatch.setattr(
-        "portfolio.common.alert_history.DEFAULT_BACKTEST_SP500_PATH",
+        "portfolio.api.services.alerts.history.DEFAULT_BACKTEST_SP500_PATH",
         tmp_path / "missing-sp500.csv",
     )
     history = build_monthly_alert_history(tmp_path)

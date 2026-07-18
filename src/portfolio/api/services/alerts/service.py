@@ -1,6 +1,6 @@
 from portfolio.api.database import get_latest_alerts
 from portfolio.api.services.alerts.schemas import AlertHistory, AlertSnapshotResponse
-from portfolio.common.alert_history import build_monthly_alert_history
+from portfolio.api.services.alerts.history import build_monthly_alert_history
 
 
 def fetch_latest_alert_snapshot() -> AlertSnapshotResponse:

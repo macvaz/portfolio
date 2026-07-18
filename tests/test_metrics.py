@@ -7,8 +7,8 @@ from portfolio.common.metrics import (
     compute_fund_metrics,
     compute_metrics,
     compute_portfolio_metrics,
-    update_all_fund_metrics,
 )
+from portfolio.job.metrics import update_all_fund_metrics
 from portfolio.common.navs import save_fund_nav_csv
 
 

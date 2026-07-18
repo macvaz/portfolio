@@ -6,7 +6,7 @@ from sqlalchemy import func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
 from portfolio.api.models import Alert, AlertDescription, Fund, Metric, Portfolio, User
-from portfolio.common.alert_descriptions import (
+from portfolio.api.services.alerts.catalog import (
     insert_alert_descriptions_from_fixture,
     sync_alert_catalog_from_fixture,
 )

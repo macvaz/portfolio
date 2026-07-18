@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from portfolio.common.quantstats import generate_performance_report_html
-from portfolio.api.services.portfolio.curve import (
+from portfolio.api.services.portfolio.quantstats import generate_performance_report_html
+from portfolio.common.equity import (
     BENCHMARK_ISIN,
     align_return_series,
     build_portfolio_daily_returns,

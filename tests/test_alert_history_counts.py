@@ -1,6 +1,6 @@
 import pandas as pd
 
-from portfolio.common.alert_history import _count_monthly_alerts
+from portfolio.api.services.alerts.history import _count_monthly_alerts
 
 
 def test_count_monthly_alerts_uses_series_start_for_eligible_total():

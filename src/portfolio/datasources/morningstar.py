@@ -3,17 +3,14 @@ Morningstar fund lookup and NAV downloads.
 
 Public API:
 - parse_morningstar_search: parse legacy-search JSON into fund metadata
-- download_navs: download NAV time series for a fund or portfolio
+- download_navs: download NAV time series for a fund
 - morningstar_quote_url: build a quote-page URL from a performance ID
 """
 
 import json
-from pathlib import Path
 
 import pandas as pd
 import requests
-
-from portfolio.api.database import get_fund
 
 MORNINGSTAR_QUOTE_URL = (
     "https://global.morningstar.com/es/inversiones/{universe}/{performance_id}/cotizacion"
@@ -117,8 +114,13 @@ def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _download_fund_navs(
-    fund_id: str, currency: str, start: str, end: str, timeout: int = 30
+def download_navs(
+    fund_id: str,
+    start: str,
+    end: str,
+    *,
+    currency: str = "EUR",
+    timeout: int = 30,
 ) -> pd.DataFrame:
     """Download Morningstar time series data and parse it into a pandas DataFrame."""
     params = _compute_params(fund_id, currency, start, end)
@@ -146,45 +148,6 @@ def _download_fund_navs(
 
     df = pd.json_normalize(records)
     return _normalize_dataframe(df)
-
-
-###################################
-# Main morningstar public methods
-###################################
-
-
-def download_navs(
-    start: str,
-    end: str,
-    *,
-    fund_id: str | None = None,
-    portfolio: dict[str, float] | None = None,
-    currency: str = "EUR",
-    db_path: Path | None = None,
-    timeout: int = 30,
-) -> pd.DataFrame:
-    """Download NAV time series for a fund or weighted portfolio."""
-    if fund_id is not None:
-        return _download_fund_navs(fund_id, currency, start, end, timeout)
-
-    if portfolio is None:
-        raise ValueError("Either fund_id or portfolio must be provided")
-
-    navs_df = pd.DataFrame()
-    for isin, weight in portfolio.items():
-        fund = get_fund(isin, db_path)
-        if fund is None:
-            print(f"No fund found for ISIN: {isin}")
-            continue
-        fund_data = _download_fund_navs(
-            fund["security_id"], currency, start, end, timeout
-        )
-        if fund_data.empty:
-            print(f"No price data for ISIN: {isin}")
-            continue
-        navs_df[isin] = fund_data["value"]
-        print(f"{isin} ({weight:.0%}): {fund['name']}")
-    return navs_df
 
 
 def morningstar_quote_url(

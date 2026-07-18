@@ -13,6 +13,7 @@ from portfolio.api.database import (
     list_user_portfolio,
     list_users,
     save_fund,
+    save_fund_metrics,
     save_user_portfolio,
     set_default_user,
 )
@@ -38,7 +39,7 @@ from portfolio.datasources.morningstar import (
     morningstar_quote_url,
     parse_morningstar_search,
 )
-from portfolio.common.metrics import refresh_fund_metrics
+from portfolio.common.metrics import compute_fund_metrics
 from portfolio.common.navs import delete_fund_nav_csv, download_and_store_fund_nav
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
@@ -59,7 +60,7 @@ def _register_fund(fund: dict) -> dict:
         start_date=NAV_START_DATE,
         end_date=date.today().isoformat(),
     )
-    refresh_fund_metrics(fund["isin"])
+    save_fund_metrics(fund["isin"], compute_fund_metrics(fund["isin"]))
     return {
         "isin": fund["isin"],
         "name": fund["name"],

@@ -1,8 +1,8 @@
-from portfolio.common.quantstats import (
+from portfolio.api.services.portfolio.quantstats import (
     generate_performance_report,
     generate_performance_report_html,
 )
-from portfolio.common.returns import calculate_buy_and_hold_returns
+from portfolio.common.equity import calculate_buy_and_hold_returns
 from portfolio.datasources.morningstar import download_navs
 
 

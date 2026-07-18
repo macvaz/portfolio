@@ -6,13 +6,12 @@ from pathlib import Path
 import pandas as pd
 import quantstats as qs
 
-from portfolio.api.services.portfolio.curve import (
+from portfolio.common.equity import (
     TRADING_DAYS_PER_YEAR,
     align_return_series,
     build_portfolio_daily_returns,
     load_benchmark_daily_returns,
 )
-from portfolio.api.database import list_funds, save_fund_metrics
 from portfolio.common.navs import load_fund_nav_csv
 
 METRIC_KEYS = (
@@ -178,26 +177,3 @@ def compute_portfolio_metrics(
         benchmark_returns,
     )
     return compute_metrics(portfolio_returns, benchmark_returns)
-
-
-def refresh_fund_metrics(
-    isin: str,
-    db_path: Path | None = None,
-    funds_dir: Path | None = None,
-) -> dict[str, float | None]:
-    """Recompute metrics from stored NAVs and persist them for one fund."""
-    metrics = compute_fund_metrics(isin, funds_dir)
-    save_fund_metrics(isin, metrics, db_path)
-    return metrics
-
-
-def update_all_fund_metrics(
-    db_path: Path | None = None,
-    funds_dir: Path | None = None,
-) -> int:
-    """Recompute and persist metrics for every fund in the database."""
-    updated = 0
-    for fund in list_funds(db_path):
-        refresh_fund_metrics(fund["isin"], db_path, funds_dir)
-        updated += 1
-    return updated
