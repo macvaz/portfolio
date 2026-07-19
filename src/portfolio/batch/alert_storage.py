@@ -5,7 +5,7 @@ import pandas as pd
 
 from portfolio.storage.database import init_db, upsert_alerts
 from portfolio.common.alert_descriptions import load_alert_description_fixture
-from portfolio.common.series import latest_series_date
+from portfolio.common.indexes import latest_index_date
 
 
 def extract_alert_values(row: pd.Series, codes: list[str]) -> dict[str, float]:
@@ -23,10 +23,10 @@ def extract_alert_values(row: pd.Series, codes: list[str]) -> dict[str, float]:
 def persist_latest_alerts(
     market_df: pd.DataFrame,
     *,
-    series_dir: Path | None = None,
+    indexes_dir: Path | None = None,
     db_path: Path | None = None,
 ) -> datetime.date | None:
-    observation_date = latest_series_date(series_dir)
+    observation_date = latest_index_date(indexes_dir)
     if observation_date is None or market_df.empty:
         return None
 

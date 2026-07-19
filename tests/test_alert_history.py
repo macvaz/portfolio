@@ -1,16 +1,22 @@
 import pandas as pd
 
 from portfolio.api.services.alerts.history import (
-    HISTORY_START_DATE,
     build_monthly_alert_history,
 )
+from portfolio.common.indexes import save_index_csv
 from portfolio.common.series import save_series_csv
 
 
-def _write_monthly_series(tmp_path, series_id: str, values: dict[str, float]) -> None:
+def _write_monthly_series(series_dir, series_id: str, values: dict[str, float]) -> None:
     dates = [pd.Timestamp(day) for day in values]
     frame = pd.DataFrame({"value": list(values.values())}, index=dates)
-    save_series_csv(series_id, frame, column_name="value", series_dir=tmp_path)
+    save_series_csv(series_id, frame, column_name="value", series_dir=series_dir)
+
+
+def _write_monthly_index(indexes_dir, index_id: str, values: dict[str, float]) -> None:
+    dates = [pd.Timestamp(day) for day in values]
+    frame = pd.DataFrame({"value": list(values.values())}, index=dates)
+    save_index_csv(index_id, frame, column_name="value", indexes_dir=indexes_dir)
 
 
 def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatch):
@@ -18,8 +24,10 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         "portfolio.api.services.alerts.history.HISTORY_START_DATE",
         pd.Timestamp("2024-01-01"),
     )
+    series_dir = tmp_path / "series"
+    indexes_dir = tmp_path / "indexes"
     _write_monthly_series(
-        tmp_path,
+        series_dir,
         "UNRATE",
         {
             "2024-05-15": 3.9,
@@ -27,15 +35,15 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         },
     )
     _write_monthly_series(
-        tmp_path,
+        series_dir,
         "T10Y3M",
         {
             "2024-05-15": 0.2,
             "2024-06-15": -0.1,
         },
     )
-    _write_monthly_series(
-        tmp_path,
+    _write_monthly_index(
+        indexes_dir,
         "SP500",
         {
             "2024-05-15": 5000.0,
@@ -43,7 +51,7 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         },
     )
 
-    history = build_monthly_alert_history(tmp_path)
+    history = build_monthly_alert_history(series_dir, indexes_dir)
     columns = [column["code"] for column in history["columns"]]
     assert columns == [
         "High_Yield_Spread",
@@ -87,13 +95,15 @@ def test_build_monthly_alert_history_fills_missing_months_from_1995(tmp_path, mo
         "portfolio.api.services.alerts.history.HISTORY_START_DATE",
         pd.Timestamp("1995-01-01"),
     )
+    series_dir = tmp_path / "series"
+    indexes_dir = tmp_path / "indexes"
     _write_monthly_series(
-        tmp_path,
+        series_dir,
         "UNRATE",
         {"1995-02-15": 5.4},
     )
 
-    history = build_monthly_alert_history(tmp_path)
+    history = build_monthly_alert_history(series_dir, indexes_dir)
     months = [row["month"] for row in history["rows"]]
 
     assert months == ["1995-02", "1995-01"]
@@ -125,13 +135,15 @@ def test_build_monthly_alert_history_honors_series_start(tmp_path, monkeypatch):
         "portfolio.api.services.alerts.history.HISTORY_START_DATE",
         pd.Timestamp("2023-01-01"),
     )
+    series_dir = tmp_path / "series"
+    indexes_dir = tmp_path / "indexes"
     _write_monthly_series(
-        tmp_path,
+        series_dir,
         "BAMLH0A0HYM2EY",
         {"2023-06-27": 8.5},
     )
 
-    history = build_monthly_alert_history(tmp_path)
+    history = build_monthly_alert_history(series_dir, indexes_dir)
     hy_idx = [
         index
         for index, column in enumerate(history["columns"])
@@ -149,6 +161,6 @@ def test_build_monthly_alert_history_honors_series_start(tmp_path, monkeypatch):
 def test_build_monthly_alert_history_returns_empty_rows_without_series(
     tmp_path, monkeypatch
 ):
-    history = build_monthly_alert_history(tmp_path)
+    history = build_monthly_alert_history(tmp_path / "series", tmp_path / "indexes")
     assert history["rows"] == []
     assert len(history["columns"]) == 8

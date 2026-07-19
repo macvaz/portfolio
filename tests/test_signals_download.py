@@ -5,8 +5,9 @@ import pandas as pd
 from portfolio.batch.signals import download_data
 
 
-def test_download_data_stores_fred_series(tmp_path):
+def test_download_data_stores_fred_series_and_index(tmp_path):
     series_dir = tmp_path / "series"
+    indexes_dir = tmp_path / "indexes"
 
     def fake_download(_fred, series_id, column_name, _start, _end):
         return pd.DataFrame(
@@ -29,11 +30,13 @@ def test_download_data_stores_fred_series(tmp_path):
             "2024-01-01",
             "2024-01-31",
             series_dir=series_dir,
+            indexes_dir=indexes_dir,
         )
 
     assert (series_dir / "UNRATE.csv").exists()
     assert (series_dir / "T10Y3M.csv").exists()
-    assert (series_dir / "SP500.csv").exists()
+    assert (indexes_dir / "SP500.csv").exists()
+    assert not (series_dir / "SP500.csv").exists()
 
     unemployment = pd.read_csv(series_dir / "UNRATE.csv")
     assert list(unemployment.columns) == ["date", "value"]

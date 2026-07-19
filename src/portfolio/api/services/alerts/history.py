@@ -6,6 +6,7 @@ from portfolio.common.alert_descriptions import (
     is_alert_active,
     load_alert_description_fixture,
 )
+from portfolio.common.indexes import DEFAULT_INDEXES_DIR, load_index_csv
 from portfolio.common.series import DEFAULT_SERIES_DIR, load_series_csv
 from portfolio.common.signals import calculate_market_signals
 
@@ -66,8 +67,8 @@ def _count_monthly_alerts(
     return active_count, eligible_count
 
 
-def _load_sp500_for_history(series_dir: Path) -> pd.DataFrame:
-    series = load_series_csv("SP500", series_dir)
+def _load_sp500_for_history(indexes_dir: Path) -> pd.DataFrame:
+    series = load_index_csv("SP500", indexes_dir)
     if series.empty:
         return series
     return series.rename(columns={"SP500": "SP500"})
@@ -83,8 +84,10 @@ def _history_month_ends(until: pd.Timestamp) -> pd.DatetimeIndex:
 
 def load_market_dataframe_from_series(
     series_dir: Path | None = None,
+    indexes_dir: Path | None = None,
 ) -> pd.DataFrame:
-    root = series_dir or DEFAULT_SERIES_DIR
+    series_root = series_dir or DEFAULT_SERIES_DIR
+    indexes_root = indexes_dir or DEFAULT_INDEXES_DIR
     fixture = load_alert_description_fixture()
     frames: list[pd.DataFrame] = []
 
@@ -93,12 +96,12 @@ def load_market_dataframe_from_series(
             continue
         code = str(entry["code"])
         series_id = str(entry["series_id"])
-        series = load_series_csv(series_id, root)
+        series = load_series_csv(series_id, series_root)
         if series.empty:
             continue
         frames.append(series.rename(columns={series_id: code}))
 
-    sp500 = _load_sp500_for_history(root)
+    sp500 = _load_sp500_for_history(indexes_root)
     if not sp500.empty:
         frames.append(sp500)
 
@@ -109,7 +112,6 @@ def load_market_dataframe_from_series(
     for frame in frames[1:]:
         df = df.join(frame, how="outer")
     return calculate_market_signals(df.sort_index())
-
 
 def _month_before_series_start(
     month_end: pd.Timestamp,
@@ -152,10 +154,11 @@ def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
 
 def build_monthly_alert_history(
     series_dir: Path | None = None,
+    indexes_dir: Path | None = None,
 ) -> dict:
     fixture = load_alert_description_fixture()
     columns = _alert_history_columns(fixture)
-    market_df = load_market_dataframe_from_series(series_dir)
+    market_df = load_market_dataframe_from_series(series_dir, indexes_dir)
     if market_df.empty:
         return {"columns": columns, "rows": []}
 

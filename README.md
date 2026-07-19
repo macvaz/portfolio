@@ -20,7 +20,8 @@ portfolio/
 ├── data/
 │   ├── portfolio.db                # SQLite storage (created at runtime)
 │   ├── funds/                      # NAV CSV files ({ISIN}.csv)
-│   ├── series/                     # Macro / SP500 series CSVs
+│   ├── series/                     # FRED macro series CSVs
+│   ├── indexes/                    # Market index CSVs (e.g. SP500)
 │   └── fixtures/                   # Alert catalog JSON fixture
 ├── html/                           # Web UI (served by FastAPI)
 ├── src/portfolio/
@@ -36,7 +37,8 @@ portfolio/
 │   │       └── alerts/             # Tactical alerts + history
 │   ├── common/                     # Shared pure helpers (no api/batch/storage imports)
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
-│   │   ├── series.py               # Macro series CSV I/O
+│   │   ├── series.py               # FRED macro series CSV I/O
+│   │   ├── indexes.py              # Market index CSV I/O
 │   │   ├── equity.py               # Buy-and-hold / benchmark returns
 │   │   ├── metrics.py              # Metric computation only
 │   │   ├── signals.py              # Death-cross calculation

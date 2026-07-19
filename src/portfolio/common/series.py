@@ -1,4 +1,3 @@
-import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -56,14 +55,3 @@ def load_series_csv(series_id: str, series_dir: Path | None = None) -> pd.DataFr
 
     df = pd.read_csv(path, parse_dates=["date"])
     return df.set_index("date").rename(columns={"value": series_id}).sort_index()
-
-
-def latest_series_date(
-    series_dir: Path | None = None,
-    series_id: str = "SP500",
-) -> datetime.date | None:
-    """Return the last observation date stored for a series CSV."""
-    series = load_series_csv(series_id, series_dir)
-    if series.empty:
-        return None
-    return series.index.max().date()

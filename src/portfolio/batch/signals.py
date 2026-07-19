@@ -8,6 +8,7 @@ from portfolio.common.alert_descriptions import (
     is_alert_active,
     load_alert_description_fixture,
 )
+from portfolio.common.indexes import DEFAULT_INDEXES_DIR, save_index_csv
 from portfolio.common.series import DEFAULT_SERIES_DIR, save_series_csv
 from portfolio.common.signals import calculate_market_signals
 from portfolio.datasource.fred import download_fred_data, init_client
@@ -20,6 +21,7 @@ def compute_signals(
     start_date: str,
     end_date: str,
     series_dir: Path | None = None,
+    indexes_dir: Path | None = None,
 ) -> pd.DataFrame:
     data_df = download_data(
         fred_api_key,
@@ -27,6 +29,7 @@ def compute_signals(
         start_date,
         end_date,
         series_dir=series_dir,
+        indexes_dir=indexes_dir,
     )
     market_df = calculate_market_signals(data_df)
     print_current_signals(market_df)
@@ -39,9 +42,11 @@ def download_data(
     start_date: str,
     end_date: str,
     series_dir: Path | None = None,
+    indexes_dir: Path | None = None,
 ) -> pd.DataFrame:
     fred = init_client(fred_api_key)
-    root = series_dir or DEFAULT_SERIES_DIR
+    series_root = series_dir or DEFAULT_SERIES_DIR
+    indexes_root = indexes_dir or DEFAULT_INDEXES_DIR
 
     macro_series_data = []
     for series_id, column_name in fred_series:
@@ -49,13 +54,13 @@ def download_data(
             fred, series_id, column_name, start_date, end_date
         )
         save_series_csv(
-            series_id, series_df, column_name=column_name, series_dir=root
+            series_id, series_df, column_name=column_name, series_dir=series_root
         )
         macro_series_data.append(series_df)
 
     print("Downloading SP500 history from Morningstar")
     sp500 = download_sp500(start_date, end_date)
-    save_series_csv("SP500", sp500, column_name="SP500", series_dir=root)
+    save_index_csv("SP500", sp500, column_name="SP500", indexes_dir=indexes_root)
 
     df = pd.DataFrame(index=sp500.index)
     df = df.join(macro_series_data, how="left")

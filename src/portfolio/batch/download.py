@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from portfolio.storage.database import DEFAULT_DB_PATH
+from portfolio.common.indexes import DEFAULT_INDEXES_DIR
 from portfolio.common.navs import DEFAULT_FUNDS_DIR
 from portfolio.common.series import DEFAULT_SERIES_DIR
 from portfolio.batch.alert_storage import persist_latest_alerts
@@ -18,6 +19,7 @@ def download(
     db_path: Path = DEFAULT_DB_PATH,
     funds_dir: Path = DEFAULT_FUNDS_DIR,
     series_dir: Path = DEFAULT_SERIES_DIR,
+    indexes_dir: Path = DEFAULT_INDEXES_DIR,
 ):
     print("Downloading FRED series...")
     market_df = compute_signals(
@@ -26,10 +28,11 @@ def download(
         start_date,
         end_date,
         series_dir=series_dir,
+        indexes_dir=indexes_dir,
     )
     observation_date = persist_latest_alerts(
         market_df,
-        series_dir=series_dir,
+        indexes_dir=indexes_dir,
         db_path=db_path,
     )
     if observation_date is not None:

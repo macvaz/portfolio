@@ -6,19 +6,19 @@ from sqlmodel import select
 from portfolio.storage.database import get_session, init_db, upsert_alerts
 from portfolio.storage.models import Alert
 from portfolio.batch.alert_storage import extract_alert_values, persist_latest_alerts
+from portfolio.common.indexes import latest_index_date, save_index_csv
 from portfolio.common.macro_constants import SP500_DEATH_CROSS, YIELD_SPREAD_10Y3M
-from portfolio.common.series import latest_series_date, save_series_csv
 
 
-def test_latest_series_date_uses_last_row_in_file(tmp_path):
-    series_dir = tmp_path / "series"
+def test_latest_index_date_uses_last_row_in_file(tmp_path):
+    indexes_dir = tmp_path / "indexes"
     df = pd.DataFrame(
         {"SP500": [4800.0, 4810.0]},
         index=pd.to_datetime(["2024-06-03", "2024-06-04"]),
     )
-    save_series_csv("SP500", df, column_name="SP500", series_dir=series_dir)
+    save_index_csv("SP500", df, column_name="SP500", indexes_dir=indexes_dir)
 
-    assert latest_series_date(series_dir) == datetime.date(2024, 6, 4)
+    assert latest_index_date(indexes_dir) == datetime.date(2024, 6, 4)
 
 
 def test_upsert_alerts_updates_existing_value(tmp_path):
@@ -48,16 +48,16 @@ def test_upsert_alerts_updates_existing_value(tmp_path):
     assert stored.value == 0.41
 
 
-def test_persist_latest_alerts_uses_series_file_date(tmp_path):
+def test_persist_latest_alerts_uses_index_file_date(tmp_path):
     db_path = tmp_path / "portfolio.db"
-    series_dir = tmp_path / "series"
+    indexes_dir = tmp_path / "indexes"
     init_db(db_path)
 
-    save_series_csv(
+    save_index_csv(
         "SP500",
         pd.DataFrame({"SP500": [4800.0]}, index=pd.to_datetime(["2024-06-04"])),
         column_name="SP500",
-        series_dir=series_dir,
+        indexes_dir=indexes_dir,
     )
 
     market_df = pd.DataFrame(
@@ -76,7 +76,7 @@ def test_persist_latest_alerts_uses_series_file_date(tmp_path):
 
     observation_date = persist_latest_alerts(
         market_df,
-        series_dir=series_dir,
+        indexes_dir=indexes_dir,
         db_path=db_path,
     )
 
