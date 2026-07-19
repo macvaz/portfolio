@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=119" />
+    <link rel="stylesheet" href="/static/style.css?v=137" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -16,9 +16,45 @@
       <div class="top-bar-inner">
         <img src="/static/logo.png" alt="Alpha Plans" class="site-logo" />
         <nav class="app-tabs" id="app-tabs" aria-label="Portfolio toolbar" hidden>
-          <button type="button" class="app-tab is-active" data-tab="management">Portfolio management</button>
-          <button type="button" class="app-tab" data-tab="risk">Risk report</button>
-          <button type="button" class="app-tab" data-tab="tactical">Tactical alerts</button>
+          <div class="app-tab-menu" id="app-tab-menu">
+            <button
+              type="button"
+              class="app-tab-trigger"
+              id="app-tab-trigger"
+              aria-expanded="false"
+              aria-controls="app-tab-dropdown"
+              aria-haspopup="listbox"
+            >
+              <span class="app-tab-trigger-label" id="app-tab-trigger-label">Portfolio management</span>
+              <svg
+                class="app-tab-caret"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div class="app-tab-dropdown" id="app-tab-dropdown" role="listbox" aria-label="Sections">
+              <button type="button" class="app-tab is-active" data-tab="management" role="option" aria-selected="true">
+                <span class="app-tab-full">Portfolio management</span>
+                <span class="app-tab-short">Manage</span>
+              </button>
+              <button type="button" class="app-tab" data-tab="risk" role="option" aria-selected="false">
+                <span class="app-tab-full">Risk report</span>
+                <span class="app-tab-short">Risk</span>
+              </button>
+              <button type="button" class="app-tab" data-tab="tactical" role="option" aria-selected="false">
+                <span class="app-tab-full">Tactical alerts</span>
+                <span class="app-tab-short">Alerts</span>
+              </button>
+            </div>
+          </div>
           <form id="add-fund-form" class="add-isin-form">
             <label class="add-isin-field">
               <button type="submit" class="add-isin-icon-btn" aria-label="Add ISIN">
@@ -199,7 +235,7 @@
             </div>
           </section>
 
-          <section class="table-panel">
+          <section class="table-panel table-panel--other-funds">
             <h2 class="table-title">Other funds</h2>
             <div class="table-scroll">
               <table class="fund-table" id="favorites-table">
@@ -281,6 +317,7 @@
                   <tbody id="alerts-status-body"></tbody>
                 </table>
               </div>
+              <div id="tactical-month-cards" class="tactical-month-cards" aria-label="Monthly tactical alerts cards"></div>
             </section>
           </div>
           <p id="tactical-message" class="risk-message" hidden></p>
@@ -342,10 +379,10 @@
 
     <script src="/static/api.js?v=14"></script>
     <script src="/static/portfolios.js?v=11"></script>
-    <script src="/static/management.js?v=73"></script>
-    <script src="/static/risk.js?v=6"></script>
-    <script src="/static/tactical.js?v=43"></script>
+    <script src="/static/management.js?v=75"></script>
+    <script src="/static/risk.js?v=7"></script>
+    <script src="/static/tactical.js?v=45"></script>
     <script src="/static/add-fund.js?v=4"></script>
-    <script src="/static/app.js?v=42"></script>
+    <script src="/static/app.js?v=44"></script>
   </body>
 </html>

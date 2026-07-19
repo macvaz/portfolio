@@ -6,17 +6,19 @@
   let savingWeights = false;
 
   const METRIC_COLUMNS = [
-    { key: "weight", format: "percent", weightColumn: true },
-    { key: "beta_6m", format: "decimal2" },
-    { key: "cor_6m", format: "decimal2" },
-    { key: "vol_1y", format: "decimal2", beforeDivider: true },
-    { key: "pct_1m", format: "signedPercent", divider: true },
-    { key: "pct_3m", format: "signedPercent" },
-    { key: "pct_6m", format: "signedPercent" },
-    { key: "pct_ytd", format: "signedPercent", beforeDivider: true },
-    { key: "sr_6m", format: "decimal2", colorize: true, divider: true },
-    { key: "sr_1y", format: "decimal2", colorize: true },
+    { key: "weight", format: "percent", weightColumn: true, label: "Weight (%)" },
+    { key: "beta_6m", format: "decimal2", label: "β (6m)" },
+    { key: "cor_6m", format: "decimal2", label: "Cor (6m)" },
+    { key: "vol_1y", format: "decimal2", beforeDivider: true, label: "Vol (1y)" },
+    { key: "pct_1m", format: "signedPercent", divider: true, label: "% 1m" },
+    { key: "pct_3m", format: "signedPercent", label: "% 3m" },
+    { key: "pct_6m", format: "signedPercent", label: "% 6m" },
+    { key: "pct_ytd", format: "signedPercent", beforeDivider: true, label: "% YTD" },
+    { key: "sr_6m", format: "decimal2", colorize: true, divider: true, label: "SR 6m" },
+    { key: "sr_1y", format: "decimal2", colorize: true, label: "SR 1y" },
   ];
+
+  const MOBILE_CARDS_MQ = window.matchMedia("(max-width: 720px)");
 
   function showError(message) {
     const el = document.getElementById("error");
@@ -107,9 +109,9 @@
       .join(" ");
   }
 
-  function renderWeightInputCell(isin, weight) {
+  function renderWeightInputCell(isin, weight, label) {
     const display = formatWeight(weight);
-    return `<td class="col-weight col-weight-editable">
+    return `<td class="col-weight col-weight-editable" data-label="${label}">
       <div class="weight-cell-slot">
         <span class="weight-display">${display}</span>
         <input
@@ -133,12 +135,12 @@
     return METRIC_COLUMNS.map((column) => {
       if (column.weightColumn && editableWeights) {
         const weight = forceZeroWeight ? 0 : fund.weight;
-        return renderWeightInputCell(fund.isin, weight);
+        return renderWeightInputCell(fund.isin, weight, column.label);
       }
 
       const value = column.weightColumn && forceZeroWeight ? 0 : fund[column.key];
       const text = formatValue(value, column.format);
-      return `<td class="${cellClasses(value, column)}">${text}</td>`;
+      return `<td class="${cellClasses(value, column)}" data-label="${column.label}"><span class="metric-value">${text}</span></td>`;
     }).join("");
   }
 
@@ -150,9 +152,9 @@
     </tr>`;
   }
 
-  function renderSummaryWeightCell(value) {
+  function renderSummaryWeightCell(value, label) {
     const text = formatWeight(value);
-    return `<td class="col-weight col-weight-editable">
+    return `<td class="col-weight col-weight-editable" data-label="${label}">
       <div class="weight-cell-slot">
         <span class="weight-display">${text}</span>
       </div>
@@ -163,15 +165,15 @@
     const cells = METRIC_COLUMNS.map((column) => {
       const value = summary[column.key];
       if (column.weightColumn) {
-        return renderSummaryWeightCell(value);
+        return renderSummaryWeightCell(value, column.label);
       }
       const text = formatValue(value, column.format);
-      return `<td class="${cellClasses(value, column)}">${text}</td>`;
+      return `<td class="${cellClasses(value, column)}" data-label="${column.label}"><span class="metric-value">${text}</span></td>`;
     }).join("");
 
     return `
     <tr class="summary-row">
-      <td class="col-name"></td>
+      <td class="col-name">Total</td>
       ${cells}
     </tr>`;
   }
@@ -244,6 +246,10 @@
     }
 
     resetSyncedTableLayout(portfolioTable, favoritesTable);
+
+    if (MOBILE_CARDS_MQ.matches) {
+      return;
+    }
 
     const widths = measureTableColumnWidths(portfolioTable);
     if (!widths.length) {
@@ -609,6 +615,12 @@
       scheduleFundTableColumnSync();
     }, 150);
   });
+
+  if (typeof MOBILE_CARDS_MQ.addEventListener === "function") {
+    MOBILE_CARDS_MQ.addEventListener("change", scheduleFundTableColumnSync);
+  } else if (typeof MOBILE_CARDS_MQ.addListener === "function") {
+    MOBILE_CARDS_MQ.addListener(scheduleFundTableColumnSync);
+  }
 
   async function loadManagement() {
     const loading = document.getElementById("management-loading");

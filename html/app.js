@@ -90,12 +90,49 @@
     }
   }
 
+  function closeTabMenu() {
+    const menu = document.getElementById("app-tab-menu");
+    const trigger = document.getElementById("app-tab-trigger");
+    if (!menu) {
+      return;
+    }
+    menu.classList.remove("is-open");
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function toggleTabMenu() {
+    const menu = document.getElementById("app-tab-menu");
+    const trigger = document.getElementById("app-tab-trigger");
+    if (!menu || !trigger) {
+      return;
+    }
+    const willOpen = !menu.classList.contains("is-open");
+    menu.classList.toggle("is-open", willOpen);
+    trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  }
+
+  function updateTabTriggerLabel(tabName) {
+    const triggerLabel = document.getElementById("app-tab-trigger-label");
+    const activeBtn = document.querySelector(`.app-tab[data-tab="${tabName}"]`);
+    if (!triggerLabel || !activeBtn) {
+      return;
+    }
+    const fullLabel = activeBtn.querySelector(".app-tab-full");
+    triggerLabel.textContent = fullLabel?.textContent?.trim() || activeBtn.textContent.trim();
+  }
+
   function setActiveTab(tabName) {
     activeTab = tabName;
 
     document.querySelectorAll(".app-tab").forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.tab === tabName);
+      const isActive = button.dataset.tab === tabName;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
     });
+    updateTabTriggerLabel(tabName);
+    closeTabMenu();
 
     document.getElementById("management-panel").hidden = tabName !== "management";
     document.getElementById("risk-panel").hidden = tabName !== "risk";
@@ -157,6 +194,10 @@
   let createBtnHideTimer = null;
 
   function revealPortfolioCreateBtn() {
+    if (window.matchMedia("(max-width: 860px)").matches) {
+      return;
+    }
+
     const picker = document.querySelector(".portfolio-picker");
     if (!picker || picker.classList.contains("is-creating")) {
       return;
@@ -192,6 +233,10 @@
   }
 
   function showPortfolioCreateInput() {
+    if (window.matchMedia("(max-width: 860px)").matches) {
+      return;
+    }
+
     const picker = document.querySelector(".portfolio-picker");
     const slot = document.querySelector(".portfolio-select-slot");
     const select = document.getElementById("portfolio-select");
@@ -360,11 +405,41 @@
     event.preventDefault();
     openAddFundFromHeader();
   });
+
+  document.getElementById("app-tab-trigger")?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleTabMenu();
+  });
+
   document.querySelectorAll(".app-tab").forEach((button) => {
     button.addEventListener("click", () => {
       showTab(button.dataset.tab).catch((err) => showError(err.message));
     });
   });
+
+  document.addEventListener("click", (event) => {
+    const menu = document.getElementById("app-tab-menu");
+    if (!menu?.classList.contains("is-open")) {
+      return;
+    }
+    if (menu.contains(event.target)) {
+      return;
+    }
+    closeTabMenu();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeTabMenu();
+    }
+  });
+
+  const mobileHeaderMq = window.matchMedia("(max-width: 860px)");
+  if (typeof mobileHeaderMq.addEventListener === "function") {
+    mobileHeaderMq.addEventListener("change", closeTabMenu);
+  } else if (typeof mobileHeaderMq.addListener === "function") {
+    mobileHeaderMq.addListener(closeTabMenu);
+  }
 
   window.AppShell = {
     showError,

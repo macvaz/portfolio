@@ -2,6 +2,7 @@
   const api = window.PortfolioApi;
 
   let reportLoaded = false;
+  let resizeTimer = null;
 
   function setRiskMessage(message) {
     const messageEl = document.getElementById("risk-message");
@@ -18,32 +19,100 @@
   }
 
   function prepareReportHtml(html) {
-    const overflowStyle =
-      "<style>html, body { overflow: visible !important; height: auto !important; }</style>";
-    if (html.includes("</head>")) {
-      return html.replace("</head>", `${overflowStyle}</head>`);
+    const fitStyle = `
+<style id="portfolio-risk-fit">
+  html, body {
+    overflow: visible !important;
+    height: auto !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  body {
+    transform-origin: top left;
+  }
+</style>`;
+    const viewport = '<meta name="viewport" content="width=device-width, initial-scale=1" />';
+
+    let prepared = html;
+    if (prepared.includes("</head>")) {
+      prepared = prepared.replace("</head>", `${viewport}${fitStyle}</head>`);
+    } else {
+      prepared = viewport + fitStyle + prepared;
     }
-    return overflowStyle + html;
+    return prepared;
   }
 
-  function resizeRiskFrame(frame) {
+  function availableFrameWidth(frame) {
+    const rect = frame.getBoundingClientRect();
+    if (rect.width > 0) {
+      return rect.width;
+    }
+    const parent = frame.parentElement?.getBoundingClientRect();
+    return parent?.width || window.innerWidth;
+  }
+
+  function fitRiskFrame(frame) {
+    const doc = frame.contentDocument;
+    if (!doc?.documentElement) {
+      return;
+    }
+
+    const body = doc.body;
+    if (body) {
+      body.style.transform = "none";
+      body.style.width = "";
+    }
+
+    const contentWidth = Math.max(
+      doc.documentElement.scrollWidth,
+      body ? body.scrollWidth : 0,
+      1,
+    );
+    const available = availableFrameWidth(frame);
+    const scale = Math.min(1, available / contentWidth);
+
+    if (body) {
+      body.style.transformOrigin = "top left";
+      if (scale < 0.999) {
+        body.style.transform = `scale(${scale})`;
+        body.style.width = `${contentWidth}px`;
+      } else {
+        body.style.transform = "none";
+        body.style.width = "";
+      }
+    }
+
+    const naturalHeight = Math.max(
+      doc.documentElement.scrollHeight,
+      body ? body.scrollHeight : 0,
+    );
+    frame.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+  }
+
+  function scheduleFitRiskFrame(frame) {
+    fitRiskFrame(frame);
+    window.setTimeout(() => fitRiskFrame(frame), 300);
+    window.setTimeout(() => fitRiskFrame(frame), 1500);
+  }
+
+  function bindRiskFrameImages(frame) {
     const doc = frame.contentDocument;
     if (!doc) {
       return;
     }
 
-    const height = Math.max(
-      doc.documentElement.scrollHeight,
-      doc.body ? doc.body.scrollHeight : 0,
-    );
-    frame.style.height = `${height}px`;
+    Array.from(doc.images || []).forEach((img) => {
+      if (img.complete) {
+        return;
+      }
+      img.addEventListener("load", () => fitRiskFrame(frame), { once: true });
+    });
   }
 
   function bindRiskFrameResize(frame) {
     frame.onload = () => {
-      resizeRiskFrame(frame);
-      window.setTimeout(() => resizeRiskFrame(frame), 300);
-      window.setTimeout(() => resizeRiskFrame(frame), 1500);
+      bindRiskFrameImages(frame);
+      scheduleFitRiskFrame(frame);
     };
   }
 
@@ -62,6 +131,10 @@
 
   async function loadRiskAnalysis({ force = false } = {}) {
     if (reportLoaded && !force) {
+      const frame = document.getElementById("risk-report-frame");
+      if (frame && !frame.hidden) {
+        fitRiskFrame(frame);
+      }
       return;
     }
 
@@ -93,6 +166,20 @@
     frame.onload = null;
     document.getElementById("risk-loading").textContent = "Generating risk report…";
   }
+
+  window.addEventListener("resize", () => {
+    if (resizeTimer !== null) {
+      clearTimeout(resizeTimer);
+    }
+    resizeTimer = window.setTimeout(() => {
+      resizeTimer = null;
+      const frame = document.getElementById("risk-report-frame");
+      if (!frame || frame.hidden || !reportLoaded) {
+        return;
+      }
+      fitRiskFrame(frame);
+    }, 150);
+  });
 
   window.RiskView = {
     loadRiskAnalysis,

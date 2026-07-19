@@ -1,6 +1,6 @@
 # Portfolio
 
-A small Python library to download and process time series (fund prices) from Morningstar and macroeconomic data from FRED, compute portfolio returns, and generate performance reports.
+Python library to download and process mutual fund prices from Morningstar and macroeconomic series from FRED. It allows creating different investment portfolios while computing returns and risk reports. Additionally, it triggers low-frequency market and financial alarms to detect real worsening of economic and financial conditions.
 
 ## Project structure
 
@@ -55,7 +55,7 @@ portfolio/
 └── tests/
 ```
 
-## Architecture
+## Package architecture of backend code
 
 Package dependencies flow **inward** toward shared code. Arrows mean “imports / depends on”:
 

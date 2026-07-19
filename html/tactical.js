@@ -73,10 +73,10 @@
   function renderSeriesRow(series) {
     return `
       <tr>
-        <td class="col-name">${renderSeriesIdentifier(series)}</td>
-        <td class="col-name col-description" title="${escapeHtml(series.description)}">${escapeHtml(series.description)}</td>
-        <td class="col-series-start">${formatSeriesStart(series.series_start)}</td>
-        <td class="col-alert-threshold">${formatThreshold(series.threshold)}</td>
+        <td class="col-name" data-label="Series">${renderSeriesIdentifier(series)}</td>
+        <td class="col-name col-description" data-label="Description" title="${escapeHtml(series.description)}">${escapeHtml(series.description)}</td>
+        <td class="col-series-start" data-label="Start">${formatSeriesStart(series.series_start)}</td>
+        <td class="col-alert-threshold" data-label="Threshold">${formatThreshold(series.threshold)}</td>
       </tr>`;
   }
 
@@ -121,6 +121,65 @@
     return `<span class="alert-name alert-name--${statusClass}">${label}</span>`;
   }
 
+  function renderMonthMetricRows(row, columns) {
+    return columns
+      .map((column, index) => {
+        const cell = (row.values || [])[index] || {};
+        const label = escapeHtml(column.label || column.code);
+        return `
+          <div class="tactical-month-metric">
+            <span class="tactical-month-metric-label">${label}</span>
+            <span class="tactical-month-metric-value">${renderAlertHistoryCell(cell, column.code)}</span>
+          </div>`;
+      })
+      .join("");
+  }
+
+  function renderMonthCard(row, columns, options = {}) {
+    const isCurrent = options.isCurrent === true;
+    const monthLabel = escapeHtml(formatMonthLabel(row.month));
+    const title = isCurrent ? `Current month — ${monthLabel}` : monthLabel;
+    const activeCount = row.active_count ?? 0;
+    const eligibleCount = row.eligible_count ?? 0;
+    return `
+      <article class="tactical-month-card${isCurrent ? " tactical-month-card--current" : ""}">
+        <header class="tactical-month-card-header">
+          <h3 class="tactical-month-card-title">${title}</h3>
+          <div class="tactical-month-card-risk">${renderActiveCountLabel(activeCount, eligibleCount)}</div>
+        </header>
+        <div class="tactical-month-metrics">
+          ${renderMonthMetricRows(row, columns)}
+        </div>
+      </article>`;
+  }
+
+  function renderAlertHistoryCards(history) {
+    const container = document.getElementById("tactical-month-cards");
+    if (!container) {
+      return;
+    }
+
+    const columns = history?.columns || [];
+    const rows = history?.rows || [];
+    if (!rows.length || !columns.length) {
+      container.innerHTML = "";
+      return;
+    }
+
+    const currentRow = rows[0];
+    const previousRows = rows.slice(1, 13);
+    const previousCards = previousRows
+      .map((row) => renderMonthCard(row, columns))
+      .join("");
+    const previousSection = previousRows.length
+      ? `<h3 class="tactical-months-label">Previous 12 months</h3>${previousCards}`
+      : "";
+
+    container.innerHTML = `
+      ${renderMonthCard(currentRow, columns, { isCurrent: true })}
+      ${previousSection}`;
+  }
+
   function renderAlertHistory(history) {
     const columns = history?.columns || [];
     const rows = history?.rows || [];
@@ -162,6 +221,8 @@
           </tr>`;
       })
       .join("");
+
+    renderAlertHistoryCards(history);
   }
 
   function renderTableBody(containerId, rows, renderRow) {
