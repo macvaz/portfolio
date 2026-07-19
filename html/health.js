@@ -1,5 +1,7 @@
 (function () {
   const api = window.PortfolioApi;
+  const MONTH_COMPARE_WINDOW = 7;
+  let latestHistory = { columns: [], context_columns: [], rows: [] };
 
   function setTacticalLoading(isLoading) {
     document.getElementById("tactical-loading").hidden = !isLoading;
@@ -128,6 +130,138 @@
     return `<span class="alert-name alert-name--${statusClass}">${label}</span>`;
   }
 
+  function renderSeriesName(column) {
+    const label = escapeHtml(column.label || column.code);
+    if (column.source_url) {
+      return `<a href="${escapeHtml(column.source_url)}" class="fund-link" target="_blank" rel="noopener noreferrer">${label}</a>`;
+    }
+    return label;
+  }
+
+  function allHistoryColumns(history) {
+    return [...(history?.columns || []), ...(history?.context_columns || [])];
+  }
+
+  function cellForColumn(row, column, history) {
+    const alertColumns = history?.columns || [];
+    const contextColumns = history?.context_columns || [];
+    const alertIndex = alertColumns.findIndex((item) => item.code === column.code);
+    if (alertIndex >= 0) {
+      return (row?.values || [])[alertIndex] || {};
+    }
+    const contextIndex = contextColumns.findIndex((item) => item.code === column.code);
+    if (contextIndex >= 0) {
+      return (row?.context_values || [])[contextIndex] || {};
+    }
+    return {};
+  }
+
+  function slidingWindowRows(history, selectedMonth) {
+    const rows = history?.rows || [];
+    const selectedIndex = rows.findIndex((row) => row.month === selectedMonth);
+    if (selectedIndex < 0) {
+      return [];
+    }
+    // History rows are newest-first; take selected month plus older months.
+    return [...rows.slice(selectedIndex, selectedIndex + MONTH_COMPARE_WINDOW)].reverse();
+  }
+
+  function renderMonthCompareTable(selectedMonth, history) {
+    const windowRows = slidingWindowRows(history, selectedMonth);
+    const columns = allHistoryColumns(history);
+    if (!windowRows.length || !columns.length) {
+      return `<p class="month-detail-empty">No data for this month.</p>`;
+    }
+
+    const headerCells = windowRows
+      .map((row) => {
+        const selectedClass =
+          row.month === selectedMonth ? " month-detail-month--selected" : "";
+        return `<th class="${selectedClass.trim()}" scope="col">${escapeHtml(
+          formatMonthLabel(row.month)
+        )}</th>`;
+      })
+      .join("");
+
+    const bodyRows = columns
+      .map((column) => {
+        const titleParts = [];
+        if (column.description) {
+          titleParts.push(column.description);
+        }
+        const thresholdLabel = formatThresholdTooltip(column.threshold, column.operator);
+        if (thresholdLabel) {
+          titleParts.push(thresholdLabel);
+        }
+        const titleAttr = titleParts.length
+          ? ` title="${escapeHtml(titleParts.join(" · "))}"`
+          : "";
+        const valueCells = windowRows
+          .map((row) => {
+            const selectedClass =
+              row.month === selectedMonth ? " month-detail-month--selected" : "";
+            const cell = cellForColumn(row, column, history);
+            return `<td class="month-detail-value${selectedClass}">${renderAlertHistoryCell(
+              cell,
+              column.code
+            )}</td>`;
+          })
+          .join("");
+        return `
+          <tr>
+            <th class="month-detail-series-col" scope="row"${titleAttr}>
+              <span class="month-detail-name">${renderSeriesName(column)}</span>
+            </th>
+            ${valueCells}
+          </tr>`;
+      })
+      .join("");
+
+    return `
+      <table class="month-detail-table">
+        <thead>
+          <tr>
+            <th class="month-detail-series-col" scope="col">Series</th>
+            ${headerCells}
+          </tr>
+        </thead>
+        <tbody>
+          ${bodyRows}
+        </tbody>
+      </table>`;
+  }
+
+  function closeMonthDetail() {
+    const screen = document.getElementById("month-detail-screen");
+    if (!screen) {
+      return;
+    }
+    screen.hidden = true;
+    document.body.classList.remove("is-month-detail-open");
+  }
+
+  function openMonthDetail(month) {
+    const screen = document.getElementById("month-detail-screen");
+    const titleEl = document.getElementById("month-detail-title");
+    const listEl = document.getElementById("month-detail-list");
+    if (!screen || !titleEl || !listEl) {
+      return;
+    }
+
+    const windowRows = slidingWindowRows(latestHistory, month);
+    if (!windowRows.length) {
+      return;
+    }
+
+    const startLabel = formatMonthLabel(windowRows[0].month);
+    const endLabel = formatMonthLabel(windowRows[windowRows.length - 1].month);
+    titleEl.textContent =
+      windowRows.length === 1 ? endLabel : `${startLabel} – ${endLabel}`;
+    listEl.innerHTML = renderMonthCompareTable(month, latestHistory);
+    screen.hidden = false;
+    document.body.classList.add("is-month-detail-open");
+  }
+
   function renderMonthMetricRows(row, columns) {
     return columns
       .map((column, index) => {
@@ -149,7 +283,13 @@
     const activeCount = row.active_count ?? 0;
     const eligibleCount = row.eligible_count ?? 0;
     return `
-      <article class="tactical-month-card${isCurrent ? " tactical-month-card--current" : ""}">
+      <article
+        class="tactical-month-card${isCurrent ? " tactical-month-card--current" : ""}"
+        data-month="${escapeHtml(row.month)}"
+        role="button"
+        tabindex="0"
+        aria-label="Open 7-month compare for ${monthLabel}"
+      >
         <header class="tactical-month-card-header">
           <h3 class="tactical-month-card-title">${title}</h3>
           <div class="tactical-month-card-risk">${renderActiveCountLabel(activeCount, eligibleCount)}</div>
@@ -188,8 +328,9 @@
   }
 
   function renderAlertHistory(history) {
-    const columns = history?.columns || [];
-    const rows = history?.rows || [];
+    latestHistory = history || { columns: [], context_columns: [], rows: [] };
+    const columns = latestHistory.columns || [];
+    const rows = latestHistory.rows || [];
     const thead = document.getElementById("alerts-status-head");
     const tbody = document.getElementById("alerts-status-body");
 
@@ -212,22 +353,29 @@
           .join("");
         const activeCount = row.active_count ?? 0;
         const eligibleCount = row.eligible_count ?? 0;
+        const monthLabel = escapeHtml(formatMonthLabel(row.month));
         return `
           <tr>
-            <td class="col-month">${escapeHtml(formatMonthLabel(row.month))}</td>
+            <td class="col-month">
+              <button
+                type="button"
+                class="month-select-btn"
+                data-month="${escapeHtml(row.month)}"
+              >${monthLabel}</button>
+            </td>
             ${valueCells}
             <td class="col-alert-active-count">${renderActiveCountLabel(activeCount, eligibleCount)}</td>
           </tr>`;
       })
       .join("");
 
-    renderAlertHistoryCards(history);
+    renderAlertHistoryCards(latestHistory);
   }
 
   function renderAlerts(snapshot) {
     const asOf = document.getElementById("tactical-as-of");
     const alerts = snapshot.alerts || [];
-    const history = snapshot.history || { columns: [], rows: [] };
+    const history = snapshot.history || { columns: [], context_columns: [], rows: [] };
     const hasData =
       snapshot.date &&
       (alerts.length > 0 || history.rows.length > 0);
@@ -235,8 +383,9 @@
     if (!hasData) {
       setTacticalContent(false);
       setTacticalMessage("No macro health data yet. Run the data job to compute it.");
-      renderAlertHistory({ columns: [], rows: [] });
+      renderAlertHistory({ columns: [], context_columns: [], rows: [] });
       asOf.textContent = "";
+      closeMonthDetail();
       return;
     }
 
@@ -260,6 +409,58 @@
       setTacticalLoading(false);
     }
   }
+
+  function bindMonthDetailUi() {
+    const screen = document.getElementById("month-detail-screen");
+    const closeBtn = document.getElementById("month-detail-close");
+    const table = document.getElementById("alerts-status-table");
+    const cards = document.getElementById("tactical-month-cards");
+
+    closeBtn?.addEventListener("click", closeMonthDetail);
+    screen?.addEventListener("click", (event) => {
+      if (event.target === screen) {
+        closeMonthDetail();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeMonthDetail();
+      }
+    });
+
+    table?.addEventListener("click", (event) => {
+      const button = event.target.closest(".month-select-btn");
+      if (!button) {
+        return;
+      }
+      openMonthDetail(button.dataset.month);
+    });
+
+    cards?.addEventListener("click", (event) => {
+      if (event.target.closest("a")) {
+        return;
+      }
+      const card = event.target.closest(".tactical-month-card[data-month]");
+      if (!card) {
+        return;
+      }
+      openMonthDetail(card.dataset.month);
+    });
+
+    cards?.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+      const card = event.target.closest(".tactical-month-card[data-month]");
+      if (!card) {
+        return;
+      }
+      event.preventDefault();
+      openMonthDetail(card.dataset.month);
+    });
+  }
+
+  bindMonthDetailUi();
 
   window.TacticalView = {
     loadTacticalAlerts,

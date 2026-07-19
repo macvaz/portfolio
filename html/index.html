@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=148" />
+    <link rel="stylesheet" href="/static/style.css?v=156" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -292,6 +292,23 @@
       <p id="error" class="error" hidden></p>
     </main>
 
+    <div id="month-detail-screen" class="month-detail-screen" hidden>
+      <div
+        class="month-detail-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="month-detail-title"
+      >
+        <header class="month-detail-header">
+          <h2 id="month-detail-title" class="month-detail-title">Month compare</h2>
+          <button type="button" id="month-detail-close" class="month-detail-close" aria-label="Close">
+            ×
+          </button>
+        </header>
+        <div id="month-detail-list" class="month-detail-list"></div>
+      </div>
+    </div>
+
     <div id="add-fund-screen" class="add-fund-screen" hidden>
       <div class="add-fund-card" role="dialog" aria-modal="true" aria-labelledby="add-fund-title">
         <h2 id="add-fund-title" class="add-fund-title">Add fund</h2>
@@ -346,7 +363,7 @@
     <script src="/static/portfolios.js?v=11"></script>
     <script src="/static/management.js?v=79"></script>
     <script src="/static/risk.js?v=7"></script>
-    <script src="/static/health.js?v=50"></script>
+    <script src="/static/health.js?v=53"></script>
     <script src="/static/add-fund.js?v=4"></script>
     <script src="/static/app.js?v=45"></script>
   </body>
