@@ -178,6 +178,28 @@
     </tr>`;
   }
 
+  function renderWeightsSummaryRow(funds) {
+    const items = funds
+      .map((fund) => {
+        const name = fund.morningstar_url
+          ? `<a href="${fund.morningstar_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${fund.name}</a>`
+          : `<span class="fund-name">${fund.name}</span>`;
+        return `
+      <div class="weights-summary-item">
+        <span class="weights-summary-name">${name}</span>
+        <span class="weights-summary-weight">${formatWeight(fund.weight)}%</span>
+      </div>`;
+      })
+      .join("");
+
+    return `
+    <tr class="weights-summary-row">
+      <td class="weights-summary-card" colspan="${METRIC_COLUMNS.length + 1}">
+        <div class="weights-summary-list">${items}</div>
+      </td>
+    </tr>`;
+  }
+
   function renderTableBody(containerId, funds, options = {}) {
     const container = document.getElementById(containerId);
     container.innerHTML = funds.map((fund) => renderFundRow(fund, options)).join("");
@@ -213,7 +235,7 @@
     const headerCells = table.querySelectorAll("thead tr:first-child th");
     const rows = [
       ...table.querySelectorAll("tbody tr"),
-      ...table.querySelectorAll("tfoot tr"),
+      ...table.querySelectorAll("tfoot tr:not(.weights-summary-row)"),
     ];
 
     return Array.from(headerCells).map((headerCell, index) => {
@@ -595,9 +617,9 @@
     document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
     renderChart(curve);
     renderTableBody("portfolio-body", metrics.portfolio, { editableWeights: true });
-    document.getElementById("portfolio-summary").innerHTML = renderSummaryRow(
-      metrics.portfolio_summary,
-    );
+    document.getElementById("portfolio-summary").innerHTML =
+      renderWeightsSummaryRow(metrics.portfolio) +
+      renderSummaryRow(metrics.portfolio_summary);
     renderTableBody("favorites-body", metrics.favorites, {
       editableWeights: true,
       forceZeroWeight: true,
