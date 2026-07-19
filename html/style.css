@@ -1005,6 +1005,7 @@ button:disabled {
 
 .month-select-btn:hover,
 .month-select-btn:focus-visible {
+  background: transparent;
   color: var(--logo-orange);
   outline: none;
 }
@@ -1026,7 +1027,7 @@ button:disabled {
 
 .month-detail-card {
   width: min(56rem, 100%);
-  max-height: min(85vh, 44rem);
+  max-height: calc(100vh - 2.5rem);
   display: flex;
   flex-direction: column;
   background: #fcf9eb;
@@ -1075,8 +1076,9 @@ button:disabled {
 }
 
 .month-detail-list {
-  padding: 0.65rem 1rem 1.15rem;
-  overflow: auto;
+  padding: 0.35rem 1rem 0.9rem;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
 .month-detail-table {
@@ -1085,14 +1087,14 @@ button:disabled {
   border-spacing: 0;
   table-layout: fixed;
   min-width: 36rem;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
 }
 
 .month-detail-table th,
 .month-detail-table td {
-  padding: 0.4rem 0.65rem;
+  padding: 0.28rem 0.55rem;
   vertical-align: middle;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .month-detail-table thead th:first-child,
@@ -1138,6 +1140,25 @@ button:disabled {
 
 .month-detail-table thead th.month-detail-month--selected {
   box-shadow: inset 0 -2px 0 rgba(255, 153, 0, 0.55);
+}
+
+.month-detail-domain-row .month-detail-domain {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  padding: 0.55rem 0 0.2rem;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b6356;
+  background: #fcf9eb;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.month-detail-domain-row:first-child .month-detail-domain {
+  padding-top: 0.15rem;
 }
 
 .month-detail-name {

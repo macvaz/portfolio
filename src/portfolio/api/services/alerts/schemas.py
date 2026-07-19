@@ -11,6 +11,7 @@ class SeriesItem(BaseModel):
     identifier: str | None = None
     source_url: str | None = None
     series_start: str | None = None
+    domain: str | None = None
 
 
 class AlertItem(BaseModel):
@@ -45,6 +46,7 @@ class AlertHistoryColumn(BaseModel):
     source_url: str | None = None
     threshold: float | None = None
     operator: str | None = None
+    domain: str | None = None
 
 
 class AlertHistory(BaseModel):

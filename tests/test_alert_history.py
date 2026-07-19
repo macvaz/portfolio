@@ -80,14 +80,17 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
     assert unemployment_col["source_url"] == "https://fred.stlouisfed.org/series/UNRATE"
     assert unemployment_col["threshold"] == 5.0
     assert unemployment_col["operator"] == "gte"
+    assert unemployment_col["domain"] == "labor_market"
     death_cross_col = next(
         column for column in history["columns"] if column["code"] == "SP500_Death_Cross"
     )
     assert death_cross_col["source_url"] is None
     assert death_cross_col["threshold"] == 1.0
+    assert death_cross_col["domain"] == "equity_market"
     sp500_col = next(column for column in history["columns"] if column["code"] == "SP500")
     assert sp500_col["source_url"] is None
     assert sp500_col["threshold"] is None
+    assert sp500_col["domain"] == "equity_market"
     assert [column["code"] for column in history["context_columns"]] == [
         "Treasury_10Y_Yield",
         "Broad_Dollar_Index",

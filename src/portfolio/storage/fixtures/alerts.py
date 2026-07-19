@@ -25,6 +25,7 @@ def _description_from_row(row: dict) -> AlertDescription:
         threshold=None if threshold is None else float(threshold),
         operator=None if operator is None else str(operator),
         role=str(row.get("role") or "alert"),
+        domain=None if row.get("domain") is None else str(row["domain"]),
     )
 
 

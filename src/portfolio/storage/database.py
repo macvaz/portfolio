@@ -466,6 +466,16 @@ def _migrate_alert_description_unified(db_path: Path | None = None) -> None:
                     "ADD COLUMN role VARCHAR NOT NULL DEFAULT 'alert'"
                 )
             )
+        if "domain" not in columns:
+            connection.execute(
+                text("ALTER TABLE alert_description ADD COLUMN domain VARCHAR")
+            )
+            connection.execute(
+                text(
+                    "CREATE INDEX IF NOT EXISTS ix_alert_description_domain "
+                    "ON alert_description (domain)"
+                )
+            )
         connection.commit()
 
 
@@ -788,6 +798,7 @@ def _series_item_from_description(
             if description.series_start
             else None
         ),
+        "domain": description.domain,
     }
 
 

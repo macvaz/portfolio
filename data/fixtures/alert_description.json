@@ -7,7 +7,8 @@
     "series_start": "1990-01-01",
     "threshold": 5.0,
     "operator": "gte",
-    "role": "alert"
+    "role": "alert",
+    "domain": "labor_market"
   },
   {
     "code": "High_Yield_Spread",
@@ -17,7 +18,8 @@
     "series_start": "2023-06-27",
     "threshold": 9.0,
     "operator": "gte",
-    "role": "alert"
+    "role": "alert",  
+    "domain": "credit_market"
   },
   {
     "code": "Financial_Stress_Index",
@@ -27,7 +29,8 @@
     "series_start": "1994-01-07",
     "threshold": 1.0,
     "operator": "gte",
-    "role": "alert"
+    "role": "alert",
+    "domain": "credit_market"
   },
   {
     "code": "Yield_Spread_10Y3M",
@@ -37,7 +40,8 @@
     "series_start": "1990-01-02",
     "threshold": 0.0,
     "operator": "lt",
-    "role": "alert"
+    "role": "alert",
+    "domain": "interest_rates"
   },
   {
     "code": "Real_Interest_Rates",
@@ -47,7 +51,8 @@
     "series_start": "2003-01-02",
     "threshold": 2.0,
     "operator": "gte",
-    "role": "alert"
+    "role": "alert",
+    "domain": "interest_rates"
   },
   {
     "code": "Breakeven_Inflation",
@@ -57,7 +62,8 @@
     "series_start": "2003-01-02",
     "threshold": 2.5,
     "operator": "gte",
-    "role": "alert"
+    "role": "alert",
+    "domain": "interest_rates"
   },
   {
     "code": "SP500_Death_Cross",
@@ -67,7 +73,8 @@
     "series_start": "1970-01-02",
     "threshold": 1.0,
     "operator": "lt",
-    "role": "alert"
+    "role": "alert",
+    "domain": "equity_market"
   },
   {
     "code": "Treasury_10Y_Yield",
@@ -77,7 +84,8 @@
     "series_start": "1962-01-02",
     "threshold": null,
     "operator": null,
-    "role": "context"
+    "role": "context",
+    "domain": "interest_rates"
   },
   {
     "code": "Broad_Dollar_Index",
@@ -87,7 +95,8 @@
     "series_start": "2006-01-02",
     "threshold": null,
     "operator": null,
-    "role": "context"
+    "role": "context",
+    "domain": "dollar"
   },
   {
     "code": "Reserve_Balances",
@@ -97,7 +106,8 @@
     "series_start": "1986-01-08",
     "threshold": null,
     "operator": null,
-    "role": "context"
+    "role": "context",
+    "domain": "banking_liquidity"
   },
   {
     "code": "Overnight_RRP",
@@ -107,7 +117,8 @@
     "series_start": "2003-02-07",
     "threshold": null,
     "operator": null,
-    "role": "context"
+    "role": "context",
+    "domain": "banking_liquidity"
   },
   {
     "code": "SOFR",
@@ -117,6 +128,7 @@
     "series_start": "2018-04-03",
     "threshold": null,
     "operator": null,
-    "role": "context"
+    "role": "context",
+    "domain": "banking_liquidity"
   }
 ]

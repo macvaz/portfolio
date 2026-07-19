@@ -142,6 +142,38 @@
     return [...(history?.columns || []), ...(history?.context_columns || [])];
   }
 
+  function formatDomainLabel(domain) {
+    if (!domain) {
+      return "Other";
+    }
+    return String(domain)
+      .split("_")
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  }
+
+  function groupColumnsByDomain(columns) {
+    const groups = [];
+    const indexByDomain = new Map();
+    for (const column of columns) {
+      const domain = column.domain || null;
+      const key = domain || "";
+      let group = indexByDomain.get(key);
+      if (!group) {
+        group = { domain, columns: [] };
+        indexByDomain.set(key, group);
+        groups.push(group);
+      }
+      group.columns.push(column);
+    }
+    const trailing = new Set(["equity_market"]);
+    return [
+      ...groups.filter((group) => !trailing.has(group.domain)),
+      ...groups.filter((group) => trailing.has(group.domain)),
+    ];
+  }
+
   function cellForColumn(row, column, history) {
     const alertColumns = history?.columns || [];
     const contextColumns = history?.context_columns || [];
@@ -166,6 +198,38 @@
     return [...rows.slice(selectedIndex, selectedIndex + MONTH_COMPARE_WINDOW)].reverse();
   }
 
+  function renderMonthCompareSeriesRow(column, windowRows, selectedMonth, history) {
+    const titleParts = [];
+    if (column.description) {
+      titleParts.push(column.description);
+    }
+    const thresholdLabel = formatThresholdTooltip(column.threshold, column.operator);
+    if (thresholdLabel) {
+      titleParts.push(thresholdLabel);
+    }
+    const titleAttr = titleParts.length
+      ? ` title="${escapeHtml(titleParts.join(" · "))}"`
+      : "";
+    const valueCells = windowRows
+      .map((row) => {
+        const selectedClass =
+          row.month === selectedMonth ? " month-detail-month--selected" : "";
+        const cell = cellForColumn(row, column, history);
+        return `<td class="month-detail-value${selectedClass}">${renderAlertHistoryCell(
+          cell,
+          column.code
+        )}</td>`;
+      })
+      .join("");
+    return `
+      <tr>
+        <th class="month-detail-series-col" scope="row"${titleAttr}>
+          <span class="month-detail-name">${renderSeriesName(column)}</span>
+        </th>
+        ${valueCells}
+      </tr>`;
+  }
+
   function renderMonthCompareTable(selectedMonth, history) {
     const windowRows = slidingWindowRows(history, selectedMonth);
     const columns = allHistoryColumns(history);
@@ -173,6 +237,7 @@
       return `<p class="month-detail-empty">No data for this month.</p>`;
     }
 
+    const monthColSpan = windowRows.length;
     const headerCells = windowRows
       .map((row) => {
         const selectedClass =
@@ -183,37 +248,21 @@
       })
       .join("");
 
-    const bodyRows = columns
-      .map((column) => {
-        const titleParts = [];
-        if (column.description) {
-          titleParts.push(column.description);
-        }
-        const thresholdLabel = formatThresholdTooltip(column.threshold, column.operator);
-        if (thresholdLabel) {
-          titleParts.push(thresholdLabel);
-        }
-        const titleAttr = titleParts.length
-          ? ` title="${escapeHtml(titleParts.join(" · "))}"`
-          : "";
-        const valueCells = windowRows
-          .map((row) => {
-            const selectedClass =
-              row.month === selectedMonth ? " month-detail-month--selected" : "";
-            const cell = cellForColumn(row, column, history);
-            return `<td class="month-detail-value${selectedClass}">${renderAlertHistoryCell(
-              cell,
-              column.code
-            )}</td>`;
-          })
-          .join("");
-        return `
-          <tr>
-            <th class="month-detail-series-col" scope="row"${titleAttr}>
-              <span class="month-detail-name">${renderSeriesName(column)}</span>
-            </th>
-            ${valueCells}
+    const bodyRows = groupColumnsByDomain(columns)
+      .map((group) => {
+        const domainLabel = escapeHtml(formatDomainLabel(group.domain));
+        const headerRow = `
+          <tr class="month-detail-domain-row">
+            <th class="month-detail-domain" scope="colgroup" colspan="${
+              monthColSpan + 1
+            }">${domainLabel}</th>
           </tr>`;
+        const seriesRows = group.columns
+          .map((column) =>
+            renderMonthCompareSeriesRow(column, windowRows, selectedMonth, history)
+          )
+          .join("");
+        return `${headerRow}${seriesRows}`;
       })
       .join("");
 

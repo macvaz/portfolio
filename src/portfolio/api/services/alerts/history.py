@@ -36,6 +36,7 @@ HISTORY_DISPLAY_ONLY_COLUMNS: dict[str, dict[str, str | None]] = {
     "SP500": {
         "description": "S&P 500 index level: broad U.S. large-cap equity benchmark (index).",
         "series_start": "1970-01-02",
+        "domain": "equity_market",
     },
 }
 
@@ -105,6 +106,7 @@ def _column_payload(
     source: str | None = None,
     threshold: float | None = None,
     operator: str | None = None,
+    domain: str | float | None = None,
 ) -> dict[str, str | float | None]:
     return {
         "code": code,
@@ -115,6 +117,7 @@ def _column_payload(
         "source_url": _fred_source_url(series_id, source),
         "threshold": threshold,
         "operator": operator,
+        "domain": None if domain is None else str(domain),
     }
 
 
@@ -132,6 +135,7 @@ def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
                     code=code,
                     description=str(display_only["description"]),
                     series_start=display_only.get("series_start"),
+                    domain=display_only.get("domain"),
                 )
             )
             continue
@@ -145,6 +149,7 @@ def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
                     source=row.get("source"),
                     threshold=row.get("threshold"),
                     operator=row.get("operator"),
+                    domain=row.get("domain"),
                 )
             )
     return columns
@@ -166,6 +171,7 @@ def _context_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
                 source=row.get("source"),
                 threshold=row.get("threshold"),
                 operator=row.get("operator"),
+                domain=row.get("domain"),
             )
         )
     return columns

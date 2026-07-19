@@ -53,6 +53,7 @@ class AlertDescription(SQLModel, table=True):
     threshold: float | None = None
     operator: str | None = None
     role: str = Field(default="alert", index=True)
+    domain: str | None = Field(default=None, index=True)
 
 
 class Alert(SQLModel, table=True):

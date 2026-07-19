@@ -74,6 +74,7 @@ def test_init_db_seeds_alert_descriptions_from_fixture(tmp_path):
         assert description.operator == expected["operator"]
         assert description.series_id == expected["series_id"]
         assert description.role == expected.get("role", "alert")
+        assert description.domain == expected.get("domain")
         expected_start = expected.get("series_start")
         if expected_start is None:
             assert description.series_start is None
@@ -96,8 +97,10 @@ def test_alert_description_fixture_is_valid_json():
             "series_start",
             "operator",
             "role",
+            "domain",
         }
         <= set(row)
         for row in payload
     )
     assert {row["role"] for row in payload} == {"alert", "context"}
+    assert all(isinstance(row["domain"], str) and row["domain"] for row in payload)
