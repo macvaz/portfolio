@@ -1534,6 +1534,10 @@ body.is-add-fund-open {
     display: none;
   }
 
+  .toolbar-alerts-legend {
+    display: none !important;
+  }
+
   .table-scroll--alerts-history {
     display: none;
   }
