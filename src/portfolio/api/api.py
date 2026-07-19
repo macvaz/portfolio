@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -34,4 +35,12 @@ app.include_router(alerts_router)
 def main() -> None:
     import uvicorn
 
-    uvicorn.run("portfolio.api.api:app", host="0.0.0.0", port=8000, reload=True)
+    host = os.getenv("PORTFOLIO_HOST", "127.0.0.1")
+    port = int(os.getenv("PORTFOLIO_PORT", "8000"))
+    reload = os.getenv("PORTFOLIO_RELOAD", "0") == "1"
+    uvicorn.run(
+        "portfolio.api.api:app",
+        host=host,
+        port=port,
+        reload=reload,
+    )

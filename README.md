@@ -39,6 +39,7 @@ portfolio/
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
 │   │   ├── series.py               # FRED macro series CSV I/O
 │   │   ├── indexes.py              # Market index CSV I/O
+│   │   ├── market.py               # Shared SP500-aligned market frame
 │   │   ├── equity.py               # Buy-and-hold / benchmark returns
 │   │   ├── metrics.py              # Metric computation only
 │   │   ├── signals.py              # Death-cross calculation
@@ -100,7 +101,7 @@ Create a `.env` file in the project root with your FRED API key:
 FRED_API_KEY=your_key_here
 ```
 
-If `FRED_API_KEY` is not set, the batch pipeline skips the macro signals step and continues with fund NAV downloads.
+If `FRED_API_KEY` is not set, the batch pipeline skips FRED downloads, still refreshes SP500 from Morningstar, and continues with fund NAV downloads. FRED or Morningstar download failures abort the batch with a clear error.
 
 **Run the batch pipeline:**
 
@@ -117,8 +118,8 @@ The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 
 **Pipeline**
 
 1. `batch.py` defines which FRED series to download (`FRED_SERIES`).
-2. `signals.py` downloads the series, forward-fills gaps on the SP500 calendar, and pipes the DataFrame through each macro function.
-3. Market signals (SP500 moving averages and death cross) are computed on top of the macro output.
+2. `signals.py` downloads the series (or skips FRED when no API key), aligns macros onto the SP500 calendar with forward-fill via `common/market.py`, and stores CSVs.
+3. Market signals (SP500 moving averages and death cross) are computed on the shared market DataFrame (also used by alert history).
 
 **Current macro indicators**
 
@@ -239,7 +240,9 @@ Open http://localhost:8000 for the API.
 
 Compose and `docker run --env-file .env` inject variables into the container environment. The batch pipeline reads `FRED_API_KEY` from there (`batch.py` also calls `load_dotenv()`, which is only needed when a `.env` file is present on disk).
 
-The API does not use `.env` today. The batch pipeline requires `FRED_API_KEY` for the macro signals step; without it, the batch pipeline skips FRED and continues with fund NAV downloads.
+If `FRED_API_KEY` is missing, FRED downloads are skipped; SP500 and fund NAVs still run. Failed downloads raise instead of writing empty files.
+
+Local API bind defaults to `127.0.0.1` (override with `PORTFOLIO_HOST` / `PORTFOLIO_PORT`). Docker entrypoint defaults to `0.0.0.0` so published ports work. Set `PORTFOLIO_RELOAD=1` to enable uvicorn reload for local development.
 
 Create `.env` in the project root:
 

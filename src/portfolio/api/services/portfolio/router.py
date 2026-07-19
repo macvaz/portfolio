@@ -39,6 +39,7 @@ from portfolio.datasource.morningstar import (
     morningstar_quote_url,
     parse_morningstar_search,
 )
+from portfolio.datasource.errors import DownloadError
 from portfolio.common.metrics import compute_fund_metrics
 from portfolio.common.navs import delete_fund_nav_csv, download_and_store_fund_nav
 
@@ -54,12 +55,20 @@ def _register_fund(fund: dict) -> dict:
         fund.get("performance_id"),
         fund.get("universe"),
     )
-    download_and_store_fund_nav(
-        fund["isin"],
-        fund["security_id"],
-        start_date=NAV_START_DATE,
-        end_date=date.today().isoformat(),
-    )
+    try:
+        path = download_and_store_fund_nav(
+            fund["isin"],
+            fund["security_id"],
+            start_date=NAV_START_DATE,
+            end_date=date.today().isoformat(),
+        )
+    except DownloadError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    if path is None:
+        raise HTTPException(
+            status_code=502,
+            detail=f"No NAV data returned for {fund['isin']}",
+        )
     save_fund_metrics(fund["isin"], compute_fund_metrics(fund["isin"]))
     return {
         "isin": fund["isin"],

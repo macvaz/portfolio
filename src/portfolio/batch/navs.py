@@ -4,6 +4,7 @@ from pathlib import Path
 
 from portfolio.storage.database import list_funds
 from portfolio.common.navs import download_and_store_fund_nav
+from portfolio.datasource.errors import DownloadError
 
 
 def store_fund_navs_from_db(
@@ -24,23 +25,34 @@ def store_fund_navs_from_db(
         return []
 
     saved_paths: list[Path] = []
+    failures: list[str] = []
     for fund in funds:
         isin = fund["isin"]
         name = fund["name"]
-        path = download_and_store_fund_nav(
-            isin,
-            fund["fund_id"],
-            start_date=start_date,
-            end_date=end_date,
-            currency=currency,
-            funds_dir=funds_dir,
-        )
+        try:
+            path = download_and_store_fund_nav(
+                isin,
+                fund["fund_id"],
+                start_date=start_date,
+                end_date=end_date,
+                currency=currency,
+                funds_dir=funds_dir,
+            )
+        except DownloadError as exc:
+            failures.append(f"{isin} ({name}): {exc}")
+            continue
+
         if path is None:
-            print(f"[skip] {isin}: no NAV data for {name}")
+            failures.append(f"{isin} ({name}): no NAV data returned")
             continue
 
         print(f"[saved] {isin}: {name} -> {path}")
         saved_paths.append(path)
 
     print(f"Done. Saved {len(saved_paths)} of {len(funds)} fund file(s).")
+    if failures:
+        raise DownloadError(
+            f"Fund NAV download failed for {len(failures)} fund(s):\n- "
+            + "\n- ".join(failures)
+        )
     return saved_paths

@@ -12,6 +12,8 @@ import json
 import pandas as pd
 import requests
 
+from portfolio.datasource.errors import DownloadError
+
 MORNINGSTAR_QUOTE_URL = (
     "https://global.morningstar.com/es/inversiones/{universe}/{performance_id}/cotizacion"
 )
@@ -19,7 +21,6 @@ BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon
 MS_SERIES_SUFFIX = "]2]1]"
 
 __all__ = ["download_navs", "morningstar_quote_url", "parse_morningstar_search"]
-
 
 def _is_isin(identifier: str) -> bool:
     return len(identifier) == 12 and identifier.isalnum()
@@ -93,10 +94,22 @@ def _compute_params(
     }
 
 
-def _extract_records(data: list[list[float | int]]) -> list[dict[str, float | int]]:
+def _extract_records(data: object) -> list[dict[str, float | int]]:
     """Convert a list of [timestamp, value] rows into record dicts."""
-    return [{"timestamp": int(timestamp), "value": value} for timestamp, value in data]
-
+    if not isinstance(data, list):
+        raise DownloadError(
+            "Morningstar response is not a tabular list of [timestamp, value] rows"
+        )
+    if not data:
+        raise DownloadError("Morningstar response contained no price rows")
+    try:
+        return [
+            {"timestamp": int(timestamp), "value": value} for timestamp, value in data
+        ]
+    except (TypeError, ValueError) as exc:
+        raise DownloadError(
+            "Morningstar response rows are not [timestamp, value] pairs"
+        ) from exc
 
 def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Normalize dates and index on the first recognized date column."""
@@ -129,25 +142,26 @@ def download_navs(
         response = requests.get(BASE_URL, params=params, timeout=timeout)
         response.raise_for_status()
     except requests.RequestException as exc:
-        print(f"Error downloading data from Morningstar: {exc}")
-        return pd.DataFrame()
+        raise DownloadError(
+            f"Failed to download Morningstar series {fund_id!r}: {exc}"
+        ) from exc
 
     try:
         payload = response.json()
     except ValueError:
         try:
             payload = json.loads(response.text)
-        except ValueError:
-            print("Received non-JSON response from Morningstar")
-            return pd.DataFrame()
+        except ValueError as exc:
+            raise DownloadError(
+                f"Morningstar returned non-JSON for {fund_id!r}"
+            ) from exc
 
     records = _extract_records(payload)
-    if records is None:
-        print("No tabular data found in Morningstar response")
-        return pd.DataFrame()
-
     df = pd.json_normalize(records)
-    return _normalize_dataframe(df)
+    normalized = _normalize_dataframe(df)
+    if normalized.empty:
+        raise DownloadError(f"Morningstar series {fund_id!r} returned no observations")
+    return normalized
 
 
 def morningstar_quote_url(

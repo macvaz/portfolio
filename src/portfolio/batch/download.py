@@ -8,6 +8,7 @@ from portfolio.batch.alert_storage import persist_latest_alerts
 from portfolio.batch.metrics import update_all_fund_metrics
 from portfolio.batch.navs import store_fund_navs_from_db
 from portfolio.batch.signals import compute_signals
+from portfolio.datasource.errors import DownloadError
 
 
 def download(
@@ -21,15 +22,20 @@ def download(
     series_dir: Path = DEFAULT_SERIES_DIR,
     indexes_dir: Path = DEFAULT_INDEXES_DIR,
 ):
-    print("Downloading FRED series...")
-    market_df = compute_signals(
-        fred_api_key,
-        fred_series,
-        start_date,
-        end_date,
-        series_dir=series_dir,
-        indexes_dir=indexes_dir,
-    )
+    print("Downloading market signals...")
+    try:
+        market_df = compute_signals(
+            fred_api_key,
+            fred_series,
+            start_date,
+            end_date,
+            series_dir=series_dir,
+            indexes_dir=indexes_dir,
+        )
+    except DownloadError as exc:
+        print(f"Market signal download failed: {exc}")
+        raise
+
     observation_date = persist_latest_alerts(
         market_df,
         indexes_dir=indexes_dir,

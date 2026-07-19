@@ -52,24 +52,40 @@ def require_portfolio(portfolio_id: int) -> int:
 
 
 def normalize_portfolio_positions(positions: list[PortfolioPosition]) -> list[dict]:
+    if not positions:
+        raise HTTPException(status_code=400, detail="Portfolio cannot be empty")
+
+    seen: set[str] = set()
     normalized = []
     for position in positions:
         isin = position.isin.upper()
+        if isin in seen:
+            raise HTTPException(
+                status_code=400, detail=f"Duplicate ISIN in positions: {isin}"
+            )
+        seen.add(isin)
         if get_fund(isin) is None:
             raise HTTPException(status_code=404, detail=f"Unknown ISIN: {isin}")
         normalized.append({"isin": isin, "weighted_assets": position.weighted_assets})
+
+    total_weight = sum(item["weighted_assets"] for item in normalized)
+    if total_weight > 1.0 + 0.01:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Portfolio weights cannot exceed 1.0 "
+                f"(got {total_weight:.4f})"
+            ),
+        )
     return normalized
 
 
 def validate_positions(positions: list[PortfolioPosition]) -> list[dict]:
-    if not positions:
-        raise HTTPException(status_code=400, detail="Portfolio cannot be empty")
-
-    total_weight = sum(position.weighted_assets for position in positions)
+    normalized = normalize_portfolio_positions(positions)
+    total_weight = sum(item["weighted_assets"] for item in normalized)
     if abs(total_weight - 1.0) > 0.01:
         raise HTTPException(
             status_code=400,
             detail=f"Portfolio weights must sum to 1.0 (got {total_weight:.4f})",
         )
-
-    return normalize_portfolio_positions(positions)
+    return normalized

@@ -1537,13 +1537,9 @@ body.is-add-fund-open {
 
   .tactical-month-card {
     padding: 0.9rem 1rem;
-    background: #fff;
-    border: 1px solid #e2d8c8;
+    background: #fcf9eb;
+    border: 1px solid rgba(255, 153, 0, 0.45);
     border-radius: 10px;
-  }
-
-  .tactical-month-card--current {
-    border-color: rgba(255, 153, 0, 0.45);
     box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.12);
   }
 
@@ -1673,9 +1669,10 @@ body.is-add-fund-open {
     flex-direction: column;
     gap: 0.3rem;
     padding: 0.9rem 1rem;
-    background: #fff;
-    border: 1px solid #e2d8c8;
+    background: #fcf9eb;
+    border: 1px solid rgba(255, 153, 0, 0.45);
     border-radius: 10px;
+    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.12);
   }
 
   .fund-table:not(.alert-table--history) td {
@@ -1810,9 +1807,10 @@ body.is-add-fund-open {
     flex-direction: column;
     gap: 0.3rem;
     padding: 0.9rem 1rem;
-    background: #fff;
-    border: 1px solid #e2d8c8;
+    background: #fcf9eb;
+    border: 1px solid rgba(255, 153, 0, 0.45);
     border-radius: 10px;
+    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.12);
   }
 
   .fund-table:not(.alert-table--history) .weights-summary-card {

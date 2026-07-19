@@ -323,6 +323,44 @@ def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
     assert response.json()[0]["weighted_assets"] == 0.35
 
 
+def test_save_portfolio_rejects_overweight_and_duplicate_isins(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
+    init_db(db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
+
+    client = TestClient(app)
+    user_id = _create_user(db_path)
+
+    overweight = client.put(
+        "/api/portfolio/positions",
+        params={"portfolio_id": user_id},
+        json={
+            "positions": [
+                {"isin": "ES0182527038", "weighted_assets": 0.6},
+                {"isin": "IE00BYX5NX33", "weighted_assets": 0.6},
+            ]
+        },
+    )
+    assert overweight.status_code == 400
+    assert "cannot exceed 1.0" in overweight.json()["detail"]
+
+    duplicate = client.put(
+        "/api/portfolio/positions",
+        params={"portfolio_id": user_id},
+        json={
+            "positions": [
+                {"isin": "ES0182527038", "weighted_assets": 0.4},
+                {"isin": "ES0182527038", "weighted_assets": 0.3},
+            ]
+        },
+    )
+    assert duplicate.status_code == 400
+    assert "Duplicate ISIN" in duplicate.json()["detail"]
+
+
 def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)

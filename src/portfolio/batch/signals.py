@@ -4,15 +4,16 @@ from pathlib import Path
 
 import pandas as pd
 
+from portfolio.batch.sp500 import download_sp500
 from portfolio.common.alert_descriptions import (
     is_alert_active,
     load_alert_description_fixture,
 )
 from portfolio.common.indexes import DEFAULT_INDEXES_DIR, save_index_csv
+from portfolio.common.market import align_market_dataframe
 from portfolio.common.series import DEFAULT_SERIES_DIR, save_series_csv
-from portfolio.common.signals import calculate_market_signals
+from portfolio.datasource.errors import DownloadError
 from portfolio.datasource.fred import download_fred_data, init_client
-from portfolio.batch.sp500 import download_sp500
 
 
 def compute_signals(
@@ -23,7 +24,7 @@ def compute_signals(
     series_dir: Path | None = None,
     indexes_dir: Path | None = None,
 ) -> pd.DataFrame:
-    data_df = download_data(
+    market_df = download_data(
         fred_api_key,
         fred_series,
         start_date,
@@ -31,7 +32,6 @@ def compute_signals(
         series_dir=series_dir,
         indexes_dir=indexes_dir,
     )
-    market_df = calculate_market_signals(data_df)
     print_current_signals(market_df)
     return market_df
 
@@ -44,31 +44,46 @@ def download_data(
     series_dir: Path | None = None,
     indexes_dir: Path | None = None,
 ) -> pd.DataFrame:
-    fred = init_client(fred_api_key)
     series_root = series_dir or DEFAULT_SERIES_DIR
     indexes_root = indexes_dir or DEFAULT_INDEXES_DIR
 
-    macro_series_data = []
-    for series_id, column_name in fred_series:
-        series_df = download_fred_data(
-            fred, series_id, column_name, start_date, end_date
+    macro_series_data: list[pd.DataFrame] = []
+    if not fred_api_key:
+        print(
+            "FRED_API_KEY not set; skipping FRED series downloads. "
+            "Continuing with SP500; existing series files are left unchanged."
         )
-        save_series_csv(
-            series_id, series_df, column_name=column_name, series_dir=series_root
-        )
-        macro_series_data.append(series_df)
+    else:
+        fred = init_client(fred_api_key)
+        downloaded: list[tuple[str, str, pd.DataFrame]] = []
+        failures: list[str] = []
+        for series_id, column_name in fred_series:
+            try:
+                series_df = download_fred_data(
+                    fred, series_id, column_name, start_date, end_date
+                )
+            except DownloadError as exc:
+                failures.append(str(exc))
+                continue
+            downloaded.append((series_id, column_name, series_df))
+        if failures:
+            raise DownloadError(
+                "FRED download failed for "
+                f"{len(failures)} series:\n- " + "\n- ".join(failures)
+            )
+        for series_id, column_name, series_df in downloaded:
+            save_series_csv(
+                series_id, series_df, column_name=column_name, series_dir=series_root
+            )
+            macro_series_data.append(series_df)
 
     print("Downloading SP500 history from Morningstar")
     sp500 = download_sp500(start_date, end_date)
+    if sp500.empty:
+        raise DownloadError("SP500 download returned no observations")
     save_index_csv("SP500", sp500, column_name="SP500", indexes_dir=indexes_root)
 
-    df = pd.DataFrame(index=sp500.index)
-    df = df.join(macro_series_data, how="left")
-    df.ffill(inplace=True)
-    df.bfill(inplace=True)
-    df["SP500"] = sp500["SP500"]
-
-    return df
+    return align_market_dataframe(sp500, macro_series_data)
 
 
 def print_current_signals(df: pd.DataFrame):

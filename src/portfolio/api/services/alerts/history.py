@@ -6,9 +6,7 @@ from portfolio.common.alert_descriptions import (
     is_alert_active,
     load_alert_description_fixture,
 )
-from portfolio.common.indexes import DEFAULT_INDEXES_DIR, load_index_csv
-from portfolio.common.series import DEFAULT_SERIES_DIR, load_series_csv
-from portfolio.common.signals import calculate_market_signals
+from portfolio.common.market import load_market_dataframe
 
 HISTORY_START_DATE = pd.Timestamp("1995-01-01")
 
@@ -67,13 +65,6 @@ def _count_monthly_alerts(
     return active_count, eligible_count
 
 
-def _load_sp500_for_history(indexes_dir: Path) -> pd.DataFrame:
-    series = load_index_csv("SP500", indexes_dir)
-    if series.empty:
-        return series
-    return series.rename(columns={"SP500": "SP500"})
-
-
 def _history_month_ends(until: pd.Timestamp) -> pd.DatetimeIndex:
     start = HISTORY_START_DATE + pd.offsets.MonthEnd(0)
     end = until + pd.offsets.MonthEnd(0)
@@ -86,32 +77,9 @@ def load_market_dataframe_from_series(
     series_dir: Path | None = None,
     indexes_dir: Path | None = None,
 ) -> pd.DataFrame:
-    series_root = series_dir or DEFAULT_SERIES_DIR
-    indexes_root = indexes_dir or DEFAULT_INDEXES_DIR
-    fixture = load_alert_description_fixture()
-    frames: list[pd.DataFrame] = []
+    """Load the market DataFrame used by alert history (shared builder)."""
+    return load_market_dataframe(series_dir, indexes_dir)
 
-    for entry in fixture:
-        if entry.get("source") != "fred" or not entry.get("series_id"):
-            continue
-        code = str(entry["code"])
-        series_id = str(entry["series_id"])
-        series = load_series_csv(series_id, series_root)
-        if series.empty:
-            continue
-        frames.append(series.rename(columns={series_id: code}))
-
-    sp500 = _load_sp500_for_history(indexes_root)
-    if not sp500.empty:
-        frames.append(sp500)
-
-    if not frames:
-        return pd.DataFrame()
-
-    df = frames[0]
-    for frame in frames[1:]:
-        df = df.join(frame, how="outer")
-    return calculate_market_signals(df.sort_index())
 
 def _month_before_series_start(
     month_end: pd.Timestamp,
@@ -158,7 +126,7 @@ def build_monthly_alert_history(
 ) -> dict:
     fixture = load_alert_description_fixture()
     columns = _alert_history_columns(fixture)
-    market_df = load_market_dataframe_from_series(series_dir, indexes_dir)
+    market_df = load_market_dataframe(series_dir, indexes_dir)
     if market_df.empty:
         return {"columns": columns, "rows": []}
 

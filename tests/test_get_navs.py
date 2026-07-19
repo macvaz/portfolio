@@ -1,5 +1,8 @@
+import pytest
+
 from portfolio.storage.database import init_db, save_fund
 from portfolio.batch.navs import store_fund_navs_from_db
+from portfolio.datasource.errors import DownloadError
 
 
 def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):
@@ -45,7 +48,7 @@ def test_run_get_navs_stores_csv_per_fund(tmp_path, monkeypatch):
     assert "2024-01-01,100.0" in content
 
 
-def test_run_get_navs_skips_funds_without_data(tmp_path, monkeypatch):
+def test_run_get_navs_raises_when_fund_has_no_data(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     init_db(db_path)
@@ -58,12 +61,12 @@ def test_run_get_navs_skips_funds_without_data(tmp_path, monkeypatch):
         lambda **_kwargs: pd.DataFrame(),
     )
 
-    saved = store_fund_navs_from_db(
-        "2024-01-01",
-        "2024-01-02",
-        db_path=db_path,
-        funds_dir=funds_dir,
-    )
+    with pytest.raises(DownloadError, match="ES0182527038"):
+        store_fund_navs_from_db(
+            "2024-01-01",
+            "2024-01-02",
+            db_path=db_path,
+            funds_dir=funds_dir,
+        )
 
-    assert saved == []
     assert not (funds_dir / "ES0182527038.csv").exists()

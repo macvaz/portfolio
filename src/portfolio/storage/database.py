@@ -2,7 +2,7 @@ from collections.abc import Generator
 import datetime
 from pathlib import Path
 
-from sqlalchemy import func, text
+from sqlalchemy import event, func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
 from portfolio.storage.models import Alert, AlertDescription, Fund, Metric, Portfolio, User
@@ -15,10 +15,18 @@ CANONICAL_DB_PATH = Path("data/portfolio.db")
 DEFAULT_DB_PATH = CANONICAL_DB_PATH
 
 _engines: dict[str, object] = {}
+_initialized_paths: set[str] = set()
 
 
 def _resolve_db_path(db_path: Path | None) -> Path:
     return db_path or DEFAULT_DB_PATH
+
+
+def _configure_sqlite_connection(dbapi_connection, _connection_record) -> None:
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA busy_timeout=5000")
+    cursor.close()
 
 
 def get_engine(db_path: Path | None = None):
@@ -26,10 +34,12 @@ def get_engine(db_path: Path | None = None):
     key = str(path.resolve())
     if key not in _engines:
         path.parent.mkdir(parents=True, exist_ok=True)
-        _engines[key] = create_engine(
+        engine = create_engine(
             f"sqlite:///{path}",
             connect_args={"check_same_thread": False},
         )
+        event.listen(engine, "connect", _configure_sqlite_connection)
+        _engines[key] = engine
     return _engines[key]
 
 
@@ -38,7 +48,6 @@ def get_session(db_path: Path | None = None) -> Session:
 
 
 def get_db(db_path: Path | None = None) -> Generator[Session, None, None]:
-    init_db(db_path)
     with get_session(db_path) as session:
         yield session
 
@@ -524,25 +533,29 @@ def reset_alert_tables_from_fixture(
 
 def init_db(db_path: Path | None = None) -> None:
     path = _resolve_db_path(db_path)
-    engine = get_engine(path)
-    SQLModel.metadata.create_all(engine)
-    _migrate_legacy_funds_table(db_path)
-    _migrate_fund_performance_id(db_path)
-    _migrate_fund_universe(db_path)
-    _migrate_drop_user_password(db_path)
-    _migrate_user_email_to_name(db_path)
-    _migrate_user_is_default(db_path)
-    _migrate_signal_dimension_metadata(db_path)
-    _migrate_signal_dimension_series_id(db_path)
-    _migrate_signal_alert_codes(db_path)
-    _migrate_signal_dimension_comparison_code(db_path)
-    _migrate_signal_dimension_unified(db_path)
-    _migrate_rename_signal_tables_to_alert(db_path)
-    _migrate_alert_description_unified(db_path)
+    key = str(path.resolve())
+    if key not in _initialized_paths:
+        engine = get_engine(path)
+        SQLModel.metadata.create_all(engine)
+        _migrate_legacy_funds_table(db_path)
+        _migrate_fund_performance_id(db_path)
+        _migrate_fund_universe(db_path)
+        _migrate_drop_user_password(db_path)
+        _migrate_user_email_to_name(db_path)
+        _migrate_user_is_default(db_path)
+        _migrate_signal_dimension_metadata(db_path)
+        _migrate_signal_dimension_series_id(db_path)
+        _migrate_signal_alert_codes(db_path)
+        _migrate_signal_dimension_comparison_code(db_path)
+        _migrate_signal_dimension_unified(db_path)
+        _migrate_rename_signal_tables_to_alert(db_path)
+        _migrate_alert_description_unified(db_path)
+        _migrate_sahm_rule_indicator_alerts(db_path)
+        _initialized_paths.add(key)
+
     with get_session(db_path) as session:
         sync_alert_catalog_from_fixture(session)
         session.commit()
-    _migrate_sahm_rule_indicator_alerts(db_path)
 
 
 def create_user(name: str, db_path: Path | None = None) -> User:
