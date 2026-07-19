@@ -91,7 +91,7 @@ def print_current_signals(df: pd.DataFrame):
         return
 
     row = df.iloc[-1]
-    print("\nTactical alerts")
+    print("\nMacro health")
     for entry in load_alert_description_fixture():
         code = str(entry["code"])
         if code not in row.index or pd.isna(row[code]):
@@ -100,7 +100,8 @@ def print_current_signals(df: pd.DataFrame):
         threshold = entry.get("threshold")
         operator = entry.get("operator")
         active = is_alert_active(value, threshold, operator)
+        role = entry.get("role") or "alert"
         if active is None:
-            print(f"- {code}: {value:.2f}")
+            print(f"- {code}: {value:.2f} ({role})")
         else:
             print(f"- {code}: {value:.2f} (active={active})")

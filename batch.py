@@ -4,28 +4,13 @@ from datetime import date
 
 from dotenv import load_dotenv
 
-from portfolio.common.macro_constants import (
-    BREAKEVEN_INFLATION,
-    FINANCIAL_STRESS_INDEX,
-    HIGH_YIELD_SPREAD,
-    REAL_INTEREST_RATES,
-    UNEMPLOYMENT_RATE,
-    YIELD_SPREAD_10Y3M,
-)
+from portfolio.common.alert_descriptions import fred_series_from_fixture
 from portfolio.batch.download import download
-
-FRED_SERIES = [
-    ("UNRATE", UNEMPLOYMENT_RATE),
-    ("BAMLH0A0HYM2EY", HIGH_YIELD_SPREAD),
-    ("STLFSI4", FINANCIAL_STRESS_INDEX),
-    ("T10Y3M", YIELD_SPREAD_10Y3M),
-    ("DFII10", REAL_INTEREST_RATES),
-    ("T10YIE", BREAKEVEN_INFLATION),
-]
 
 load_dotenv()
 
 FRED_API_KEY = os.getenv("FRED_API_KEY")
+FRED_SERIES = fred_series_from_fixture()
 
 
 def _parse_args() -> argparse.Namespace:

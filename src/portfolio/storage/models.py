@@ -52,6 +52,7 @@ class AlertDescription(SQLModel, table=True):
     series_start: datetime.date | None = None
     threshold: float | None = None
     operator: str | None = None
+    role: str = Field(default="alert", index=True)
 
 
 class Alert(SQLModel, table=True):

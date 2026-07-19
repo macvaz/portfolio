@@ -827,7 +827,7 @@ button:disabled {
 }
 
 .table-scroll--alerts-history {
-  max-height: min(75vh, 680px);
+  max-height: calc(100vh - 8.5rem);
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -843,6 +843,8 @@ button:disabled {
 }
 
 .table-scroll--alerts-history .alert-table th {
+  position: sticky;
+  top: 0;
   background: #fcf9eb;
   z-index: 2;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
@@ -960,6 +962,10 @@ button:disabled {
   white-space: normal;
   font-weight: 600;
   color: inherit;
+}
+
+.alert-table th.col-alert-history .fund-link {
+  font-weight: 600;
 }
 
 .alert-table td.col-value {

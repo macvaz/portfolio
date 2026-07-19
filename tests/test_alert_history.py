@@ -73,6 +73,29 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         "SP500 death cross",
         "SP500",
     ]
+    unemployment_col = next(
+        column for column in history["columns"] if column["code"] == "Unemployment_Rate"
+    )
+    assert unemployment_col["identifier"] == "UNRATE"
+    assert unemployment_col["source_url"] == "https://fred.stlouisfed.org/series/UNRATE"
+    assert unemployment_col["threshold"] == 5.0
+    assert unemployment_col["operator"] == "gte"
+    death_cross_col = next(
+        column for column in history["columns"] if column["code"] == "SP500_Death_Cross"
+    )
+    assert death_cross_col["source_url"] is None
+    assert death_cross_col["threshold"] == 1.0
+    sp500_col = next(column for column in history["columns"] if column["code"] == "SP500")
+    assert sp500_col["source_url"] is None
+    assert sp500_col["threshold"] is None
+    assert [column["code"] for column in history["context_columns"]] == [
+        "Treasury_10Y_Yield",
+        "Broad_Dollar_Index",
+        "Reserve_Balances",
+        "Overnight_RRP",
+        "SOFR",
+    ]
+    assert len(history["rows"][0]["context_values"]) == len(history["context_columns"])
 
     assert len(history["rows"]) == 6
     assert history["rows"][0]["month"] == "2024-06"

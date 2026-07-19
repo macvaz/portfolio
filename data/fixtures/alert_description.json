@@ -6,7 +6,8 @@
     "series_id": "UNRATE",
     "series_start": "1990-01-01",
     "threshold": 5.0,
-    "operator": "gte"
+    "operator": "gte",
+    "role": "alert"
   },
   {
     "code": "High_Yield_Spread",
@@ -15,7 +16,8 @@
     "series_id": "BAMLH0A0HYM2EY",
     "series_start": "2023-06-27",
     "threshold": 9.0,
-    "operator": "gte"
+    "operator": "gte",
+    "role": "alert"
   },
   {
     "code": "Financial_Stress_Index",
@@ -24,7 +26,8 @@
     "series_id": "STLFSI4",
     "series_start": "1994-01-07",
     "threshold": 1.0,
-    "operator": "gte"
+    "operator": "gte",
+    "role": "alert"
   },
   {
     "code": "Yield_Spread_10Y3M",
@@ -33,7 +36,8 @@
     "series_id": "T10Y3M",
     "series_start": "1990-01-02",
     "threshold": 0.0,
-    "operator": "lt"
+    "operator": "lt",
+    "role": "alert"
   },
   {
     "code": "Real_Interest_Rates",
@@ -42,7 +46,8 @@
     "series_id": "DFII10",
     "series_start": "2003-01-02",
     "threshold": 2.0,
-    "operator": "gte"
+    "operator": "gte",
+    "role": "alert"
   },
   {
     "code": "Breakeven_Inflation",
@@ -51,7 +56,8 @@
     "series_id": "T10YIE",
     "series_start": "2003-01-02",
     "threshold": 2.5,
-    "operator": "gte"
+    "operator": "gte",
+    "role": "alert"
   },
   {
     "code": "SP500_Death_Cross",
@@ -60,6 +66,57 @@
     "series_id": null,
     "series_start": "1970-01-02",
     "threshold": 1.0,
-    "operator": "lt"
+    "operator": "lt",
+    "role": "alert"
+  },
+  {
+    "code": "Treasury_10Y_Yield",
+    "description": "10-year Treasury constant-maturity yield: market yield on U.S. Treasury securities at 10-year maturity, investment basis (percent).",
+    "source": "fred",
+    "series_id": "DGS10",
+    "series_start": "1962-01-02",
+    "threshold": null,
+    "operator": null,
+    "role": "context"
+  },
+  {
+    "code": "Broad_Dollar_Index",
+    "description": "Nominal broad U.S. dollar index: trade-weighted value of the dollar against a broad set of foreign currencies (index, Jan 2006=100).",
+    "source": "fred",
+    "series_id": "DTWEXBGS",
+    "series_start": "2006-01-02",
+    "threshold": null,
+    "operator": null,
+    "role": "context"
+  },
+  {
+    "code": "Reserve_Balances",
+    "description": "Reserve balances with Federal Reserve Banks: week-average deposits of depository institutions held at the Fed (millions of U.S. dollars).",
+    "source": "fred",
+    "series_id": "WRESBAL",
+    "series_start": "1986-01-08",
+    "threshold": null,
+    "operator": null,
+    "role": "context"
+  },
+  {
+    "code": "Overnight_RRP",
+    "description": "Overnight reverse repo facility usage: Treasury securities sold by the Federal Reserve in temporary open-market operations (billions of U.S. dollars).",
+    "source": "fred",
+    "series_id": "RRPONTSYD",
+    "series_start": "2003-02-07",
+    "threshold": null,
+    "operator": null,
+    "role": "context"
+  },
+  {
+    "code": "SOFR",
+    "description": "Secured Overnight Financing Rate: broad measure of the cost of borrowing cash overnight collateralized by Treasury securities (percent).",
+    "source": "fred",
+    "series_id": "SOFR",
+    "series_start": "2018-04-03",
+    "threshold": null,
+    "operator": null,
+    "role": "context"
   }
 ]

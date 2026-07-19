@@ -8,5 +8,11 @@ def fetch_latest_alert_snapshot() -> AlertSnapshotResponse:
     history = AlertHistory(**history_payload)
     snapshot = get_latest_alerts()
     if snapshot is None:
-        return AlertSnapshotResponse(date=None, series=[], alerts=[], history=history)
+        return AlertSnapshotResponse(
+            date=None,
+            series=[],
+            context=[],
+            alerts=[],
+            history=history,
+        )
     return AlertSnapshotResponse(**snapshot, history=history)

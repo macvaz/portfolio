@@ -459,6 +459,13 @@ def _migrate_alert_description_unified(db_path: Path | None = None) -> None:
             connection.execute(
                 text("ALTER TABLE alert_description ADD COLUMN series_start DATE")
             )
+        if "role" not in columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE alert_description "
+                    "ADD COLUMN role VARCHAR NOT NULL DEFAULT 'alert'"
+                )
+            )
         connection.commit()
 
 
@@ -756,6 +763,34 @@ def upsert_alerts(
 from portfolio.common.alert_descriptions import alert_label, is_alert_active
 
 
+def _series_item_from_description(
+    description: AlertDescription,
+    value: float,
+) -> dict:
+    identifier = description.series_id
+    source_url = (
+        f"https://fred.stlouisfed.org/series/{identifier}"
+        if description.source == "fred" and identifier
+        else None
+    )
+    active = is_alert_active(value, description.threshold, description.operator)
+    return {
+        "code": description.code,
+        "label": alert_label(description.code),
+        "description": description.description,
+        "value": value,
+        "threshold": description.threshold,
+        "active": active,
+        "identifier": identifier,
+        "source_url": source_url,
+        "series_start": (
+            description.series_start.isoformat()
+            if description.series_start
+            else None
+        ),
+    }
+
+
 def get_latest_alerts(db_path: Path | None = None) -> dict | None:
     init_db(db_path)
     with get_session(db_path) as session:
@@ -770,6 +805,7 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
 
     values_by_code = {alert.code: alert.value for alert in stored_alerts}
     series: list[dict] = []
+    context: list[dict] = []
     alerts: list[dict] = []
 
     for description in descriptions:
@@ -777,50 +813,32 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
         if value is None:
             continue
 
-        active = is_alert_active(
-            value, description.threshold, description.operator
-        )
-        identifier = description.series_id
-        source_url = (
-            f"https://fred.stlouisfed.org/series/{identifier}"
-            if description.source == "fred" and identifier
-            else None
-        )
-        label = alert_label(description.code)
+        role = getattr(description, "role", "alert") or "alert"
+        item = _series_item_from_description(description, value)
+
+        if role == "context":
+            if description.source == "fred":
+                context.append(item)
+            continue
 
         if description.source == "fred":
-            series.append(
-                {
-                    "code": description.code,
-                    "label": label,
-                    "description": description.description,
-                    "value": value,
-                    "threshold": description.threshold,
-                    "active": active,
-                    "identifier": identifier,
-                    "source_url": source_url,
-                    "series_start": (
-                        description.series_start.isoformat()
-                        if description.series_start
-                        else None
-                    ),
-                }
-            )
+            series.append(item)
 
-        if active is not None:
+        if item["active"] is not None:
             alerts.append(
                 {
-                    "code": description.code,
-                    "description": description.description,
-                    "value": value,
-                    "threshold": description.threshold,
-                    "active": active,
-                    "identifier": identifier,
-                    "source_url": source_url,
+                    "code": item["code"],
+                    "description": item["description"],
+                    "value": item["value"],
+                    "threshold": item["threshold"],
+                    "active": item["active"],
+                    "identifier": item["identifier"],
+                    "source_url": item["source_url"],
                 }
             )
 
     series.sort(key=lambda item: item.get("label") or item["code"])
+    context.sort(key=lambda item: item.get("label") or item["code"])
     alerts.sort(
         key=lambda item: (not item["active"], item.get("identifier") or item["code"])
     )
@@ -828,6 +846,7 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
     return {
         "date": latest_date.isoformat(),
         "series": series,
+        "context": context,
         "alerts": alerts,
     }
 

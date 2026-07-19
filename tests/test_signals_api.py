@@ -32,6 +32,8 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
             "Real_Interest_Rates": 2.1,
             "SP500_Death_Cross": 0.94,
             "Breakeven_Inflation": 2.3,
+            "Treasury_10Y_Yield": 4.3,
+            "SOFR": 5.3,
         },
         observation_date,
         db_path,
@@ -45,9 +47,32 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     assert payload["date"] == "2024-06-04"
     assert "history" in payload
     assert isinstance(payload["history"]["columns"], list)
+    assert isinstance(payload["history"]["context_columns"], list)
     assert isinstance(payload["history"]["rows"], list)
     assert len(payload["series"]) == 6
     assert len(payload["alerts"]) == 7
+    assert "Treasury_10Y_Yield" not in {item["code"] for item in payload["series"]}
+    assert "SOFR" not in {item["code"] for item in payload["alerts"]}
+
+    context_codes = {item["code"] for item in payload["context"]}
+    assert context_codes == {"Treasury_10Y_Yield", "SOFR"}
+    sofr = next(item for item in payload["context"] if item["code"] == "SOFR")
+    assert sofr["label"] == "SOFR"
+    assert sofr["identifier"] == "SOFR"
+    assert sofr["value"] == 5.3
+    assert sofr["active"] is None
+
+    history_context_codes = [
+        column["code"] for column in payload["history"]["context_columns"]
+    ]
+    assert history_context_codes == [
+        "Treasury_10Y_Yield",
+        "Broad_Dollar_Index",
+        "Reserve_Balances",
+        "Overnight_RRP",
+        "SOFR",
+    ]
+    assert all("context_values" in row for row in payload["history"]["rows"])
 
     series_codes = {item["code"] for item in payload["series"]}
     assert series_codes == {
@@ -101,6 +126,8 @@ def test_list_alerts_returns_empty_snapshot_when_no_data(tmp_path, monkeypatch):
     payload = response.json()
     assert payload["date"] is None
     assert payload["series"] == []
+    assert payload["context"] == []
     assert payload["alerts"] == []
     assert "columns" in payload["history"]
+    assert "context_columns" in payload["history"]
     assert "rows" in payload["history"]

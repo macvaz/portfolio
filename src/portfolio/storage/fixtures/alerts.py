@@ -24,6 +24,7 @@ def _description_from_row(row: dict) -> AlertDescription:
         series_start=series_start,
         threshold=None if threshold is None else float(threshold),
         operator=None if operator is None else str(operator),
+        role=str(row.get("role") or "alert"),
     )
 
 

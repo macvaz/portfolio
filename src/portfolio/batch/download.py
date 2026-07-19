@@ -22,7 +22,7 @@ def download(
     series_dir: Path = DEFAULT_SERIES_DIR,
     indexes_dir: Path = DEFAULT_INDEXES_DIR,
 ):
-    print("Downloading market signals...")
+    print("Downloading macro series from FRED...")
     try:
         market_df = compute_signals(
             fred_api_key,

@@ -34,6 +34,43 @@
     return threshold.toFixed(2);
   }
 
+  function formatThresholdTooltip(threshold, operator) {
+    if (threshold === null || threshold === undefined || !Number.isFinite(threshold)) {
+      return null;
+    }
+    const value = formatThreshold(threshold);
+    if (operator === "lt") {
+      return `Threshold: < ${value}`;
+    }
+    if (operator === "lte") {
+      return `Threshold: ≤ ${value}`;
+    }
+    if (operator === "gt") {
+      return `Threshold: > ${value}`;
+    }
+    return `Threshold: ≥ ${value}`;
+  }
+
+  function renderHistoryColumnHeader(column) {
+    const titleParts = [];
+    if (column.description) {
+      titleParts.push(column.description);
+    }
+    const thresholdLabel = formatThresholdTooltip(column.threshold, column.operator);
+    if (thresholdLabel) {
+      titleParts.push(thresholdLabel);
+    }
+    if (column.series_start) {
+      titleParts.push(`from ${column.series_start}`);
+    }
+    const title = escapeHtml(titleParts.join(" · "));
+    const label = escapeHtml(column.label || column.code);
+    if (column.source_url) {
+      return `<th class="col-alert-history" title="${title}"><a href="${escapeHtml(column.source_url)}" class="fund-link" target="_blank" rel="noopener noreferrer">${label}</a></th>`;
+    }
+    return `<th class="col-alert-history" title="${title}">${label}</th>`;
+  }
+
   function formatNumericValue(value) {
     if (!Number.isFinite(value)) {
       return "-";
@@ -53,39 +90,6 @@
       month: "short",
       year: "numeric",
     });
-  }
-
-  function renderSeriesIdentifier(series) {
-    const label = series.label || series.identifier || series.code;
-    const title = series.identifier && series.label !== series.identifier
-      ? series.identifier
-      : "";
-    if (series.source_url) {
-      return `<a href="${series.source_url}" class="fund-link" target="_blank" rel="noopener noreferrer" title="${escapeHtml(title)}">${escapeHtml(label)}</a>`;
-    }
-    return escapeHtml(label);
-  }
-
-  function formatSeriesStart(seriesStart) {
-    if (!seriesStart) {
-      return "-";
-    }
-    return seriesStart;
-  }
-
-  function renderSeriesRow(series) {
-    return `
-      <tr>
-        <td class="col-name" data-label="Series">${renderSeriesIdentifier(series)}</td>
-        <td class="col-name col-description" data-label="Description" title="${escapeHtml(series.description)}">${escapeHtml(series.description)}</td>
-        <td class="col-series-start" data-label="Start">${formatSeriesStart(series.series_start)}</td>
-        <td class="col-alert-threshold" data-label="Threshold">${formatThreshold(series.threshold)}</td>
-      </tr>`;
-  }
-
-  function renderAlertBadge(content, active) {
-    const statusClass = active ? "active" : "inactive";
-    return `<span class="alert-name alert-name--${statusClass}">${content}</span>`;
   }
 
   function formatSp500Value(value) {
@@ -189,15 +193,7 @@
     const thead = document.getElementById("alerts-status-head");
     const tbody = document.getElementById("alerts-status-body");
 
-    const headerCells = columns
-      .map((column) => {
-        const titleParts = [column.description];
-        if (column.series_start) {
-          titleParts.push(`from ${column.series_start}`);
-        }
-        return `<th class="col-alert-history" title="${escapeHtml(titleParts.join(" · "))}">${escapeHtml(column.label || column.code)}</th>`;
-      })
-      .join("");
+    const headerCells = columns.map((column) => renderHistoryColumnHeader(column)).join("");
 
     thead.innerHTML = `
       <tr>
@@ -228,40 +224,25 @@
     renderAlertHistoryCards(history);
   }
 
-  function renderTableBody(containerId, rows, renderRow) {
-    const tbody = document.getElementById(containerId);
-    tbody.innerHTML = rows.map((row) => renderRow(row)).join("");
-  }
-
   function renderAlerts(snapshot) {
     const asOf = document.getElementById("tactical-as-of");
-    const summaryEl = document.getElementById("tactical-alerts-summary");
-    const series = snapshot.series || [];
     const alerts = snapshot.alerts || [];
     const history = snapshot.history || { columns: [], rows: [] };
-    const activeCount = alerts.filter((alert) => alert.active).length;
     const hasData =
       snapshot.date &&
-      (series.length > 0 || alerts.length > 0 || history.rows.length > 0);
+      (alerts.length > 0 || history.rows.length > 0);
 
     if (!hasData) {
       setTacticalContent(false);
       setTacticalMessage("No macro health data yet. Run the data job to compute it.");
-      renderTableBody("alerts-series-body", [], renderSeriesRow);
       renderAlertHistory({ columns: [], rows: [] });
       asOf.textContent = "";
-      summaryEl.textContent = "";
       return;
     }
 
     setTacticalMessage("");
     setTacticalContent(true);
-    asOf.textContent = snapshot.date
-      ? `— FRED series and thresholds as of ${snapshot.date}`
-      : "— FRED series and thresholds";
-    summaryEl.textContent =
-      alerts.length > 0 ? `— ${activeCount} of ${alerts.length} active` : "";
-    renderTableBody("alerts-series-body", series, renderSeriesRow);
+    asOf.textContent = snapshot.date ? `— as of ${snapshot.date}` : "";
     renderAlertHistory(history);
   }
 
