@@ -54,22 +54,22 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
     history = build_monthly_alert_history(series_dir, indexes_dir)
     columns = [column["code"] for column in history["columns"]]
     assert columns == [
+        "Unemployment_Rate",
         "High_Yield_Spread",
         "Financial_Stress_Index",
-        "Yield_Spread_10Y3M",
         "Real_Interest_Rates",
-        "Unemployment_Rate",
         "Breakeven_Inflation",
+        "Yield_Spread_10Y3M",
         "SP500_Death_Cross",
         "SP500",
     ]
     assert [column["label"] for column in history["columns"]] == [
+        "Unemployment rate",
         "High yield spread",
         "Financial stress",
-        "Curve inversion",
         "Real interest rate",
-        "Unemployment rate",
         "Breakeven inflation",
+        "Curve inversion",
         "SP500 death cross",
         "SP500",
     ]

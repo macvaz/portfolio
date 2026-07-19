@@ -12,6 +12,7 @@ wheels/
 
 # Local data
 data/portfolio.db
+data/portfolio.db-*
 data/funds/
 data/indexes/
 data/series/

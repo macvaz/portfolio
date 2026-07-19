@@ -126,7 +126,7 @@ The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 
 | Indicator | Input series | Alert / output |
 |-----------|--------------|----------------|
 | Inverted curve | 10Y–3M yield spread (`T10Y3M`) | Active when spread < 0 |
-| Breakeven inflation | 10-year breakeven inflation (`T10YIE`) | Active when rate ≥ 3.0% |
+| Breakeven inflation | 10-year breakeven inflation (`T10YIE`) | Active when rate ≥ 2.5% |
 | Financial stress | STL Financial Stress Index (`STLFSI4`) | Active when index ≥ 1.0 |
 
 **Files**

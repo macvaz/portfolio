@@ -50,7 +50,7 @@
     "source": "fred",
     "series_id": "T10YIE",
     "series_start": "2003-01-02",
-    "threshold": 3.0,
+    "threshold": 2.5,
     "operator": "gte"
   },
   {

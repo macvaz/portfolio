@@ -12,12 +12,12 @@ from portfolio.common.market import load_market_dataframe
 HISTORY_START_DATE = pd.Timestamp("1995-01-01")
 
 ALERT_HISTORY_COLUMN_ORDER = (
+    "Unemployment_Rate",
     "High_Yield_Spread",
     "Financial_Stress_Index",
-    "Yield_Spread_10Y3M",
     "Real_Interest_Rates",
-    "Unemployment_Rate",
     "Breakeven_Inflation",
+    "Yield_Spread_10Y3M",
     "SP500_Death_Cross",
     "SP500",
 )

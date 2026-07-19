@@ -43,7 +43,7 @@ def test_alert_description_and_alert_persist(tmp_path):
         alert = session.exec(select(Alert)).first()
 
     assert description.operator == "gte"
-    assert description.threshold == 3.0
+    assert description.threshold == 2.5
     assert alert.code == "Breakeven_Inflation"
     assert alert.date == date(2026, 6, 1)
     assert alert.value == 2.3
