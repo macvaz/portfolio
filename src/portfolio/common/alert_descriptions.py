@@ -5,6 +5,21 @@ from pathlib import Path
 
 DEFAULT_ALERT_DESCRIPTION_FIXTURE = Path("data/fixtures/alert_description.json")
 
+ALERT_LABELS = {
+    "High_Yield_Spread": "High yield spread",
+    "Financial_Stress_Index": "Financial stress",
+    "Yield_Spread_10Y3M": "Curve inversion",
+    "Real_Interest_Rates": "Real interest rate",
+    "Unemployment_Rate": "Unemployment rate",
+    "Breakeven_Inflation": "Breakeven inflation",
+    "SP500_Death_Cross": "SP500 death cross",
+    "SP500": "SP500",
+}
+
+
+def alert_label(code: str) -> str:
+    return ALERT_LABELS.get(code, code.replace("_", " "))
+
 
 def load_alert_description_fixture(
     fixture_path: Path | None = None,

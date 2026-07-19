@@ -5,10 +5,10 @@ from datetime import date
 from dotenv import load_dotenv
 
 from portfolio.common.macro_constants import (
+    BREAKEVEN_INFLATION,
     FINANCIAL_STRESS_INDEX,
     HIGH_YIELD_SPREAD,
     REAL_INTEREST_RATES,
-    SAHM_RULE_INDICATOR,
     UNEMPLOYMENT_RATE,
     YIELD_SPREAD_10Y3M,
 )
@@ -20,7 +20,7 @@ FRED_SERIES = [
     ("STLFSI4", FINANCIAL_STRESS_INDEX),
     ("T10Y3M", YIELD_SPREAD_10Y3M),
     ("DFII10", REAL_INTEREST_RATES),
-    ("SAHMREALTIME", SAHM_RULE_INDICATOR),
+    ("T10YIE", BREAKEVEN_INFLATION),
 ]
 
 load_dotenv()

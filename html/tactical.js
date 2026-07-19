@@ -56,11 +56,14 @@
   }
 
   function renderSeriesIdentifier(series) {
-    const identifier = series.identifier || series.code;
+    const label = series.label || series.identifier || series.code;
+    const title = series.identifier && series.label !== series.identifier
+      ? series.identifier
+      : "";
     if (series.source_url) {
-      return `<a href="${series.source_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${identifier}</a>`;
+      return `<a href="${series.source_url}" class="fund-link" target="_blank" rel="noopener noreferrer" title="${escapeHtml(title)}">${escapeHtml(label)}</a>`;
     }
-    return identifier;
+    return escapeHtml(label);
   }
 
   function formatSeriesStart(seriesStart) {
@@ -243,7 +246,7 @@
 
     if (!hasData) {
       setTacticalContent(false);
-      setTacticalMessage("No tactical alerts yet. Run the data job to compute them.");
+      setTacticalMessage("No macro health data yet. Run the data job to compute it.");
       renderTableBody("alerts-series-body", [], renderSeriesRow);
       renderAlertHistory({ columns: [], rows: [] });
       asOf.textContent = "";

@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from portfolio.common.alert_descriptions import (
+    alert_label,
     is_alert_active,
     load_alert_description_fixture,
 )
@@ -16,21 +17,10 @@ ALERT_HISTORY_COLUMN_ORDER = (
     "Yield_Spread_10Y3M",
     "Real_Interest_Rates",
     "Unemployment_Rate",
-    "Sahm_Rule_Indicator",
+    "Breakeven_Inflation",
     "SP500_Death_Cross",
     "SP500",
 )
-
-ALERT_HISTORY_COLUMN_LABELS = {
-    "High_Yield_Spread": "High yield spread",
-    "Financial_Stress_Index": "Financial stress",
-    "Yield_Spread_10Y3M": "Curve inversion",
-    "Real_Interest_Rates": "Real interest rate",
-    "Unemployment_Rate": "Unemployment rate",
-    "Sahm_Rule_Indicator": "Sahm rule",
-    "SP500_Death_Cross": "SP500 death cross",
-    "SP500": "SP500",
-}
 
 HISTORY_DISPLAY_ONLY_COLUMNS: dict[str, dict[str, str | None]] = {
     "SP500": {
@@ -102,7 +92,7 @@ def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
             columns.append(
                 {
                     "code": code,
-                    "label": ALERT_HISTORY_COLUMN_LABELS[code],
+                    "label": alert_label(code),
                     "description": str(display_only["description"]),
                     "series_start": display_only.get("series_start"),
                 }
@@ -112,7 +102,7 @@ def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
             columns.append(
                 {
                     "code": code,
-                    "label": ALERT_HISTORY_COLUMN_LABELS[code],
+                    "label": alert_label(code),
                     "description": str(row["description"]),
                     "series_start": row.get("series_start"),
                 }

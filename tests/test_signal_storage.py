@@ -27,12 +27,12 @@ def test_upsert_alerts_updates_existing_value(tmp_path):
     observation_date = datetime.date(2024, 6, 4)
 
     upsert_alerts(
-        {"Sahm_Rule_Indicator": 0.32},
+        {"Breakeven_Inflation": 2.3},
         observation_date,
         db_path,
     )
     upsert_alerts(
-        {"Sahm_Rule_Indicator": 0.41},
+        {"Breakeven_Inflation": 2.5},
         observation_date,
         db_path,
     )
@@ -40,12 +40,12 @@ def test_upsert_alerts_updates_existing_value(tmp_path):
     with get_session(db_path) as session:
         stored = session.exec(
             select(Alert).where(
-                Alert.code == "Sahm_Rule_Indicator",
+                Alert.code == "Breakeven_Inflation",
                 Alert.date == observation_date,
             )
         ).one()
 
-    assert stored.value == 0.41
+    assert stored.value == 2.5
 
 
 def test_persist_latest_alerts_uses_index_file_date(tmp_path):
@@ -67,7 +67,7 @@ def test_persist_latest_alerts_uses_index_file_date(tmp_path):
             "Financial_Stress_Index": [0.4],
             YIELD_SPREAD_10Y3M: [0.12],
             "Real_Interest_Rates": [1.8],
-            "Sahm_Rule_Indicator": [0.32],
+            "Breakeven_Inflation": [2.3],
             "SP500": [4800.0],
             SP500_DEATH_CROSS: [1.02],
         },
@@ -88,13 +88,13 @@ def test_persist_latest_alerts_uses_index_file_date(tmp_path):
             for alert in session.exec(select(Alert)).all()
         }
 
-    assert stored["Sahm_Rule_Indicator"] == 0.32
+    assert stored["Breakeven_Inflation"] == 2.3
     assert stored["Unemployment_Rate"] == 3.8
     assert stored[SP500_DEATH_CROSS] == 1.02
 
 
 def test_extract_alert_values_skips_missing_columns():
-    row = pd.Series({"Sahm_Rule_Indicator": 0.25})
-    values = extract_alert_values(row, ["Sahm_Rule_Indicator", SP500_DEATH_CROSS])
+    row = pd.Series({"Breakeven_Inflation": 2.25})
+    values = extract_alert_values(row, ["Breakeven_Inflation", SP500_DEATH_CROSS])
 
-    assert values == {"Sahm_Rule_Indicator": 0.25}
+    assert values == {"Breakeven_Inflation": 2.25}

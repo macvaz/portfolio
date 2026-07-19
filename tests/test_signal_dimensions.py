@@ -16,8 +16,8 @@ def test_alert_description_fixture_matches_expected_catalog():
 
     assert rows["Yield_Spread_10Y3M"]["threshold"] == 0.0
     assert rows["Yield_Spread_10Y3M"]["operator"] == "lt"
-    assert rows["Sahm_Rule_Indicator"]["threshold"] == 0.5
-    assert rows["Sahm_Rule_Indicator"]["series_id"] == "SAHMREALTIME"
+    assert rows["Breakeven_Inflation"]["threshold"] == 3.0
+    assert rows["Breakeven_Inflation"]["series_id"] == "T10YIE"
     assert rows["Financial_Stress_Index"]["threshold"] == 1.0
     assert rows["High_Yield_Spread"]["threshold"] == 9.0
     assert rows["Unemployment_Rate"]["threshold"] == 5.0

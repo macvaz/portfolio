@@ -877,7 +877,7 @@ button:disabled {
 }
 
 .alert-table--series col.col-alert-code {
-  width: 10.5rem;
+  width: 12.5rem;
 }
 
 .alert-table--series col.col-alert-start {
@@ -891,7 +891,7 @@ button:disabled {
 .alert-table--series th.col-name:not(.col-description),
 .alert-table--series td.col-name:not(.col-description) {
   min-width: 0;
-  max-width: 10.5rem;
+  max-width: 12.5rem;
   padding-right: 0.65rem;
   white-space: nowrap;
   overflow: hidden;
@@ -1427,12 +1427,12 @@ body.is-add-fund-open {
   }
 
   .alert-table--series col.col-alert-code {
-    width: 8.5rem;
+    width: 10.5rem;
   }
 
   .alert-table--series th.col-name:not(.col-description),
   .alert-table--series td.col-name:not(.col-description) {
-    max-width: 8.5rem;
+    max-width: 10.5rem;
   }
 
   .table-title .alerts-summary {

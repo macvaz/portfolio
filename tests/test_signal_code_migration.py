@@ -96,13 +96,19 @@ def test_migrate_signal_alert_codes_renames_legacy_rows(tmp_path):
     init_db(db_path)
 
     connection = sqlite3.connect(db_path)
-    row = connection.execute(
+    dimensions = {
+        row[0]
+        for row in connection.execute("SELECT code FROM alert_description").fetchall()
+    }
+    sahm_description = connection.execute(
         "SELECT code FROM alert_description WHERE code = 'Sahm_Rule_Indicator'"
     ).fetchone()
-    alert = connection.execute(
-        "SELECT code FROM alert WHERE date = '2024-06-04'"
+    sahm_alert = connection.execute(
+        "SELECT code FROM alert WHERE code IN ('Sahm_Value', 'Sahm_Rule_Indicator')"
     ).fetchone()
     connection.close()
 
-    assert row == ("Sahm_Rule_Indicator",)
-    assert alert == ("Sahm_Rule_Indicator",)
+    assert sahm_description is None
+    assert sahm_alert is None
+    assert "Breakeven_Inflation" in dimensions
+    assert "Sahm_Value" not in dimensions

@@ -59,7 +59,7 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         "Yield_Spread_10Y3M",
         "Real_Interest_Rates",
         "Unemployment_Rate",
-        "Sahm_Rule_Indicator",
+        "Breakeven_Inflation",
         "SP500_Death_Cross",
         "SP500",
     ]
@@ -69,7 +69,7 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         "Curve inversion",
         "Real interest rate",
         "Unemployment rate",
-        "Sahm rule",
+        "Breakeven inflation",
         "SP500 death cross",
         "SP500",
     ]
@@ -125,9 +125,9 @@ def test_build_monthly_alert_history_fills_missing_months_from_1995(tmp_path, mo
     assert feb_1995["values"][unemployment_idx]["value"] == 5.4
     assert jan_1995["values"][hy_idx] == {"value": None, "active": None}
     assert jan_1995["active_count"] == 0
-    assert jan_1995["eligible_count"] == 5
+    assert jan_1995["eligible_count"] == 4
     assert feb_1995["active_count"] == 1
-    assert feb_1995["eligible_count"] == 5
+    assert feb_1995["eligible_count"] == 4
 
 
 def test_build_monthly_alert_history_honors_series_start(tmp_path, monkeypatch):

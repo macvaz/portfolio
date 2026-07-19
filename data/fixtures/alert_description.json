@@ -45,12 +45,12 @@
     "operator": "gte"
   },
   {
-    "code": "Sahm_Rule_Indicator",
-    "description": "Real-time Sahm Rule recession indicator: triggers when the 3-month unemployment average rises 0.5 pp above its 12-month low (percentage points).",
+    "code": "Breakeven_Inflation",
+    "description": "10-year breakeven inflation rate: market-implied average inflation expected over the next 10 years from Treasury and TIPS yields (percent).",
     "source": "fred",
-    "series_id": "SAHMREALTIME",
-    "series_start": "1990-01-01",
-    "threshold": 0.5,
+    "series_id": "T10YIE",
+    "series_start": "2003-01-02",
+    "threshold": 3.0,
     "operator": "gte"
   },
   {

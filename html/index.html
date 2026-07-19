@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=145" />
+    <link rel="stylesheet" href="/static/style.css?v=146" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -50,8 +50,8 @@
                 <span class="app-tab-short">Risk</span>
               </button>
               <button type="button" class="app-tab" data-tab="tactical" role="option" aria-selected="false">
-                <span class="app-tab-full">Tactical alerts</span>
-                <span class="app-tab-short">Alerts</span>
+                <span class="app-tab-full">Macro health</span>
+                <span class="app-tab-short">Macro</span>
               </button>
             </div>
           </div>
@@ -265,7 +265,7 @@
         </div>
 
         <div id="tactical-panel" class="app-panel" hidden>
-          <div id="tactical-loading" class="management-loading">Loading tactical alerts…</div>
+          <div id="tactical-loading" class="management-loading">Loading macro health…</div>
           <div id="tactical-content" hidden>
             <section class="table-panel table-panel--macro">
               <h2 class="table-title">
@@ -295,7 +295,7 @@
 
             <section class="table-panel">
               <h2 class="table-title">
-                Monthly tactical alerts
+                Monthly macro health
                 <span id="tactical-alerts-summary" class="alerts-summary"></span>
               </h2>
               <div class="table-scroll table-scroll--alerts table-scroll--alerts-history">
@@ -308,7 +308,7 @@
                   <tbody id="alerts-status-body"></tbody>
                 </table>
               </div>
-              <div id="tactical-month-cards" class="tactical-month-cards" aria-label="Monthly tactical alerts cards"></div>
+              <div id="tactical-month-cards" class="tactical-month-cards" aria-label="Monthly macro health cards"></div>
             </section>
           </div>
           <p id="tactical-message" class="risk-message" hidden></p>
@@ -372,7 +372,7 @@
     <script src="/static/portfolios.js?v=11"></script>
     <script src="/static/management.js?v=79"></script>
     <script src="/static/risk.js?v=7"></script>
-    <script src="/static/tactical.js?v=45"></script>
+    <script src="/static/tactical.js?v=47"></script>
     <script src="/static/add-fund.js?v=4"></script>
     <script src="/static/app.js?v=45"></script>
   </body>

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class SeriesItem(BaseModel):
     code: str
+    label: str | None = None
     description: str
     value: float
     threshold: float | None = None

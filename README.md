@@ -125,11 +125,9 @@ The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 
 
 | Indicator | Input series | Alert / output |
 |-----------|--------------|----------------|
-| Inverted curve | 10Y–3M yield spread (`T10Y3M`) | `Alert_Inverted_Curve` when spread < 0 |
-| Sahm rule | FRED real-time indicator (`SAHMREALTIME`) | `SAHM_RULE` when indicator ≥ 0.5 pp |
-| Financial stress | STL Financial Stress Index (`STLFSI4`) | `FINANCIAL_STRESS` when index ≥ 1.0 |
-
-The Sahm rule is tracked as an informational alert and does not gate other signals.
+| Inverted curve | 10Y–3M yield spread (`T10Y3M`) | Active when spread < 0 |
+| Breakeven inflation | 10-year breakeven inflation (`T10YIE`) | Active when rate ≥ 3.0% |
+| Financial stress | STL Financial Stress Index (`STLFSI4`) | Active when index ≥ 1.0 |
 
 **Files**
 

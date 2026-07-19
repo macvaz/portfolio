@@ -31,7 +31,7 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
             "Yield_Spread_10Y3M": -0.05,
             "Real_Interest_Rates": 2.1,
             "SP500_Death_Cross": 0.94,
-            "Sahm_Rule_Indicator": 0.32,
+            "Breakeven_Inflation": 2.3,
         },
         observation_date,
         db_path,
@@ -56,7 +56,7 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
         "Financial_Stress_Index",
         "Yield_Spread_10Y3M",
         "Real_Interest_Rates",
-        "Sahm_Rule_Indicator",
+        "Breakeven_Inflation",
     }
     assert "SP500_Death_Cross" not in series_codes
 
@@ -71,6 +71,13 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     assert unemployment["threshold"] == 5.0
     assert unemployment["series_start"] == "1990-01-01"
     assert unemployment["active"] is False
+    assert unemployment["label"] == "Unemployment rate"
+
+    breakeven = next(
+        item for item in payload["series"] if item["code"] == "Breakeven_Inflation"
+    )
+    assert breakeven["label"] == "Breakeven inflation"
+    assert breakeven["identifier"] == "T10YIE"
 
     active_codes = {item["code"] for item in payload["alerts"] if item["active"]}
     assert active_codes == {

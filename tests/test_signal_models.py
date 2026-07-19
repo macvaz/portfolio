@@ -31,19 +31,19 @@ def test_alert_description_and_alert_persist(tmp_path):
     with get_session(db_path) as session:
         session.add(
             Alert(
-                code="Sahm_Rule_Indicator",
+                code="Breakeven_Inflation",
                 date=date(2026, 6, 1),
-                value=0.32,
+                value=2.3,
             )
         )
         session.commit()
 
     with get_session(db_path) as session:
-        description = session.get(AlertDescription, "Sahm_Rule_Indicator")
+        description = session.get(AlertDescription, "Breakeven_Inflation")
         alert = session.exec(select(Alert)).first()
 
     assert description.operator == "gte"
-    assert description.threshold == 0.5
-    assert alert.code == "Sahm_Rule_Indicator"
+    assert description.threshold == 3.0
+    assert alert.code == "Breakeven_Inflation"
     assert alert.date == date(2026, 6, 1)
-    assert alert.value == 0.32
+    assert alert.value == 2.3

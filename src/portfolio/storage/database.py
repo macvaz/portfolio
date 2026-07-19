@@ -753,7 +753,7 @@ def upsert_alerts(
         session.commit()
 
 
-from portfolio.common.alert_descriptions import is_alert_active
+from portfolio.common.alert_descriptions import alert_label, is_alert_active
 
 
 def get_latest_alerts(db_path: Path | None = None) -> dict | None:
@@ -786,11 +786,13 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
             if description.source == "fred" and identifier
             else None
         )
+        label = alert_label(description.code)
 
         if description.source == "fred":
             series.append(
                 {
                     "code": description.code,
+                    "label": label,
                     "description": description.description,
                     "value": value,
                     "threshold": description.threshold,
@@ -818,7 +820,7 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
                 }
             )
 
-    series.sort(key=lambda item: item.get("identifier") or item["code"])
+    series.sort(key=lambda item: item.get("label") or item["code"])
     alerts.sort(
         key=lambda item: (not item["active"], item.get("identifier") or item["code"])
     )
