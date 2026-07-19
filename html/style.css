@@ -1735,6 +1735,15 @@ body.is-month-detail-open {
     gap: 0.75rem;
   }
 
+  .month-detail-table {
+    min-width: 0;
+  }
+
+  .month-detail-table thead th.month-detail-series-col,
+  .month-detail-table tbody th.month-detail-series-col {
+    width: 8.5rem;
+  }
+
   .tactical-months-label {
     margin: 0.35rem 0 0.1rem;
     font-size: 1.15rem;

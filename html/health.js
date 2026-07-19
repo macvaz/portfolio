@@ -1,7 +1,16 @@
 (function () {
   const api = window.PortfolioApi;
   const MONTH_COMPARE_WINDOW = 7;
+  const MONTH_COMPARE_WINDOW_SMALL = 2;
+  const MONTH_COMPARE_SMALL_QUERY = "(max-width: 720px)";
   let latestHistory = { columns: [], context_columns: [], rows: [] };
+  let openCompareMonth = null;
+
+  function monthCompareWindowSize() {
+    return window.matchMedia(MONTH_COMPARE_SMALL_QUERY).matches
+      ? MONTH_COMPARE_WINDOW_SMALL
+      : MONTH_COMPARE_WINDOW;
+  }
 
   function setTacticalLoading(isLoading) {
     document.getElementById("tactical-loading").hidden = !isLoading;
@@ -195,7 +204,8 @@
       return [];
     }
     // History rows are newest-first; take selected month plus older months.
-    return [...rows.slice(selectedIndex, selectedIndex + MONTH_COMPARE_WINDOW)].reverse();
+    const windowSize = monthCompareWindowSize();
+    return [...rows.slice(selectedIndex, selectedIndex + windowSize)].reverse();
   }
 
   function renderMonthCompareSeriesRow(column, windowRows, selectedMonth, history) {
@@ -285,6 +295,7 @@
     if (!screen) {
       return;
     }
+    openCompareMonth = null;
     screen.hidden = true;
     document.body.classList.remove("is-month-detail-open");
   }
@@ -307,6 +318,7 @@
     titleEl.textContent =
       windowRows.length === 1 ? endLabel : `${startLabel} – ${endLabel}`;
     listEl.innerHTML = renderMonthCompareTable(month, latestHistory);
+    openCompareMonth = month;
     screen.hidden = false;
     document.body.classList.add("is-month-detail-open");
   }
@@ -337,7 +349,7 @@
         data-month="${escapeHtml(row.month)}"
         role="button"
         tabindex="0"
-        aria-label="Open 7-month compare for ${monthLabel}"
+        aria-label="Open month compare for ${monthLabel}"
       >
         <header class="tactical-month-card-header">
           <h3 class="tactical-month-card-title">${title}</h3>
@@ -507,6 +519,18 @@
       event.preventDefault();
       openMonthDetail(card.dataset.month);
     });
+
+    const smallScreenQuery = window.matchMedia(MONTH_COMPARE_SMALL_QUERY);
+    const onCompareWindowChange = () => {
+      if (openCompareMonth) {
+        openMonthDetail(openCompareMonth);
+      }
+    };
+    if (typeof smallScreenQuery.addEventListener === "function") {
+      smallScreenQuery.addEventListener("change", onCompareWindowChange);
+    } else if (typeof smallScreenQuery.addListener === "function") {
+      smallScreenQuery.addListener(onCompareWindowChange);
+    }
   }
 
   bindMonthDetailUi();
