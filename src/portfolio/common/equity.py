@@ -115,6 +115,16 @@ def align_return_series(
     return portfolio_out, benchmark_out
 
 
+def slice_returns_from(
+    returns: pd.Series | None,
+    start_date,
+) -> pd.Series | None:
+    """Keep returns on or after start_date (inclusive)."""
+    if returns is None or returns.empty or start_date is None:
+        return returns
+    return returns[returns.index >= pd.Timestamp(start_date)]
+
+
 def build_portfolio_evolution(
     positions: list[dict],
     funds_dir: Path | None = None,

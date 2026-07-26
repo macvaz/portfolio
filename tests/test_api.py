@@ -104,6 +104,54 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
 
     def mock_report_html(portfolio_returns, benchmark_returns):
         assert benchmark_returns.name == "S&P 500"
+        assert str(portfolio_returns.index.min().date()) == "2024-01-03"
+        return "<html><body>QuantStats report</body></html>"
+
+    monkeypatch.setattr(
+        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
+        mock_report_html,
+    )
+
+    response = client.get(
+        "/api/portfolio/risk_report",
+        params={"portfolio_id": user_id, "start_date": "2024-01-03"},
+    )
+    assert response.status_code == 200
+    assert "QuantStats report" in response.text
+
+
+def test_get_risk_report_returns_quantstats_html_full_period(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    funds_dir = tmp_path / "funds"
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
+    init_db(db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+
+    import pandas as pd
+    from portfolio.common.navs import save_fund_nav_csv
+
+    df = pd.DataFrame(
+        {"value": [100.0, 101.0, 102.0, 103.0, 104.0]},
+        index=pd.to_datetime(
+            ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"]
+        ),
+    )
+    save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
+    save_fund_nav_csv("IE00BYX5MX67", df, funds_dir=funds_dir)
+
+    client = TestClient(app)
+    user_id = _create_user(db_path)
+
+    client.put(
+        "/api/portfolio/positions",
+        params={"portfolio_id": user_id},
+        json={"positions": [{"isin": "ES0182527038", "weighted_assets": 1.0}]},
+    )
+
+    def mock_report_html(portfolio_returns, benchmark_returns):
+        assert benchmark_returns.name == "S&P 500"
         return "<html><body>QuantStats report</body></html>"
 
     monkeypatch.setattr(

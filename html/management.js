@@ -4,6 +4,7 @@
   let performanceChart = null;
   let managementData = null;
   let savingWeights = false;
+  let curveStartDate = null;
 
   const METRIC_COLUMNS = [
     { key: "weight", format: "percent", weightColumn: true, label: "Weight (%)" },
@@ -310,13 +311,38 @@
     return positions;
   }
 
+  async function fetchCurve(startDate = null) {
+    let path = `${api.PORTFOLIO_API}/curve`;
+    if (startDate) {
+      path += `?start_date=${encodeURIComponent(startDate)}`;
+    }
+    return api.fetchJson(api.withPortfolioId(path));
+  }
+
   async function loadScreenData() {
     const [curve, metrics, portfolios] = await Promise.all([
-      api.fetchJson(api.withPortfolioId(`${api.PORTFOLIO_API}/curve`)),
+      fetchCurve(curveStartDate),
       api.fetchJson(api.withPortfolioId(`${api.PORTFOLIO_API}/metrics`)),
       api.fetchJson(`${api.PORTFOLIO_API}/portfolios`),
     ]);
     return { curve, metrics, portfolios };
+  }
+
+  async function applyCurveStartDate(startDate) {
+    showError("");
+    try {
+      const curve = await fetchCurve(startDate);
+      curveStartDate = startDate;
+      if (managementData) {
+        managementData.curve = curve;
+      }
+      document.getElementById("portfolio-legend").innerHTML = formatPortfolioLegendHtml(curve);
+      document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
+      renderChart(curve);
+      window.RiskView?.resetRiskAnalysis();
+    } catch (error) {
+      showError(error.message);
+    }
   }
 
   function updatePortfolioTableTitle(portfolios) {
@@ -480,15 +506,19 @@
     return `&nbsp;${sign}<strong>${number}%</strong>&nbsp;${suffix}`;
   }
 
-  function formatLegendPerformanceHtml(cumulative, annualized) {
+  function formatLegendPerformanceHtml(cumulative, annualized, volatility) {
     const parts = [];
     const cumulativeLabel = formatMetricHtml(cumulative, "total");
     const annualizedLabel = formatMetricHtml(annualized, "CAGR");
+    const volatilityLabel = formatMetricHtml(volatility, "Vol");
     if (cumulativeLabel) {
       parts.push(cumulativeLabel);
     }
     if (annualizedLabel) {
       parts.push(annualizedLabel);
+    }
+    if (volatilityLabel) {
+      parts.push(volatilityLabel);
     }
     return parts.join(",");
   }
@@ -497,6 +527,7 @@
     const perf = formatLegendPerformanceHtml(
       cumulativeReturn(curve.portfolio),
       curve.portfolio_annualized_pct,
+      curve.portfolio_volatility_pct,
     );
     return perf ? `Portfolio:${perf}` : "Portfolio";
   }
@@ -506,6 +537,7 @@
     const perf = formatLegendPerformanceHtml(
       cumulativeReturn(curve.benchmark),
       curve.benchmark_annualized_pct,
+      curve.benchmark_volatility_pct,
     );
     return perf ? `${name}:${perf}` : name;
   }
@@ -555,6 +587,22 @@
         interaction: {
           mode: "index",
           intersect: false,
+        },
+        onClick(event, _elements, chart) {
+          const points = chart.getElementsAtEventForMode(
+            event,
+            "index",
+            { intersect: false },
+            true,
+          );
+          if (!points.length) {
+            return;
+          }
+          const label = chart.data.labels[points[0].index];
+          if (!label || label === curveStartDate) {
+            return;
+          }
+          applyCurveStartDate(label);
         },
         plugins: {
           legend: {
@@ -606,6 +654,14 @@
     }
 
     performanceChart = new Chart(context, buildChartConfig(curve));
+    canvas.title = curveStartDate
+      ? `From ${curveStartDate} — double-click to reset`
+      : "Click a date to measure from there";
+    canvas.ondblclick = () => {
+      if (curveStartDate) {
+        applyCurveStartDate(null);
+      }
+    };
   }
 
   function renderScreen({ curve, metrics, portfolios }) {
@@ -664,6 +720,7 @@
   function resetManagement() {
     managementData = null;
     savingWeights = false;
+    curveStartDate = null;
     if (performanceChart) {
       performanceChart.destroy();
       performanceChart = null;
@@ -679,5 +736,8 @@
   window.ManagementView = {
     loadManagement,
     resetManagement,
+    getCurveStartDate() {
+      return curveStartDate;
+    },
   };
 })();

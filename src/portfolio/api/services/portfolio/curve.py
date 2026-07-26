@@ -13,6 +13,7 @@ from portfolio.common.equity import (
     align_return_series,
     build_portfolio_daily_returns,
     load_benchmark_daily_returns,
+    slice_returns_from,
 )
 
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     "TRADING_DAYS_PER_YEAR",
     "align_return_series",
     "annualized_return_pct",
+    "annualized_volatility_pct",
     "build_equity_curve",
     "build_portfolio_daily_returns",
     "build_user_equity_curve",
@@ -29,12 +31,15 @@ __all__ = [
 ]
 
 
-def _empty_curve() -> dict:
+def _empty_curve(start_date: date | None = None) -> dict:
     return {
         "benchmark_name": BENCHMARK_NAME,
         "benchmark_isin": BENCHMARK_ISIN,
         "portfolio_annualized_pct": None,
         "benchmark_annualized_pct": None,
+        "portfolio_volatility_pct": None,
+        "benchmark_volatility_pct": None,
+        "start_date": start_date.isoformat() if start_date else None,
         "as_of": date.today().isoformat(),
         "labels": [],
         "portfolio": [],
@@ -73,36 +78,60 @@ def annualized_return_pct(
     return round(float(annualized * 100), 2)
 
 
+def annualized_volatility_pct(
+    returns: pd.Series,
+    periods_per_year: int = TRADING_DAYS_PER_YEAR,
+) -> float | None:
+    """Annualized volatility from daily returns, matching QuantStats."""
+    returns = returns.dropna()
+    if len(returns) < 2:
+        return None
+
+    volatility = float(returns.std(ddof=1)) * (periods_per_year**0.5)
+    return round(volatility * 100, 2)
+
+
 def build_equity_curve(
     positions: list[dict],
     funds_dir: Path | None = None,
+    start_date: date | None = None,
 ) -> dict:
     """Compute buy-and-hold portfolio equity curve from local NAV CSV files."""
     portfolio_returns = build_portfolio_daily_returns(positions, funds_dir)
     if portfolio_returns is None or portfolio_returns.empty:
-        return _empty_curve()
+        return _empty_curve(start_date)
 
     benchmark_returns = load_benchmark_daily_returns(funds_dir)
     portfolio_returns, benchmark_returns = align_return_series(
         portfolio_returns,
         benchmark_returns,
     )
+    portfolio_returns = slice_returns_from(portfolio_returns, start_date)
+    benchmark_returns = slice_returns_from(benchmark_returns, start_date)
+
+    if portfolio_returns is None or portfolio_returns.empty:
+        return _empty_curve(start_date)
 
     labels, portfolio = returns_to_cumulative_curve(portfolio_returns)
     if not labels:
-        return _empty_curve()
+        return _empty_curve(start_date)
 
     benchmark: list[float] = []
     benchmark_annualized_pct = None
+    benchmark_volatility_pct = None
     if benchmark_returns is not None and not benchmark_returns.empty:
         _, benchmark = returns_to_cumulative_curve(benchmark_returns)
         benchmark_annualized_pct = annualized_return_pct(benchmark_returns)
+        benchmark_volatility_pct = annualized_volatility_pct(benchmark_returns)
 
     return {
         "benchmark_name": BENCHMARK_NAME,
         "benchmark_isin": BENCHMARK_ISIN,
         "portfolio_annualized_pct": annualized_return_pct(portfolio_returns),
         "benchmark_annualized_pct": benchmark_annualized_pct,
+        "portfolio_volatility_pct": annualized_volatility_pct(portfolio_returns),
+        "benchmark_volatility_pct": benchmark_volatility_pct,
+        "start_date": start_date.isoformat() if start_date else None,
         "as_of": date.today().isoformat(),
         "labels": labels,
         "portfolio": portfolio,
@@ -114,6 +143,7 @@ def build_user_equity_curve(
     user_id: int,
     db_path=None,
     funds_dir: Path | None = None,
+    start_date: date | None = None,
 ) -> dict:
     positions = list_user_portfolio(user_id, db_path)
-    return build_equity_curve(positions, funds_dir)
+    return build_equity_curve(positions, funds_dir, start_date=start_date)

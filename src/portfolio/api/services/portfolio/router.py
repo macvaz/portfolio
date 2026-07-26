@@ -145,10 +145,10 @@ def remove_fund(isin: str) -> None:
 
 
 @router.get("/curve")
-def get_curve(portfolio_id: int) -> dict:
+def get_curve(portfolio_id: int, start_date: date | None = None) -> dict:
     """Buy-and-hold portfolio equity curve from stored NAV files."""
     require_portfolio(portfolio_id)
-    return build_user_equity_curve(portfolio_id)
+    return build_user_equity_curve(portfolio_id, start_date=start_date)
 
 
 @router.get("/metrics")
@@ -172,11 +172,11 @@ def save_portfolio(body: PortfolioSave, portfolio_id: int) -> list[dict]:
 
 
 @router.get("/risk_report", response_class=HTMLResponse)
-def get_risk_report(portfolio_id: int) -> HTMLResponse:
+def get_risk_report(portfolio_id: int, start_date: date | None = None) -> HTMLResponse:
     """QuantStats tearsheet for the user's saved portfolio."""
     require_portfolio(portfolio_id)
     try:
-        html = build_user_risk_report_html(portfolio_id)
+        html = build_user_risk_report_html(portfolio_id, start_date=start_date)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return HTMLResponse(content=html)

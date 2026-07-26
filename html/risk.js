@@ -117,7 +117,12 @@
   }
 
   async function fetchReportHtml() {
-    const response = await fetch(api.withPortfolioId(`${api.PORTFOLIO_API}/risk_report`));
+    let path = `${api.PORTFOLIO_API}/risk_report`;
+    const startDate = window.ManagementView?.getCurveStartDate?.();
+    if (startDate) {
+      path += `?start_date=${encodeURIComponent(startDate)}`;
+    }
+    const response = await fetch(api.withPortfolioId(path));
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       const detail = body.detail;
