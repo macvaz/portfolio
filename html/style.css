@@ -520,11 +520,11 @@ button:disabled {
 }
 
 .legend-portfolio::before {
-  background: #e91e8c;
+  background: #348dc1;
 }
 
 .legend-benchmark::before {
-  background: #1f5eff;
+  background: #c9a227;
 }
 
 .chart-note {
