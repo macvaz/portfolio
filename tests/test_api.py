@@ -259,7 +259,7 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     response = client.get("/api/portfolio/curve", params={"portfolio_id": user_id})
     assert response.status_code == 200
     data = response.json()
-    assert data["portfolio"][0] == 0.0
+    assert data["portfolio"][0] == 10.0
     assert len(data["labels"]) >= 2
     assert data["benchmark"] == []
 

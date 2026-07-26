@@ -48,13 +48,15 @@ def _empty_curve(start_date: date | None = None) -> dict:
 
 
 def returns_to_cumulative_curve(returns: pd.Series) -> tuple[list[str], list[float]]:
-    """Convert daily simple returns to a cumulative % curve starting at zero."""
+    """Convert daily simple returns to a cumulative % curve.
+
+    Matches QuantStats compounded cumulative return: ``(1+r).cumprod() - 1``.
+    """
     returns = returns.dropna()
     if returns.empty:
         return [], []
 
-    wealth = (1 + returns).cumprod()
-    cumulative_pct = (wealth / wealth.iloc[0] - 1.0) * 100.0
+    cumulative_pct = ((1 + returns).cumprod() - 1.0) * 100.0
     labels = [index_date.strftime("%Y-%m-%d") for index_date in cumulative_pct.index]
     values = [round(float(value), 2) for value in cumulative_pct.tolist()]
     return labels, values

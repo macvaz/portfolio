@@ -34,7 +34,7 @@ def test_build_equity_curve_from_nav_files(tmp_path):
     curve = build_equity_curve(positions, funds_dir=funds_dir)
 
     assert curve["labels"] == ["2024-02-29", "2024-03-31", "2024-04-30"]
-    assert curve["portfolio"][0] == 0.0
+    assert curve["portfolio"][0] != 0.0
     assert curve["portfolio"][-1] > curve["portfolio"][0]
     assert curve["benchmark"] == []
 
@@ -63,7 +63,7 @@ def test_build_equity_curve_reflects_partial_weights(tmp_path):
         funds_dir=funds_dir,
     )
 
-    assert full["portfolio"] == [0.0, 10.0]
+    assert full["portfolio"] == [10.0, 21.0]
     assert 0 < partial["portfolio"][-1] < full["portfolio"][-1]
 
 
@@ -111,8 +111,8 @@ def test_build_equity_curve_includes_sp500_benchmark(tmp_path):
     )
 
     assert curve["labels"] == ["2024-02-29", "2024-03-31"]
-    assert curve["portfolio"] == [0.0, 10.0]
-    assert curve["benchmark"] == [0.0, 16.67]
+    assert curve["portfolio"] == [10.0, 21.0]
+    assert curve["benchmark"] == [20.0, 40.0]
 
 
 def test_build_equity_curve_empty_without_nav_files(tmp_path):
@@ -208,7 +208,20 @@ def test_build_equity_curve_respects_start_date(tmp_path):
     assert full["labels"] == ["2024-02-29", "2024-03-31", "2024-04-30"]
     assert sliced["labels"] == ["2024-03-31", "2024-04-30"]
     assert sliced["start_date"] == "2024-03-31"
-    assert sliced["portfolio"][0] == 0.0
+    assert sliced["portfolio"][0] != 0.0
     assert sliced["portfolio"][-1] != full["portfolio"][-1]
     assert sliced["portfolio_volatility_pct"] != full["portfolio_volatility_pct"]
     assert sliced["benchmark_volatility_pct"] != full["benchmark_volatility_pct"]
+
+
+def test_curve_total_matches_quantstats_cumulative_return():
+    import quantstats as qs
+
+    returns = pd.Series(
+        [0.01, -0.005, 0.002, 0.003, -0.001] * 50,
+        index=pd.bdate_range("2020-01-01", periods=250),
+    )
+    _, curve = returns_to_cumulative_curve(returns)
+    expected = float(qs.stats.comp(returns) * 100)
+    assert curve[-1] == round(expected, 2)
+    assert annualized_return_pct(returns) == round(float(qs.stats.cagr(returns) * 100), 2)
