@@ -1844,14 +1844,14 @@ body.is-month-detail-open {
     order: -1;
   }
 
+  /* Card mode: skip per-fund metrics; weights + portfolio summary remain */
+  #portfolio-table tbody {
+    display: none;
+  }
+
   #portfolio-table tbody::before {
-    content: "Fund metrics";
-    display: block;
-    margin: 0.15rem 0 0.1rem;
-    font-size: 1.15rem;
-    font-weight: 600;
-    line-height: 1.3;
-    color: inherit;
+    content: none;
+    display: none;
   }
 
   #portfolio-table tfoot .weights-summary-row,
