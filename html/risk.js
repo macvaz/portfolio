@@ -15,10 +15,18 @@
   }
 
   function setRiskFrameVisible(isVisible) {
-    document.getElementById("risk-report-frame").hidden = !isVisible;
+    const frame = document.getElementById("risk-report-frame");
+    const scroll = frame?.closest(".risk-report-scroll");
+    frame.hidden = !isVisible;
+    if (scroll) {
+      scroll.hidden = !isVisible;
+    }
   }
 
+  const REPORT_MIN_WIDTH = 1100;
+
   function prepareReportHtml(html) {
+    // Keep QuantStats' desktop multi-column layout; the risk tab scrolls instead.
     const fitStyle = `
 <style id="portfolio-risk-fit">
   html, body {
@@ -26,12 +34,10 @@
     height: auto !important;
     margin: 0 !important;
     max-width: none !important;
-  }
-  body {
-    transform-origin: top left;
+    min-width: ${REPORT_MIN_WIDTH}px !important;
   }
 </style>`;
-    const viewport = '<meta name="viewport" content="width=device-width, initial-scale=1" />';
+    const viewport = `<meta name="viewport" content="width=${REPORT_MIN_WIDTH}" />`;
 
     let prepared = html;
     if (prepared.includes("</head>")) {
@@ -42,16 +48,7 @@
     return prepared;
   }
 
-  function availableFrameWidth(frame) {
-    const rect = frame.getBoundingClientRect();
-    if (rect.width > 0) {
-      return rect.width;
-    }
-    const parent = frame.parentElement?.getBoundingClientRect();
-    return parent?.width || window.innerWidth;
-  }
-
-  function fitRiskFrame(frame) {
+  function sizeRiskFrame(frame) {
     const doc = frame.contentDocument;
     if (!doc?.documentElement) {
       return;
@@ -66,33 +63,21 @@
     const contentWidth = Math.max(
       doc.documentElement.scrollWidth,
       body ? body.scrollWidth : 0,
-      1,
+      REPORT_MIN_WIDTH,
     );
-    const available = availableFrameWidth(frame);
-    const scale = Math.min(1, available / contentWidth);
-
-    if (body) {
-      body.style.transformOrigin = "top left";
-      if (scale < 0.999) {
-        body.style.transform = `scale(${scale})`;
-        body.style.width = `${contentWidth}px`;
-      } else {
-        body.style.transform = "none";
-        body.style.width = "";
-      }
-    }
-
-    const naturalHeight = Math.max(
+    const contentHeight = Math.max(
       doc.documentElement.scrollHeight,
       body ? body.scrollHeight : 0,
     );
-    frame.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+
+    frame.style.width = `${contentWidth}px`;
+    frame.style.height = `${Math.ceil(contentHeight)}px`;
   }
 
-  function scheduleFitRiskFrame(frame) {
-    fitRiskFrame(frame);
-    window.setTimeout(() => fitRiskFrame(frame), 300);
-    window.setTimeout(() => fitRiskFrame(frame), 1500);
+  function scheduleSizeRiskFrame(frame) {
+    sizeRiskFrame(frame);
+    window.setTimeout(() => sizeRiskFrame(frame), 300);
+    window.setTimeout(() => sizeRiskFrame(frame), 1500);
   }
 
   function bindRiskFrameImages(frame) {
@@ -105,14 +90,14 @@
       if (img.complete) {
         return;
       }
-      img.addEventListener("load", () => fitRiskFrame(frame), { once: true });
+      img.addEventListener("load", () => sizeRiskFrame(frame), { once: true });
     });
   }
 
   function bindRiskFrameResize(frame) {
     frame.onload = () => {
       bindRiskFrameImages(frame);
-      scheduleFitRiskFrame(frame);
+      scheduleSizeRiskFrame(frame);
     };
   }
 
@@ -138,7 +123,7 @@
     if (reportLoaded && !force) {
       const frame = document.getElementById("risk-report-frame");
       if (frame && !frame.hidden) {
-        fitRiskFrame(frame);
+        sizeRiskFrame(frame);
       }
       return;
     }
@@ -167,6 +152,7 @@
     setRiskFrameVisible(false);
     const frame = document.getElementById("risk-report-frame");
     frame.srcdoc = "";
+    frame.style.width = "";
     frame.style.height = "0";
     frame.onload = null;
     document.getElementById("risk-loading").textContent = "Generating risk report…";
@@ -182,7 +168,7 @@
       if (!frame || frame.hidden || !reportLoaded) {
         return;
       }
-      fitRiskFrame(frame);
+      sizeRiskFrame(frame);
     }, 150);
   });
 
