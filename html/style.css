@@ -2049,6 +2049,40 @@ body.is-month-detail-open {
     display: none;
   }
 
+  /* Portfolio metrics card: performance first, Vol under YTD, hide Sharpe */
+  #portfolio-table tfoot .summary-row td[data-label="SR 6m"],
+  #portfolio-table tfoot .summary-row td[data-label="SR 1y"] {
+    display: none !important;
+  }
+
+  #portfolio-table tfoot .summary-row td[data-label="% 1m"] {
+    order: 1;
+  }
+
+  #portfolio-table tfoot .summary-row td[data-label="% 3m"] {
+    order: 2;
+  }
+
+  #portfolio-table tfoot .summary-row td[data-label="% 6m"] {
+    order: 3;
+  }
+
+  #portfolio-table tfoot .summary-row td[data-label="% YTD"] {
+    order: 4;
+  }
+
+  #portfolio-table tfoot .summary-row td[data-label="Vol (1y)"] {
+    order: 5;
+  }
+
+  #portfolio-table tfoot .summary-row td[data-label="β (6m)"] {
+    order: 6;
+  }
+
+  #portfolio-table tfoot .summary-row td[data-label="Cor (6m)"] {
+    order: 7;
+  }
+
   /* Individual fund cards: weight lives on the weights summary card */
   #portfolio-table tbody tr[data-isin] td.col-weight-editable {
     display: none;
