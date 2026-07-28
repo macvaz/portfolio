@@ -2,7 +2,12 @@
   const api = window.PortfolioApi;
 
   let reportLoaded = false;
+  let cachedReportHtml = null;
+  let lastStackedLayout = null;
   let resizeTimer = null;
+
+  // Match portfolio management card breakpoint.
+  const MOBILE_LAYOUT_MQ = window.matchMedia("(max-width: 720px)");
 
   function setRiskMessage(message) {
     const messageEl = document.getElementById("risk-message");
@@ -23,29 +28,130 @@
     }
   }
 
-  const REPORT_MIN_WIDTH = 1100;
+  function isStackedLayout() {
+    return MOBILE_LAYOUT_MQ.matches;
+  }
 
-  function prepareReportHtml(html) {
-    // Keep QuantStats' desktop multi-column layout; the risk tab scrolls instead.
-    const fitStyle = `
+  // QuantStats has no layout mode — only a fixed #left/#right float template.
+  // Desktop: compact side-by-side at 900px (avoids accidental stack + heavy scroll).
+  // Mobile: force a single column so phones don't need horizontal scroll.
+  const REPORT_MIN_WIDTH = 900;
+  const REPORT_BODY_PAD_Y = 16;
+  const REPORT_BODY_PAD_X = 16;
+  const REPORT_COLUMN_GAP = 16;
+  const REPORT_CONTENT_WIDTH = REPORT_MIN_WIDTH - REPORT_BODY_PAD_X * 2;
+  const REPORT_LEFT_WIDTH = Math.round(REPORT_CONTENT_WIDTH * (620 / 958));
+  const REPORT_RIGHT_WIDTH =
+    REPORT_CONTENT_WIDTH - REPORT_LEFT_WIDTH - REPORT_COLUMN_GAP;
+
+  function desktopFitStyle() {
+    return `
 <style id="portfolio-risk-fit">
   html, body {
     overflow: visible !important;
     height: auto !important;
     margin: 0 !important;
+    padding: ${REPORT_BODY_PAD_Y}px ${REPORT_BODY_PAD_X}px !important;
+    box-sizing: border-box !important;
     max-width: none !important;
+    width: ${REPORT_MIN_WIDTH}px !important;
     min-width: ${REPORT_MIN_WIDTH}px !important;
   }
+  .container {
+    max-width: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .container::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  #left {
+    float: left !important;
+    width: ${REPORT_LEFT_WIDTH}px !important;
+    margin-right: ${REPORT_COLUMN_GAP}px !important;
+  }
+  #right {
+    float: right !important;
+    width: ${REPORT_RIGHT_WIDTH}px !important;
+  }
 </style>`;
-    const viewport = `<meta name="viewport" content="width=${REPORT_MIN_WIDTH}" />`;
+  }
 
-    let prepared = html;
-    if (prepared.includes("</head>")) {
-      prepared = prepared.replace("</head>", `${viewport}${fitStyle}</head>`);
-    } else {
-      prepared = viewport + fitStyle + prepared;
+  function stackedFitStyle() {
+    return `
+<style id="portfolio-risk-fit">
+  html, body {
+    overflow: visible !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: ${REPORT_BODY_PAD_Y}px ${REPORT_BODY_PAD_X}px !important;
+    box-sizing: border-box !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  .container {
+    max-width: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .container > h1,
+  .container > h4,
+  .container > hr {
+    display: none !important;
+  }
+  #left,
+  #right {
+    float: none !important;
+    width: 100% !important;
+    margin: 0 0 1rem !important;
+    box-sizing: border-box !important;
+  }
+  #left {
+    margin-top: 0 !important;
+  }
+  /* QuantStats SVGs include large internal padding; keep their pull-up margins
+     and scale height with width so stacked charts don't leave huge gaps. */
+  #left svg,
+  #monthly_heatmap svg {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: -1.5rem 0 !important;
+  }
+  #left > div {
+    margin-bottom: -0.75rem !important;
+  }
+</style>`;
+  }
+
+  function prepareReportHtml(html, stacked) {
+    const fitStyle = stacked ? stackedFitStyle() : desktopFitStyle();
+    const viewport = stacked
+      ? `<meta name="viewport" content="width=device-width, initial-scale=1" />`
+      : `<meta name="viewport" content="width=${REPORT_MIN_WIDTH}" />`;
+
+    let prepared = html.replace(/<meta\s+name="viewport"[^>]*>/i, viewport);
+    if (!/<meta\s+name="viewport"/i.test(prepared)) {
+      prepared = prepared.includes("</head>")
+        ? prepared.replace("</head>", `${viewport}</head>`)
+        : viewport + prepared;
     }
-    return prepared;
+
+    if (prepared.includes("</head>")) {
+      return prepared.replace("</head>", `${fitStyle}</head>`);
+    }
+    return fitStyle + prepared;
+  }
+
+  function frameMinWidth(frame) {
+    if (!isStackedLayout()) {
+      return REPORT_MIN_WIDTH;
+    }
+    const scroll = frame.closest(".risk-report-scroll");
+    return Math.max(scroll?.clientWidth || 0, 280);
   }
 
   function sizeRiskFrame(frame) {
@@ -60,11 +166,14 @@
       body.style.width = "";
     }
 
-    const contentWidth = Math.max(
-      doc.documentElement.scrollWidth,
-      body ? body.scrollWidth : 0,
-      REPORT_MIN_WIDTH,
-    );
+    const minWidth = frameMinWidth(frame);
+    const contentWidth = isStackedLayout()
+      ? minWidth
+      : Math.max(
+          doc.documentElement.scrollWidth,
+          body ? body.scrollWidth : 0,
+          minWidth,
+        );
     const contentHeight = Math.max(
       doc.documentElement.scrollHeight,
       body ? body.scrollHeight : 0,
@@ -101,6 +210,12 @@
     };
   }
 
+  function applyReportHtml(frame, html, stacked) {
+    lastStackedLayout = stacked;
+    bindRiskFrameResize(frame);
+    frame.srcdoc = prepareReportHtml(html, stacked);
+  }
+
   async function fetchReportHtml() {
     let path = `${api.PORTFOLIO_API}/risk_report`;
     const startDate = window.ManagementView?.getCurveStartDate?.();
@@ -120,9 +235,15 @@
   }
 
   async function loadRiskAnalysis({ force = false } = {}) {
-    if (reportLoaded && !force) {
+    if (reportLoaded && !force && cachedReportHtml) {
       const frame = document.getElementById("risk-report-frame");
-      if (frame && !frame.hidden) {
+      if (!frame || frame.hidden) {
+        return;
+      }
+      const stacked = isStackedLayout();
+      if (stacked !== lastStackedLayout) {
+        applyReportHtml(frame, cachedReportHtml, stacked);
+      } else {
         sizeRiskFrame(frame);
       }
       return;
@@ -134,8 +255,8 @@
 
     try {
       const frame = document.getElementById("risk-report-frame");
-      bindRiskFrameResize(frame);
-      frame.srcdoc = prepareReportHtml(await fetchReportHtml());
+      cachedReportHtml = await fetchReportHtml();
+      applyReportHtml(frame, cachedReportHtml, isStackedLayout());
       setRiskFrameVisible(true);
       reportLoaded = true;
     } catch (error) {
@@ -147,6 +268,8 @@
 
   function resetRiskAnalysis() {
     reportLoaded = false;
+    cachedReportHtml = null;
+    lastStackedLayout = null;
     setRiskLoading(false);
     setRiskMessage("");
     setRiskFrameVisible(false);
@@ -158,19 +281,31 @@
     document.getElementById("risk-loading").textContent = "Generating risk report…";
   }
 
-  window.addEventListener("resize", () => {
+  function onViewportChange() {
     if (resizeTimer !== null) {
       clearTimeout(resizeTimer);
     }
     resizeTimer = window.setTimeout(() => {
       resizeTimer = null;
       const frame = document.getElementById("risk-report-frame");
-      if (!frame || frame.hidden || !reportLoaded) {
+      if (!frame || frame.hidden || !reportLoaded || !cachedReportHtml) {
+        return;
+      }
+      const stacked = isStackedLayout();
+      if (stacked !== lastStackedLayout) {
+        applyReportHtml(frame, cachedReportHtml, stacked);
         return;
       }
       sizeRiskFrame(frame);
     }, 150);
-  });
+  }
+
+  window.addEventListener("resize", onViewportChange);
+  if (typeof MOBILE_LAYOUT_MQ.addEventListener === "function") {
+    MOBILE_LAYOUT_MQ.addEventListener("change", onViewportChange);
+  } else if (typeof MOBILE_LAYOUT_MQ.addListener === "function") {
+    MOBILE_LAYOUT_MQ.addListener(onViewportChange);
+  }
 
   window.RiskView = {
     loadRiskAnalysis,

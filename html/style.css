@@ -476,9 +476,10 @@ button:disabled {
 
 .risk-report-frame {
   display: block;
-  width: 1100px;
+  width: 900px;
   max-width: none;
   height: 0;
+  margin: 0 auto;
   overflow: hidden;
   border: 0;
   background: #fff;
@@ -1739,6 +1740,10 @@ body.is-month-detail-open {
 @media (max-width: 720px) {
   .table-panel--other-funds {
     display: none;
+  }
+
+  .risk-report-frame {
+    width: 100%;
   }
 
   .table-panel--macro {
