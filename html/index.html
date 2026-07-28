@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=162" />
+    <link rel="stylesheet" href="/static/style.css?v=163" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -255,13 +255,15 @@
         <div id="risk-panel" class="app-panel" hidden>
           <div id="risk-loading" class="management-loading">Generating risk report…</div>
           <p id="risk-message" class="risk-message" hidden></p>
-          <iframe
-            id="risk-report-frame"
-            class="risk-report-frame"
-            title="Portfolio risk report"
-            scrolling="no"
-            hidden
-          ></iframe>
+          <div class="risk-report-scroll" hidden>
+            <iframe
+              id="risk-report-frame"
+              class="risk-report-frame"
+              title="Portfolio risk report"
+              scrolling="no"
+              hidden
+            ></iframe>
+          </div>
         </div>
 
         <div id="tactical-panel" class="app-panel" hidden>
@@ -362,7 +364,7 @@
     <script src="/static/api.js?v=14"></script>
     <script src="/static/portfolios.js?v=11"></script>
     <script src="/static/management.js?v=84"></script>
-    <script src="/static/risk.js?v=8"></script>
+    <script src="/static/risk.js?v=9"></script>
     <script src="/static/health.js?v=56"></script>
     <script src="/static/add-fund.js?v=4"></script>
     <script src="/static/app.js?v=45"></script>
