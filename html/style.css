@@ -1913,7 +1913,7 @@ body.is-month-detail-open {
   }
 
   #portfolio-table tfoot .summary-row::before {
-    content: "Portfolio metrics";
+    content: "Metrics";
   }
 
   .fund-table:not(.alert-table--history) tr {
