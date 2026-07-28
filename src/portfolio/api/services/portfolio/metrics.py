@@ -4,7 +4,10 @@ from datetime import date
 
 from portfolio.storage.database import get_fund_metrics, list_funds, list_user_portfolio
 from portfolio.datasource.morningstar import morningstar_quote_url
-from portfolio.common.metrics import compute_portfolio_metrics
+from portfolio.common.metrics import (
+    compute_portfolio_correlation_matrix,
+    compute_portfolio_metrics,
+)
 
 
 def _fund_row(
@@ -62,4 +65,7 @@ def get_portfolio_metrics(user_id: int, db_path=None, funds_dir=None) -> dict:
             "weight": total_weight,
             **compute_portfolio_metrics(positions, funds_dir),
         },
+        "correlation_matrix": compute_portfolio_correlation_matrix(
+            positions, funds_dir
+        ),
     }

@@ -179,6 +179,103 @@
     </tr>`;
   }
 
+  function shortFundLabel(name, used) {
+    const words = String(name || "")
+      .split(/[\s/\-_]+/)
+      .filter((word) => word.length > 2);
+    let base = words.length
+      ? words
+          .slice(0, 3)
+          .map((word) => word[0].toUpperCase())
+          .join("")
+      : String(name || "?").slice(0, 3).toUpperCase();
+    if (!base) {
+      base = "?";
+    }
+    let label = base;
+    let suffix = 2;
+    while (used.has(label)) {
+      label = `${base}${suffix}`;
+      suffix += 1;
+    }
+    used.add(label);
+    return label;
+  }
+
+  function correlationCellClass(value) {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+      return "";
+    }
+    if (value >= 0.7) {
+      return "corr-high";
+    }
+    return "";
+  }
+
+  function renderCorrelationMatrixRow(correlation) {
+    if (
+      !correlation ||
+      !Array.isArray(correlation.labels) ||
+      correlation.labels.length < 2 ||
+      !Array.isArray(correlation.matrix)
+    ) {
+      return "";
+    }
+
+    const used = new Set();
+    const labels = correlation.labels.map((item) => ({
+      isin: item.isin,
+      name: item.name || item.isin,
+      short: shortFundLabel(item.name || item.isin, used),
+    }));
+
+    // Lower triangle only (no diagonal): columns are funds 0..n-2, rows are 1..n-1.
+    const columnLabels = labels.slice(0, -1);
+    const headerCells = columnLabels
+      .map(
+        (label) =>
+          `<th scope="col" title="${label.name}">${label.short}</th>`,
+      )
+      .join("");
+
+    const bodyRows = labels
+      .slice(1)
+      .map((rowLabel, offset) => {
+        const rowIndex = offset + 1;
+        const values = correlation.matrix[rowIndex] || [];
+        const cells = columnLabels
+          .map((colLabel, colIndex) => {
+            if (colIndex >= rowIndex) {
+              return `<td class="corr-empty" aria-hidden="true"></td>`;
+            }
+            const value = values[colIndex];
+            const text = formatValue(value, "decimal2");
+            const cls = correlationCellClass(value);
+            return `<td class="${cls}" title="${rowLabel.name} × ${colLabel.name}">${text}</td>`;
+          })
+          .join("");
+        return `<tr><th scope="row" title="${rowLabel.name}">${rowLabel.short}</th>${cells}</tr>`;
+      })
+      .join("");
+
+    return `
+    <tr class="correlation-matrix-row">
+      <td class="correlation-matrix-card" colspan="${METRIC_COLUMNS.length + 1}">
+        <div class="correlation-matrix-scroll">
+          <table class="correlation-matrix-table">
+            <thead>
+              <tr>
+                <th scope="col"></th>
+                ${headerCells}
+              </tr>
+            </thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </div>
+      </td>
+    </tr>`;
+  }
+
   function renderWeightsSummaryRow(funds) {
     const items = funds
       .map((fund) => {
@@ -236,7 +333,9 @@
     const headerCells = table.querySelectorAll("thead tr:first-child th");
     const rows = [
       ...table.querySelectorAll("tbody tr"),
-      ...table.querySelectorAll("tfoot tr:not(.weights-summary-row)"),
+      ...table.querySelectorAll(
+        "tfoot tr:not(.weights-summary-row):not(.correlation-matrix-row)",
+      ),
     ];
 
     return Array.from(headerCells).map((headerCell, index) => {
@@ -675,7 +774,8 @@
     renderTableBody("portfolio-body", metrics.portfolio, { editableWeights: true });
     document.getElementById("portfolio-summary").innerHTML =
       renderWeightsSummaryRow(metrics.portfolio) +
-      renderSummaryRow(metrics.portfolio_summary);
+      renderSummaryRow(metrics.portfolio_summary) +
+      renderCorrelationMatrixRow(metrics.correlation_matrix);
     renderTableBody("favorites-body", metrics.favorites, {
       editableWeights: true,
       forceZeroWeight: true,

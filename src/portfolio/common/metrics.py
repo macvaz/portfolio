@@ -177,3 +177,63 @@ def compute_portfolio_metrics(
         benchmark_returns,
     )
     return compute_metrics(portfolio_returns, benchmark_returns)
+
+
+def compute_portfolio_correlation_matrix(
+    positions: list[dict],
+    funds_dir: Path | None = None,
+    window_days: int = WINDOW_DAYS["6m"],
+) -> dict | None:
+    """Pairwise fund–fund return correlations over the trailing window.
+
+    Uses the same 6m window as ``cor_6m``. Returns ``None`` when fewer than
+    two funds have overlapping NAV history.
+    """
+    series_by_isin: dict[str, pd.Series] = {}
+    labels: list[dict[str, str]] = []
+
+    for position in positions:
+        isin = position["isin"]
+        if isin in series_by_isin:
+            continue
+        returns = load_fund_daily_returns(isin, funds_dir)
+        if returns is None or returns.empty:
+            continue
+        series_by_isin[isin] = returns
+        labels.append({"isin": isin, "name": position.get("name") or isin})
+
+    if len(series_by_isin) < 2:
+        return None
+
+    returns_df = pd.concat(
+        [series_by_isin[label["isin"]] for label in labels],
+        axis=1,
+        join="inner",
+    ).dropna(how="any")
+    if returns_df.shape[1] < 2 or len(returns_df) < 2:
+        return None
+
+    returns_df = _window_returns(returns_df, window_days)
+    if len(returns_df) < 2:
+        return None
+
+    # Drop columns that became all-NaN after the window cut (should be rare).
+    returns_df = returns_df.dropna(axis=1, how="all")
+    if returns_df.shape[1] < 2:
+        return None
+
+    label_by_isin = {label["isin"]: label for label in labels}
+    ordered_labels = [
+        label_by_isin[isin] for isin in returns_df.columns if isin in label_by_isin
+    ]
+    corr = returns_df.corr()
+    matrix = [
+        [_round_metric(float(corr.iloc[i, j])) for j in range(len(corr.columns))]
+        for i in range(len(corr.columns))
+    ]
+
+    return {
+        "window": "6m",
+        "labels": ordered_labels,
+        "matrix": matrix,
+    }

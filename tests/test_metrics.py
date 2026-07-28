@@ -6,6 +6,7 @@ from portfolio.storage.database import get_fund_metrics, init_db, save_fund
 from portfolio.common.metrics import (
     compute_fund_metrics,
     compute_metrics,
+    compute_portfolio_correlation_matrix,
     compute_portfolio_metrics,
 )
 from portfolio.batch.metrics import update_all_fund_metrics
@@ -86,6 +87,67 @@ def test_compute_portfolio_metrics_from_positions(tmp_path):
 
     assert metrics["pct_1w"] is not None
     assert metrics["beta_6m"] is not None
+
+
+def test_compute_portfolio_correlation_matrix(tmp_path):
+    funds_dir = tmp_path / "funds"
+    # Highly correlated pair: same return path with tiny noise on the second.
+    base = [0.01, -0.005, 0.008, 0.002, 0.004, -0.003, 0.006, 0.001]
+    save_fund_nav_csv(
+        "ES0182527038",
+        _daily_navs("2024-01-01", base),
+        funds_dir=funds_dir,
+    )
+    save_fund_nav_csv(
+        "IE00BYX5NX33",
+        _daily_navs("2024-01-01", [r + 0.0001 for r in base]),
+        funds_dir=funds_dir,
+    )
+    save_fund_nav_csv(
+        "LU1234567890",
+        _daily_navs("2024-01-01", [-0.01, 0.012, -0.008, 0.015, -0.004, 0.009, -0.002, 0.003]),
+        funds_dir=funds_dir,
+    )
+
+    result = compute_portfolio_correlation_matrix(
+        [
+            {"isin": "ES0182527038", "name": "Fund Alpha", "weighted_assets": 0.4},
+            {"isin": "IE00BYX5NX33", "name": "Fund Beta", "weighted_assets": 0.3},
+            {"isin": "LU1234567890", "name": "Fund Gamma", "weighted_assets": 0.3},
+        ],
+        funds_dir=funds_dir,
+    )
+
+    assert result is not None
+    assert result["window"] == "6m"
+    assert [label["isin"] for label in result["labels"]] == [
+        "ES0182527038",
+        "IE00BYX5NX33",
+        "LU1234567890",
+    ]
+    assert len(result["matrix"]) == 3
+    assert all(len(row) == 3 for row in result["matrix"])
+    assert result["matrix"][0][0] == 1.0
+    assert result["matrix"][1][1] == 1.0
+    assert result["matrix"][0][1] == result["matrix"][1][0]
+    assert result["matrix"][0][1] > 0.99
+
+
+def test_compute_portfolio_correlation_matrix_requires_two_funds(tmp_path):
+    funds_dir = tmp_path / "funds"
+    save_fund_nav_csv(
+        "ES0182527038",
+        _daily_navs("2024-01-01", [0.01, -0.005, 0.008]),
+        funds_dir=funds_dir,
+    )
+
+    assert (
+        compute_portfolio_correlation_matrix(
+            [{"isin": "ES0182527038", "name": "Only Fund", "weighted_assets": 1.0}],
+            funds_dir=funds_dir,
+        )
+        is None
+    )
 
 
 def test_update_all_fund_metrics_persists_to_database(tmp_path):
