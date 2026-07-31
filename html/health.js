@@ -110,12 +110,29 @@
     return Math.round(value).toLocaleString("en-US");
   }
 
+  function formatReserveBalancesValue(value) {
+    if (!Number.isFinite(value)) {
+      return "-";
+    }
+    // FRED WRESBAL is in millions of USD; show trillions.
+    return (value / 1_000_000).toFixed(3);
+  }
+
+  function formatHistoryValue(value, code) {
+    if (code === "SP500") {
+      return formatSp500Value(value);
+    }
+    if (code === "Reserve_Balances") {
+      return formatReserveBalancesValue(value);
+    }
+    return formatNumericValue(value);
+  }
+
   function renderAlertHistoryCell(cell, code) {
     if (!Number.isFinite(cell.value)) {
       return "-";
     }
-    const formatted =
-      code === "SP500" ? formatSp500Value(cell.value) : formatNumericValue(cell.value);
+    const formatted = formatHistoryValue(cell.value, code);
     if (cell.active === null || cell.active === undefined) {
       return formatted;
     }
@@ -180,7 +197,32 @@
     return [
       ...groups.filter((group) => !trailing.has(group.domain)),
       ...groups.filter((group) => trailing.has(group.domain)),
-    ];
+    ].map((group) => ({
+      ...group,
+      columns: sortColumnsForCompare(group.columns),
+    }));
+  }
+
+  // Within-domain order for the month-compare table (alerts + context mixed).
+  const COMPARE_SERIES_ORDER = [
+    "Treasury_10Y_Yield",
+    "Breakeven_Inflation",
+    "Real_Interest_Rates",
+    "Yield_Spread_10Y3M",
+  ];
+
+  function sortColumnsForCompare(columns) {
+    const rank = new Map(
+      COMPARE_SERIES_ORDER.map((code, index) => [code, index]),
+    );
+    return [...columns].sort((left, right) => {
+      const leftRank = rank.has(left.code) ? rank.get(left.code) : 1000;
+      const rightRank = rank.has(right.code) ? rank.get(right.code) : 1000;
+      if (leftRank !== rightRank) {
+        return leftRank - rightRank;
+      }
+      return 0;
+    });
   }
 
   function cellForColumn(row, column, history) {

@@ -82,8 +82,8 @@
     "source": "fred",
     "series_id": "DGS10",
     "series_start": "1962-01-02",
-    "threshold": null,
-    "operator": null,
+    "threshold": 4.5,
+    "operator": "gte",
     "role": "context",
     "domain": "interest_rates"
   },

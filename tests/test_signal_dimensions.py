@@ -28,7 +28,8 @@ def test_alert_description_fixture_matches_expected_catalog():
     assert rows["Unemployment_Rate"]["role"] == "alert"
     assert rows["Treasury_10Y_Yield"]["series_id"] == "DGS10"
     assert rows["Treasury_10Y_Yield"]["role"] == "context"
-    assert rows["Treasury_10Y_Yield"]["threshold"] is None
+    assert rows["Treasury_10Y_Yield"]["threshold"] == 4.5
+    assert rows["Treasury_10Y_Yield"]["operator"] == "gte"
     assert rows["Broad_Dollar_Index"]["series_id"] == "DTWEXBGS"
     assert rows["Reserve_Balances"]["series_id"] == "WRESBAL"
     assert rows["Overnight_RRP"]["series_id"] == "RRPONTSYD"

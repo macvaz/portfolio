@@ -507,7 +507,7 @@ button:disabled {
 
 .chart-wrapper .chart-legend {
   position: absolute;
-  top: 1rem;
+  top: 0;
   left: 3.5rem;
   z-index: 1;
   margin: 0;
@@ -1612,7 +1612,7 @@ body.is-month-detail-open {
   }
 
   .chart-wrapper .chart-legend {
-    top: 0.65rem;
+    top: 0;
     left: 2.4rem;
     font-size: 0.78rem;
     max-width: calc(100% - 2.75rem);

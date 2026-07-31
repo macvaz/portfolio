@@ -56,11 +56,18 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
 
     context_codes = {item["code"] for item in payload["context"]}
     assert context_codes == {"Treasury_10Y_Yield", "SOFR"}
+    assert "Treasury_10Y_Yield" not in {item["code"] for item in payload["alerts"]}
     sofr = next(item for item in payload["context"] if item["code"] == "SOFR")
     assert sofr["label"] == "SOFR"
     assert sofr["identifier"] == "SOFR"
     assert sofr["value"] == 5.3
     assert sofr["active"] is None
+    treasury = next(
+        item for item in payload["context"] if item["code"] == "Treasury_10Y_Yield"
+    )
+    assert treasury["threshold"] == 4.5
+    assert treasury["value"] == 4.3
+    assert treasury["active"] is False
 
     history_context_codes = [
         column["code"] for column in payload["history"]["context_columns"]
