@@ -17,7 +17,8 @@ from portfolio.datasource.errors import DownloadError
 MORNINGSTAR_QUOTE_URL = (
     "https://global.morningstar.com/es/inversiones/{universe}/{performance_id}/cotizacion"
 )
-BASE_URL = "http://tools.morningstar.es/api/rest.svc/timeseries_price/2nhcdckzon"
+# tools.morningstar.es now redirects to global.morningstar.com (403/empty).
+BASE_URL = "https://lt.morningstar.com/api/rest.svc/timeseries_price/t92wz0sj7c"
 MS_SERIES_SUFFIX = "]2]1]"
 
 __all__ = ["download_navs", "morningstar_quote_url", "parse_morningstar_search"]
