@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
-set -euo pipefail
+LOG_FILE="$LOGS_DIR/portfolio.log"
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT"
+set +e
+docker exec -t portfolio python batch.py >"$LOG_FILE" 2>&1
+EXIT_CODE=$?
+set -e
 
-exec docker compose -f docker/docker-compose.yml --profile batch run --rm batch "$@"
+if [ "$EXIT_CODE" -ne 0 ] || grep -qiE 'Traceback|DownloadError|Error:|failed' "$LOG_FILE"; then
+  echo "Portfolio batch reported an error (exit=$EXIT_CODE); sending email to $MAILTO"
+  mutt -s "Portfolio batch failed" -a "$LOG_FILE" -- "$MAILTO" <"$LOG_FILE"
+  exit 1
+fi
+
+echo "Portfolio batch completed successfully"
