@@ -6,9 +6,10 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from portfolio.storage.database import init_db
-from portfolio.api.services.portfolio.router import router as portfolio_router
 from portfolio.api.services.alerts.router import router as alerts_router
+from portfolio.api.services.portfolio.router import router as portfolio_router
+from portfolio.logging_config import configure_logging
+from portfolio.storage.database import init_db
 
 WEB_DIR = Path(__file__).resolve().parents[3] / "html"
 
@@ -35,6 +36,7 @@ app.include_router(alerts_router)
 def main() -> None:
     import uvicorn
 
+    configure_logging()
     host = os.getenv("PORTFOLIO_HOST", "127.0.0.1")
     port = int(os.getenv("PORTFOLIO_PORT", "8000"))
     reload = os.getenv("PORTFOLIO_RELOAD", "0") == "1"

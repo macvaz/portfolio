@@ -1,14 +1,17 @@
+import logging
 from pathlib import Path
 
-from portfolio.storage.database import DEFAULT_DB_PATH
-from portfolio.common.indexes import DEFAULT_INDEXES_DIR
-from portfolio.common.navs import DEFAULT_FUNDS_DIR
-from portfolio.common.series import DEFAULT_SERIES_DIR
 from portfolio.batch.alert_storage import persist_latest_alerts
 from portfolio.batch.metrics import update_all_fund_metrics
 from portfolio.batch.navs import store_fund_navs_from_db
 from portfolio.batch.signals import compute_signals
+from portfolio.common.indexes import DEFAULT_INDEXES_DIR
+from portfolio.common.navs import DEFAULT_FUNDS_DIR
+from portfolio.common.series import DEFAULT_SERIES_DIR
 from portfolio.datasource.errors import DownloadError
+from portfolio.storage.database import DEFAULT_DB_PATH
+
+logger = logging.getLogger(__name__)
 
 
 def download(
@@ -22,7 +25,7 @@ def download(
     series_dir: Path = DEFAULT_SERIES_DIR,
     indexes_dir: Path = DEFAULT_INDEXES_DIR,
 ):
-    print("Downloading macro series from FRED...")
+    logger.info("Downloading macro series from FRED...")
     try:
         market_df = compute_signals(
             fred_api_key,
@@ -33,7 +36,7 @@ def download(
             indexes_dir=indexes_dir,
         )
     except DownloadError as exc:
-        print(f"Market signal download failed: {exc}")
+        logger.error("Market signal download failed: %s", exc)
         raise
 
     observation_date = persist_latest_alerts(
@@ -42,9 +45,9 @@ def download(
         db_path=db_path,
     )
     if observation_date is not None:
-        print(f"Stored tactical alerts for {observation_date.isoformat()}.")
+        logger.info("Stored tactical alerts for %s.", observation_date.isoformat())
 
-    print("\nDownloading fund NAVs from Morningstar...")
+    logger.info("Downloading fund NAVs from Morningstar...")
     store_fund_navs_from_db(
         start_date,
         end_date,
@@ -53,6 +56,6 @@ def download(
         funds_dir=funds_dir,
     )
 
-    print("\nComputing fund metrics...")
+    logger.info("Computing fund metrics...")
     updated = update_all_fund_metrics(db_path, funds_dir)
-    print(f"Done. Updated metrics for {updated} fund(s).")
+    logger.info("Done. Updated metrics for %s fund(s).", updated)

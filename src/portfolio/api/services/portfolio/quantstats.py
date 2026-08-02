@@ -8,6 +8,7 @@ from quantstats._plotting import core as qs_plot_core
 from quantstats._plotting import wrappers as qs_plot_wrappers
 
 logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
 
 # Match management-tab chart colors.
 # QuantStats uses palette index 0 for benchmark and index 1 for strategy.
@@ -43,9 +44,13 @@ def generate_performance_report(
     qs.extend_pandas()
     _apply_report_colors()
 
-    print(f"[*] Generating QuantStats report against benchmark: {benchmark.name}...")
+    logger.info(
+        "Generating QuantStats report against benchmark: %s...",
+        benchmark.name,
+    )
     qs.reports.html(returns, benchmark, output=output_file)
-    print(f"[+] Performance report successfully saved to: {output_file}")
+    logger.info("Performance report successfully saved to: %s", output_file)
+
 
 
 def generate_performance_report_html(

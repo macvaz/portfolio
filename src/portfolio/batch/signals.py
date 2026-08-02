@@ -1,5 +1,6 @@
 """Download FRED + SP500 series and compute tactical market signals."""
 
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -14,6 +15,8 @@ from portfolio.common.market import align_market_dataframe
 from portfolio.common.series import DEFAULT_SERIES_DIR, save_series_csv
 from portfolio.datasource.errors import DownloadError
 from portfolio.datasource.fred import download_fred_data, init_client
+
+logger = logging.getLogger(__name__)
 
 
 def compute_signals(
@@ -32,7 +35,7 @@ def compute_signals(
         series_dir=series_dir,
         indexes_dir=indexes_dir,
     )
-    print_current_signals(market_df)
+    log_current_signals(market_df)
     return market_df
 
 
@@ -49,7 +52,7 @@ def download_data(
 
     macro_series_data: list[pd.DataFrame] = []
     if not fred_api_key:
-        print(
+        logger.warning(
             "FRED_API_KEY not set; skipping FRED series downloads. "
             "Continuing with SP500; existing series files are left unchanged."
         )
@@ -77,7 +80,7 @@ def download_data(
             )
             macro_series_data.append(series_df)
 
-    print("Downloading SP500 history from Morningstar")
+    logger.info("Downloading SP500 history from Morningstar")
     sp500 = download_sp500(start_date, end_date)
     if sp500.empty:
         raise DownloadError("SP500 download returned no observations")
@@ -86,12 +89,12 @@ def download_data(
     return align_market_dataframe(sp500, macro_series_data)
 
 
-def print_current_signals(df: pd.DataFrame):
+def log_current_signals(df: pd.DataFrame):
     if df.empty:
         return
 
     row = df.iloc[-1]
-    print("\nMacro health")
+    logger.info("Macro health")
     for entry in load_alert_description_fixture():
         code = str(entry["code"])
         if code not in row.index or pd.isna(row[code]):
@@ -102,6 +105,6 @@ def print_current_signals(df: pd.DataFrame):
         active = is_alert_active(value, threshold, operator)
         role = entry.get("role") or "alert"
         if active is None:
-            print(f"- {code}: {value:.2f} ({role})")
+            logger.info("%s: %.2f (%s)", code, value, role)
         else:
-            print(f"- {code}: {value:.2f} (active={active})")
+            logger.info("%s: %.2f (active=%s)", code, value, active)

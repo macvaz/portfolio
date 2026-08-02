@@ -1,10 +1,13 @@
 """Batch-download fund NAVs for every fund stored in the database."""
 
+import logging
 from pathlib import Path
 
-from portfolio.storage.database import list_funds
 from portfolio.common.navs import download_and_store_fund_nav
 from portfolio.datasource.errors import DownloadError
+from portfolio.storage.database import list_funds
+
+logger = logging.getLogger(__name__)
 
 
 def store_fund_navs_from_db(
@@ -18,7 +21,7 @@ def store_fund_navs_from_db(
     """Download NAV series for all funds in the DB and store one CSV per ISIN."""
     funds = list_funds(db_path)
     if not funds:
-        print(
+        logger.warning(
             "No funds found in database. Add funds via the web UI "
             "(Morningstar JSON import) before running get-data."
         )
@@ -46,10 +49,10 @@ def store_fund_navs_from_db(
             failures.append(f"{isin} ({name}): no NAV data returned")
             continue
 
-        print(f"[saved] {isin}: {name} -> {path}")
+        logger.info("Saved %s: %s", isin, name)
         saved_paths.append(path)
 
-    print(f"Done. Saved {len(saved_paths)} of {len(funds)} fund file(s).")
+    logger.info("Done. Saved %s of %s fund file(s).", len(saved_paths), len(funds))
     if failures:
         raise DownloadError(
             f"Fund NAV download failed for {len(failures)} fund(s):\n- "

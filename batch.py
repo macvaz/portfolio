@@ -4,8 +4,9 @@ from datetime import date
 
 from dotenv import load_dotenv
 
-from portfolio.common.alert_descriptions import fred_series_from_fixture
 from portfolio.batch.download import download
+from portfolio.common.alert_descriptions import fred_series_from_fixture
+from portfolio.logging_config import configure_logging
 
 load_dotenv()
 
@@ -27,11 +28,18 @@ def _parse_args() -> argparse.Namespace:
         default=date.today().isoformat(),
         help="End date for downloads (YYYY-MM-DD).",
     )
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default=None,
+        help="Logging level (default: PORTFOLIO_LOG_LEVEL or INFO).",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = _parse_args()
+    configure_logging(args.log_level)
     download(
         FRED_API_KEY,
         FRED_SERIES,
