@@ -66,9 +66,16 @@ def download_data(
                     fred, series_id, column_name, start_date, end_date
                 )
             except DownloadError as exc:
+                logger.error("Failed %s: %s", series_id, exc)
                 failures.append(str(exc))
                 continue
+            logger.info("Saved %s: %s", series_id, column_name)
             downloaded.append((series_id, column_name, series_df))
+        logger.info(
+            "Done. Saved %s of %s FRED series.",
+            len(downloaded),
+            len(fred_series),
+        )
         if failures:
             raise DownloadError(
                 "FRED download failed for "
