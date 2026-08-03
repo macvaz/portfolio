@@ -179,6 +179,24 @@ def compute_portfolio_metrics(
     return compute_metrics(portfolio_returns, benchmark_returns)
 
 
+def compute_portfolio_ter(positions: list[dict]) -> float | None:
+    """Weight-average fund TERs: ``sum(weight_i * ter_i)``.
+
+    Cash (unallocated weight) contributes 0. Returns ``None`` when any
+    held position is missing a TER.
+    """
+    if not positions:
+        return None
+
+    weighted_ter = 0.0
+    for position in positions:
+        ter = position.get("ter")
+        if ter is None:
+            return None
+        weighted_ter += float(position["weighted_assets"]) * float(ter)
+    return round(weighted_ter, 2)
+
+
 def compute_portfolio_correlation_matrix(
     positions: list[dict],
     funds_dir: Path | None = None,

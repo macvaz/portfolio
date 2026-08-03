@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=171" />
+    <link rel="stylesheet" href="/static/style.css?v=179" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -147,7 +147,8 @@
           </section>
 
           <section class="table-panel">
-            <h2 class="table-title">
+            <h2 class="table-title table-title--portfolio">
+              <span class="portfolio-table-heading">
               Portfolio:
               <span class="portfolio-table-name-wrap">
                 <span class="portfolio-table-actions">
@@ -202,6 +203,8 @@
                 </span>
                 <span id="portfolio-table-name" class="portfolio-table-name"></span>
               </span>
+              </span>
+              <span id="portfolio-table-ter" class="portfolio-table-ter" hidden></span>
             </h2>
             <div class="table-scroll">
               <table class="fund-table" id="portfolio-table">
@@ -363,7 +366,7 @@
 
     <script src="/static/api.js?v=14"></script>
     <script src="/static/portfolios.js?v=11"></script>
-    <script src="/static/management.js?v=88"></script>
+    <script src="/static/management.js?v=94"></script>
     <script src="/static/risk.js?v=10"></script>
     <script src="/static/health.js?v=58"></script>
     <script src="/static/add-fund.js?v=4"></script>

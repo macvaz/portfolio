@@ -41,6 +41,7 @@ def test_save_fund_roundtrip(tmp_path):
         "security_id": "F0GBR04KHC",
         "performance_id": "0P000068Z4",
         "universe": "FO",
+        "ter": None,
     }
     assert list_funds(db_path) == [
         {
@@ -49,6 +50,7 @@ def test_save_fund_roundtrip(tmp_path):
             "fund_id": "F0GBR04KHC",
             "performance_id": "0P000068Z4",
             "universe": "FO",
+            "ter": None,
         }
     ]
 

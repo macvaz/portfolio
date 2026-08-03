@@ -172,10 +172,15 @@
       return `<td class="${cellClasses(value, column)}" data-label="${column.label}"><span class="metric-value">${text}</span></td>`;
     }).join("");
 
+    const hasTer =
+      summary.ter !== null && summary.ter !== undefined && !Number.isNaN(summary.ter);
+    const terText = hasTer ? Number(summary.ter).toFixed(2) : "—";
+
     return `
     <tr class="summary-row">
       <td class="col-name">Total</td>
       ${cells}
+      <td class="col-portfolio-ter" data-label="% TER"><span class="metric-value">${terText}</span></td>
     </tr>`;
   }
 
@@ -442,6 +447,22 @@
     } catch (error) {
       showError(error.message);
     }
+  }
+
+  function updatePortfolioTableTer(summary) {
+    const terEl = document.getElementById("portfolio-table-ter");
+    if (!terEl) {
+      return;
+    }
+    const ter = summary?.ter;
+    const hasTer = ter !== null && ter !== undefined && !Number.isNaN(ter);
+    if (!hasTer) {
+      terEl.hidden = true;
+      terEl.textContent = "";
+      return;
+    }
+    terEl.textContent = `TER ${Number(ter).toFixed(2)} %`;
+    terEl.hidden = false;
   }
 
   function updatePortfolioTableTitle(portfolios) {
@@ -767,6 +788,7 @@
     managementData = { curve, metrics, portfolios };
 
     updatePortfolioTableTitle(portfolios);
+    updatePortfolioTableTer(metrics.portfolio_summary);
 
     document.getElementById("portfolio-legend").innerHTML = formatPortfolioLegendHtml(curve);
     document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
@@ -831,6 +853,7 @@
     document.getElementById("portfolio-body").innerHTML = "";
     document.getElementById("portfolio-summary").innerHTML = "";
     document.getElementById("favorites-body").innerHTML = "";
+    updatePortfolioTableTer(null);
   }
 
   window.ManagementView = {

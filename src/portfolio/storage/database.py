@@ -105,6 +105,18 @@ def _migrate_fund_universe(db_path: Path | None = None) -> None:
             connection.commit()
 
 
+def _migrate_fund_ter(db_path: Path | None = None) -> None:
+    """Add ``ter`` to ``fund`` when upgrading an existing database."""
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        columns = {
+            row[1] for row in connection.execute(text("PRAGMA table_info(fund)"))
+        }
+        if "ter" not in columns:
+            connection.execute(text("ALTER TABLE fund ADD COLUMN ter REAL"))
+            connection.commit()
+
+
 def _migrate_drop_user_password(db_path: Path | None = None) -> None:
     """Remove ``hashed_password`` from ``user`` when upgrading an existing database."""
     engine = get_engine(db_path)
@@ -557,6 +569,7 @@ def init_db(db_path: Path | None = None) -> None:
         _migrate_legacy_funds_table(db_path)
         _migrate_fund_performance_id(db_path)
         _migrate_fund_universe(db_path)
+        _migrate_fund_ter(db_path)
         _migrate_drop_user_password(db_path)
         _migrate_user_email_to_name(db_path)
         _migrate_user_is_default(db_path)
@@ -639,6 +652,7 @@ def get_fund(isin: str, db_path: Path | None = None) -> dict | None:
         "security_id": fund.fund_id,
         "performance_id": fund.performance_id,
         "universe": fund.universe,
+        "ter": fund.ter,
     }
 
 
@@ -653,6 +667,7 @@ def list_funds(db_path: Path | None = None) -> list[dict]:
             "fund_id": fund.fund_id,
             "performance_id": fund.performance_id,
             "universe": fund.universe,
+            "ter": fund.ter,
         }
         for fund in funds
     ]
@@ -664,6 +679,7 @@ def save_fund(
     fund_id: str,
     performance_id: str | None = None,
     universe: str | None = None,
+    ter: float | None = None,
     db_path: Path | None = None,
 ) -> None:
     init_db(db_path)
@@ -675,6 +691,8 @@ def save_fund(
                 performance_id = existing.performance_id
             if universe is None:
                 universe = existing.universe
+            if ter is None:
+                ter = existing.ter
         session.merge(
             Fund(
                 isin=isin,
@@ -682,6 +700,7 @@ def save_fund(
                 fund_id=fund_id,
                 performance_id=performance_id,
                 universe=universe,
+                ter=ter,
             )
         )
         session.commit()
@@ -894,6 +913,7 @@ def list_user_portfolio(user_id: int, db_path: Path | None = None) -> list[dict]
             "fund_id": fund.fund_id,
             "performance_id": fund.performance_id,
             "universe": fund.universe,
+            "ter": fund.ter,
             "weighted_assets": position.weighted_assets,
         }
         for position, fund in rows

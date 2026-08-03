@@ -269,8 +269,8 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
-    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
-    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", ter=1.0, db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", ter=0.1, db_path=db_path)
     save_fund_metrics(
         "ES0182527038",
         {
@@ -297,8 +297,8 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
         params={"portfolio_id": user_id},
         json={
             "positions": [
-                {"isin": "ES0182527038", "weighted_assets": 0.35},
-                {"isin": "IE00BYX5NX33", "weighted_assets": 0.65},
+                {"isin": "ES0182527038", "weighted_assets": 0.6},
+                {"isin": "IE00BYX5NX33", "weighted_assets": 0.4},
             ]
         },
     )
@@ -310,10 +310,11 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     assert len(data["portfolio"]) == 2
     assert data["portfolio"][0]["isin"] == "ES0182527038"
     assert data["portfolio"][0]["name"] == "Test Fund"
-    assert data["portfolio"][0]["weight"] == 35.0
+    assert data["portfolio"][0]["weight"] == 60.0
     assert data["portfolio"][1]["isin"] == "IE00BYX5NX33"
-    assert data["portfolio"][1]["weight"] == 65.0
+    assert data["portfolio"][1]["weight"] == 40.0
     assert data["portfolio_summary"]["weight"] == 100.0
+    assert data["portfolio_summary"]["ter"] == 0.64
     assert data["portfolio"][0]["beta_6m"] == 0.05
     assert data["favorites"] == []
 

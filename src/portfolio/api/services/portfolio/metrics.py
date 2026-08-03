@@ -7,6 +7,7 @@ from portfolio.datasource.morningstar import morningstar_quote_url
 from portfolio.common.metrics import (
     compute_portfolio_correlation_matrix,
     compute_portfolio_metrics,
+    compute_portfolio_ter,
 )
 
 
@@ -63,6 +64,7 @@ def get_portfolio_metrics(user_id: int, db_path=None, funds_dir=None) -> dict:
         "favorites": favorites,
         "portfolio_summary": {
             "weight": total_weight,
+            "ter": compute_portfolio_ter(positions),
             **compute_portfolio_metrics(positions, funds_dir),
         },
         "correlation_matrix": compute_portfolio_correlation_matrix(

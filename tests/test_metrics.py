@@ -8,6 +8,7 @@ from portfolio.common.metrics import (
     compute_metrics,
     compute_portfolio_correlation_matrix,
     compute_portfolio_metrics,
+    compute_portfolio_ter,
 )
 from portfolio.batch.metrics import update_all_fund_metrics
 from portfolio.common.navs import save_fund_nav_csv
@@ -87,6 +88,36 @@ def test_compute_portfolio_metrics_from_positions(tmp_path):
 
     assert metrics["pct_1w"] is not None
     assert metrics["beta_6m"] is not None
+
+
+def test_compute_portfolio_ter_weighted_average():
+    ter = compute_portfolio_ter(
+        [
+            {"isin": "A", "weighted_assets": 0.6, "ter": 1.0},
+            {"isin": "B", "weighted_assets": 0.4, "ter": 0.1},
+        ]
+    )
+    assert ter == 0.64
+
+
+def test_compute_portfolio_ter_cash_lowers_average():
+    # 50% invested at 1.0% TER, 50% cash → portfolio TER 0.50
+    assert (
+        compute_portfolio_ter([{"isin": "A", "weighted_assets": 0.5, "ter": 1.0}])
+        == 0.5
+    )
+
+
+def test_compute_portfolio_ter_requires_all_positions():
+    assert (
+        compute_portfolio_ter(
+            [
+                {"isin": "A", "weighted_assets": 0.5, "ter": 1.0},
+                {"isin": "B", "weighted_assets": 0.5, "ter": None},
+            ]
+        )
+        is None
+    )
 
 
 def test_compute_portfolio_correlation_matrix(tmp_path):
