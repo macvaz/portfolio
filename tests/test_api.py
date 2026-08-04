@@ -81,7 +81,7 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report_cache.DEFAULT_RISK_REPORTS_DIR",
+        "portfolio.api.services.risk.risk_report_cache.DEFAULT_RISK_REPORTS_DIR",
         reports_dir,
     )
     init_db(db_path)
@@ -107,7 +107,7 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
         return "<html><body>QuantStats report</body></html>"
 
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
         mock_report_html,
     )
 
@@ -123,7 +123,7 @@ def test_get_risk_report_returns_quantstats_html(tmp_path, monkeypatch):
         return "<html><body>QuantStats report</body></html>"
 
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
         mock_dated_report_html,
     )
 
@@ -143,7 +143,7 @@ def test_get_risk_report_returns_quantstats_html_full_period(tmp_path, monkeypat
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report_cache.DEFAULT_RISK_REPORTS_DIR",
+        "portfolio.api.services.risk.risk_report_cache.DEFAULT_RISK_REPORTS_DIR",
         reports_dir,
     )
     init_db(db_path)
@@ -169,7 +169,7 @@ def test_get_risk_report_returns_quantstats_html_full_period(tmp_path, monkeypat
         return "<html><body>QuantStats report</body></html>"
 
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
         mock_report_html,
     )
 
@@ -195,7 +195,7 @@ def test_full_risk_report_serves_from_cache(tmp_path, monkeypatch):
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report_cache.DEFAULT_RISK_REPORTS_DIR",
+        "portfolio.api.services.risk.risk_report_cache.DEFAULT_RISK_REPORTS_DIR",
         reports_dir,
     )
     init_db(db_path)
@@ -220,7 +220,7 @@ def test_full_risk_report_serves_from_cache(tmp_path, monkeypatch):
         return f"<html><body>report-{calls['n']}</body></html>"
 
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
         mock_report_html,
     )
 

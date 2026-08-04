@@ -39,10 +39,6 @@ class PortfolioPositionResponse(BaseModel):
     weighted_assets: float
 
 
-class RiskReportRequest(BaseModel):
-    positions: list[PortfolioPosition]
-
-
 def require_portfolio(portfolio_id: int) -> int:
     if get_user(portfolio_id) is None:
         raise HTTPException(

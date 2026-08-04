@@ -7,7 +7,7 @@ from sqlalchemy import event, func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
 from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription, Fund, Metric, Portfolio, User
-from portfolio.storage.fixtures.alerts import (
+from portfolio.storage.fixtures.macro_health_checks import (
     insert_alert_descriptions_from_fixture,
     sync_alert_catalog_from_fixture,
 )

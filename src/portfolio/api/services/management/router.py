@@ -3,7 +3,6 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import HTMLResponse
 from sqlmodel import Session, select
 
 from portfolio.storage.database import (
@@ -19,28 +18,21 @@ from portfolio.storage.database import (
     set_default_user,
 )
 from portfolio.storage.models import User
-from portfolio.api.services.portfolio.curve import build_user_equity_curve
-from portfolio.api.services.portfolio.metrics import get_portfolio_metrics
-from portfolio.api.services.portfolio.risk_report import (
-    build_risk_report_html,
-    build_user_risk_report_html,
-    warm_user_risk_report_cache,
-)
-from portfolio.api.services.portfolio.risk_report_cache import (
-    invalidate_all_risk_reports,
-    invalidate_portfolio_risk_reports,
-    write_cached_risk_report,
-)
-from portfolio.api.services.portfolio.schemas import (
+from portfolio.api.services.management.curve import build_user_equity_curve
+from portfolio.api.services.management.metrics import get_portfolio_metrics
+from portfolio.api.services.management.schemas import (
     FundResponse,
     PortfolioCreate,
     PortfolioListItem,
     PortfolioPositionResponse,
     PortfolioSave,
-    RiskReportRequest,
     normalize_portfolio_positions,
     require_portfolio,
-    validate_positions,
+)
+from portfolio.api.services.risk.risk_report import warm_user_risk_report_cache
+from portfolio.api.services.risk.risk_report_cache import (
+    invalidate_all_risk_reports,
+    invalidate_portfolio_risk_reports,
 )
 from portfolio.datasource.morningstar import (
     morningstar_quote_url,
@@ -50,7 +42,7 @@ from portfolio.datasource.errors import DownloadError
 from portfolio.common.metrics import compute_fund_metrics
 from portfolio.common.navs import delete_fund_nav_csv, download_and_store_fund_nav
 
-router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
+router = APIRouter(prefix="/api/portfolio", tags=["management"])
 NAV_START_DATE = "2000-01-01"
 logger = logging.getLogger(__name__)
 
@@ -209,28 +201,3 @@ def save_portfolio(body: PortfolioSave, portfolio_id: int) -> list[dict]:
     saved = save_user_portfolio(portfolio_id, positions)
     _warm_risk_report_cache(portfolio_id)
     return saved
-
-
-@router.get("/risk_report", response_class=HTMLResponse)
-def get_risk_report(portfolio_id: int, start_date: date | None = None) -> HTMLResponse:
-    """QuantStats tearsheet for the user's saved portfolio."""
-    require_portfolio(portfolio_id)
-    try:
-        html = build_user_risk_report_html(portfolio_id, start_date=start_date)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return HTMLResponse(content=html)
-
-
-@router.post("/risk_report", response_class=HTMLResponse)
-def create_risk_report(body: RiskReportRequest, portfolio_id: int) -> HTMLResponse:
-    require_portfolio(portfolio_id)
-    positions = validate_positions(body.positions)
-    save_user_portfolio(portfolio_id, positions)
-
-    try:
-        html = build_risk_report_html(positions)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    write_cached_risk_report(portfolio_id, positions, html)
-    return HTMLResponse(content=html)

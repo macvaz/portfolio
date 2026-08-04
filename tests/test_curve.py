@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import date
 
-from portfolio.api.services.portfolio.curve import (
+from portfolio.api.services.management.curve import (
     BENCHMARK_NAME,
     align_return_series,
     annualized_return_pct,

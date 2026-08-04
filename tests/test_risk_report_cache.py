@@ -2,12 +2,12 @@
 
 import pandas as pd
 
-from portfolio.api.services.portfolio.risk_report import (
+from portfolio.api.services.risk.risk_report import (
     build_user_risk_report_html,
     warm_all_risk_report_caches,
     warm_user_risk_report_cache,
 )
-from portfolio.api.services.portfolio.risk_report_cache import (
+from portfolio.api.services.risk.risk_report_cache import (
     nav_stamp,
     positions_fingerprint,
     read_cached_risk_report,
@@ -56,7 +56,7 @@ def test_build_user_risk_report_caches_full_period(tmp_path, monkeypatch):
         return "<html>cached</html>"
 
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
         mock_report_html,
     )
 
@@ -101,7 +101,7 @@ def test_nav_stamp_change_misses_cache(tmp_path, monkeypatch):
 def test_warm_all_risk_report_caches(tmp_path, monkeypatch):
     db_path, funds_dir, reports_dir, user_id, _ = _seed(tmp_path, monkeypatch)
     monkeypatch.setattr(
-        "portfolio.api.services.portfolio.risk_report.generate_performance_report_html",
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
         lambda *args, **kwargs: "<html>warm</html>",
     )
     warmed = warm_all_risk_report_caches(

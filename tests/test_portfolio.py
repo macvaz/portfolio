@@ -1,4 +1,4 @@
-from portfolio.api.services.portfolio.quantstats import (
+from portfolio.api.services.risk.quantstats import (
     generate_performance_report,
     generate_performance_report_html,
 )

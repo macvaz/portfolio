@@ -29,11 +29,12 @@ portfolio/
 │   │   ├── models.py               # SQLModel tables
 │   │   ├── database.py             # Engine, migrations, CRUD
 │   │   └── fixtures/
-│   │       └── alerts.py           # Seed/sync alert descriptions
+│   │       └── macro_health_checks.py  # Seed/sync macro health check catalog
 │   ├── api/                        # HTTP app only
 │   │   ├── api.py                  # FastAPI app shell
 │   │   └── services/
-│   │       ├── portfolio/          # Funds, positions, curve, metrics, risk
+│   │       ├── management/         # Funds, positions, curve, metrics
+│   │       ├── risk/               # QuantStats risk reports + cache
 │   │       └── macro/              # Macro health series + history
 │   ├── common/                     # Shared pure helpers (no api/batch/storage imports)
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download

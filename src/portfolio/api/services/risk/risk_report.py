@@ -6,8 +6,8 @@ import logging
 from datetime import date
 from pathlib import Path
 
-from portfolio.api.services.portfolio.quantstats import generate_performance_report_html
-from portfolio.api.services.portfolio.risk_report_cache import (
+from portfolio.api.services.risk.quantstats import generate_performance_report_html
+from portfolio.api.services.risk.risk_report_cache import (
     invalidate_portfolio_risk_reports,
     read_cached_risk_report,
     write_cached_risk_report,
