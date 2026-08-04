@@ -35,7 +35,7 @@
   // QuantStats has no layout mode — only a fixed #left/#right float template.
   // Desktop: compact side-by-side at 900px (avoids accidental stack + heavy scroll).
   // Mobile: force a single column so phones don't need horizontal scroll.
-  const REPORT_MIN_WIDTH = 1100;
+  const REPORT_MIN_WIDTH = 1300;
   const REPORT_BODY_PAD_Y = 16;
   const REPORT_BODY_PAD_X = 16;
   const REPORT_COLUMN_GAP = 16;
