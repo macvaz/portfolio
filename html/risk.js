@@ -67,14 +67,32 @@
     display: table;
     clear: both;
   }
+  .container > h1,
+  .container > h4,
+  .container > hr {
+    display: none !important;
+  }
   #left {
     float: left !important;
     width: ${REPORT_LEFT_WIDTH}px !important;
     margin-right: ${REPORT_COLUMN_GAP}px !important;
+    margin-top: 0 !important;
   }
   #right {
     float: right !important;
     width: ${REPORT_RIGHT_WIDTH}px !important;
+  }
+  /* QuantStats uses negative SVG margins for a dense tearsheet; at our wider
+     desktop column that pulls axis ticks into the next chart. */
+  #left svg,
+  #monthly_heatmap svg {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 0 0.75rem !important;
+  }
+  #left > div {
+    margin-bottom: 0.5rem !important;
   }
 </style>`;
   }
