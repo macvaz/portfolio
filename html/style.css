@@ -476,9 +476,10 @@ button:disabled {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  border: 1px solid #e2d8c8;
+  border: 1px solid rgba(201, 162, 39, 0.35);
   border-radius: 8px;
   background: #fff;
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1);
 }
 
 /* Desktop: no page vertical padding; report fills below the header. */
@@ -1096,9 +1097,9 @@ button:disabled {
   display: flex;
   flex-direction: column;
   background: #fcf9eb;
-  border: 1px solid rgba(255, 153, 0, 0.28);
+  border: 1px solid rgba(201, 162, 39, 0.35);
   border-radius: 12px;
-  box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.08), 0 18px 48px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1), 0 18px 48px rgba(0, 0, 0, 0.16);
   overflow: hidden;
 }
 
@@ -1251,7 +1252,7 @@ button:disabled {
 }
 
 .tactical-month-card:focus-visible {
-  outline: 2px solid rgba(255, 153, 0, 0.45);
+  outline: 2px solid rgba(201, 162, 39, 0.55);
   outline-offset: 2px;
 }
 
@@ -1347,9 +1348,9 @@ body.is-month-detail-open {
 .add-fund-card {
   width: min(720px, 100%);
   background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.35);
   border-radius: 12px;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1), 0 18px 48px rgba(0, 0, 0, 0.14);
   padding: 1.5rem 1.75rem 1.75rem;
 }
 
@@ -1830,9 +1831,9 @@ body.is-month-detail-open {
   .tactical-month-card {
     padding: 0.9rem 1rem;
     background: #fcf9eb;
-    border: 1px solid rgba(255, 153, 0, 0.28);
+    border: 1px solid rgba(201, 162, 39, 0.35);
     border-radius: 10px;
-    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.08);
+    box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1);
   }
 
   .tactical-month-card-header {
@@ -1970,9 +1971,9 @@ body.is-month-detail-open {
     gap: 0.3rem;
     padding: 0.9rem 1rem;
     background: #fcf9eb;
-    border: 1px solid rgba(255, 153, 0, 0.28);
+    border: 1px solid rgba(201, 162, 39, 0.35);
     border-radius: 10px;
-    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.08);
+    box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1);
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -2151,9 +2152,9 @@ body.is-month-detail-open {
     gap: 0.3rem;
     padding: 0.9rem 1rem;
     background: #fcf9eb;
-    border: 1px solid rgba(255, 153, 0, 0.28);
+    border: 1px solid rgba(201, 162, 39, 0.35);
     border-radius: 10px;
-    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.08);
+    box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1);
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -2232,9 +2233,9 @@ body.is-month-detail-open {
     gap: 0.3rem;
     padding: 0.9rem 1rem;
     background: #fcf9eb;
-    border: 1px solid rgba(255, 153, 0, 0.28);
+    border: 1px solid rgba(201, 162, 39, 0.35);
     border-radius: 10px;
-    box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.08);
+    box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.1);
   }
 
   .fund-table:not(.alert-table--history) .correlation-matrix-card {
@@ -2368,12 +2369,17 @@ body.is-month-detail-open {
   }
 
   .portfolio-table-meta {
+    display: inline-flex;
+  }
+
+  .portfolio-table-ter,
+  .portfolio-table-meta-sep {
     display: none;
   }
 
-  .portfolio-table-as-of,
-  .portfolio-table-ter {
-    display: none;
+  .portfolio-table-as-of {
+    display: inline;
+    font-size: 0.82rem;
   }
 
   .alert-table--series .col-description {

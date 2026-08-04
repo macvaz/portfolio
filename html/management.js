@@ -227,7 +227,7 @@
 
     return `
     <tr class="summary-row">
-      <td class="col-name">Total</td>
+      <td class="col-name"></td>
       ${cells}
       <td class="col-portfolio-ter" data-label="% TER"><span class="metric-value">${terText}</span></td>
     </tr>`;
