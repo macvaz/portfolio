@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+from portfolio.api.services.portfolio.risk_report import warm_all_risk_report_caches
 from portfolio.batch.alert_storage import persist_latest_alerts
 from portfolio.batch.metrics import update_all_fund_metrics
 from portfolio.batch.navs import store_fund_navs_from_db
@@ -59,3 +60,7 @@ def download(
     logger.info("Computing fund metrics...")
     updated = update_all_fund_metrics(db_path, funds_dir)
     logger.info("Done. Updated metrics for %s fund(s).", updated)
+
+    logger.info("Warming portfolio risk report caches...")
+    warmed = warm_all_risk_report_caches(db_path=db_path, funds_dir=funds_dir)
+    logger.info("Warmed risk report cache for %s portfolio(s).", warmed)

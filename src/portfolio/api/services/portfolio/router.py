@@ -1,4 +1,5 @@
 from datetime import date
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -23,6 +24,12 @@ from portfolio.api.services.portfolio.metrics import get_portfolio_metrics
 from portfolio.api.services.portfolio.risk_report import (
     build_risk_report_html,
     build_user_risk_report_html,
+    warm_user_risk_report_cache,
+)
+from portfolio.api.services.portfolio.risk_report_cache import (
+    invalidate_all_risk_reports,
+    invalidate_portfolio_risk_reports,
+    write_cached_risk_report,
 )
 from portfolio.api.services.portfolio.schemas import (
     FundResponse,
@@ -45,6 +52,16 @@ from portfolio.common.navs import delete_fund_nav_csv, download_and_store_fund_n
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 NAV_START_DATE = "2000-01-01"
+logger = logging.getLogger(__name__)
+
+
+def _warm_risk_report_cache(portfolio_id: int) -> None:
+    try:
+        warm_user_risk_report_cache(portfolio_id)
+    except Exception:
+        logger.exception(
+            "Failed to warm risk report cache for portfolio %s", portfolio_id
+        )
 
 
 def _register_fund(fund: dict) -> dict:
@@ -119,6 +136,7 @@ def add_portfolio(
 def remove_portfolio(portfolio_id: int) -> None:
     if not delete_user(portfolio_id):
         raise HTTPException(status_code=404, detail="Portfolio not found")
+    invalidate_portfolio_risk_reports(portfolio_id)
 
 
 @router.put("/portfolios/{portfolio_id}/default", response_model=PortfolioListItem)
@@ -161,6 +179,7 @@ def remove_fund(isin: str) -> None:
     if not delete_fund(isin.upper()):
         raise HTTPException(status_code=404, detail=f"ISIN {isin} not found")
     delete_fund_nav_csv(isin.upper())
+    invalidate_all_risk_reports()
 
 
 @router.get("/curve")
@@ -187,7 +206,9 @@ def get_portfolio(portfolio_id: int) -> list[dict]:
 def save_portfolio(body: PortfolioSave, portfolio_id: int) -> list[dict]:
     require_portfolio(portfolio_id)
     positions = normalize_portfolio_positions(body.positions)
-    return save_user_portfolio(portfolio_id, positions)
+    saved = save_user_portfolio(portfolio_id, positions)
+    _warm_risk_report_cache(portfolio_id)
+    return saved
 
 
 @router.get("/risk_report", response_class=HTMLResponse)
@@ -211,4 +232,5 @@ def create_risk_report(body: RiskReportRequest, portfolio_id: int) -> HTMLRespon
         html = build_risk_report_html(positions)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    write_cached_risk_report(portfolio_id, positions, html)
     return HTMLResponse(content=html)
