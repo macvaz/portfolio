@@ -3,7 +3,7 @@ import datetime
 from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db, reset_alert_tables_from_fixture
-from portfolio.storage.models import Alert, AlertDescription
+from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
 from portfolio.common.alert_descriptions import load_alert_description_fixture
 
 
@@ -13,14 +13,14 @@ def test_reset_alert_tables_from_fixture_reloads_catalog(tmp_path):
 
     with get_session(db_path) as session:
         session.add(
-            Alert(
+            MacroHealthCheck(
                 code="Yield_Spread_10Y3M",
                 date=datetime.date(2024, 6, 4),
                 value=-0.05,
             )
         )
         session.add(
-            AlertDescription(
+            MacroHealthCheckDescription(
                 code="LEGACY_ALERT",
                 description="Old row",
                 threshold=0.0,
@@ -34,8 +34,8 @@ def test_reset_alert_tables_from_fixture_reloads_catalog(tmp_path):
 
     fixture_rows = load_alert_description_fixture()
     with get_session(db_path) as session:
-        descriptions = session.exec(select(AlertDescription)).all()
-        alerts = session.exec(select(Alert)).all()
+        descriptions = session.exec(select(MacroHealthCheckDescription)).all()
+        alerts = session.exec(select(MacroHealthCheck)).all()
 
     assert len(descriptions) == len(fixture_rows)
     assert {description.code for description in descriptions} == {

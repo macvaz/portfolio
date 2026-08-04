@@ -48,10 +48,12 @@ def test_migrate_signal_alert_codes_when_new_code_already_exists(tmp_path):
     connection = sqlite3.connect(db_path)
     dimensions = {
         row[0]
-        for row in connection.execute("SELECT code FROM alert_description").fetchall()
+        for row in connection.execute(
+            "SELECT code FROM macro_health_check_description"
+        ).fetchall()
     }
     alerts = connection.execute(
-        "SELECT code, value FROM alert ORDER BY code"
+        "SELECT code, value FROM macro_health_check ORDER BY code"
     ).fetchall()
     connection.close()
 
@@ -98,13 +100,17 @@ def test_migrate_signal_alert_codes_renames_legacy_rows(tmp_path):
     connection = sqlite3.connect(db_path)
     dimensions = {
         row[0]
-        for row in connection.execute("SELECT code FROM alert_description").fetchall()
+        for row in connection.execute(
+            "SELECT code FROM macro_health_check_description"
+        ).fetchall()
     }
     sahm_description = connection.execute(
-        "SELECT code FROM alert_description WHERE code = 'Sahm_Rule_Indicator'"
+        "SELECT code FROM macro_health_check_description "
+        "WHERE code = 'Sahm_Rule_Indicator'"
     ).fetchone()
     sahm_alert = connection.execute(
-        "SELECT code FROM alert WHERE code IN ('Sahm_Value', 'Sahm_Rule_Indicator')"
+        "SELECT code FROM macro_health_check "
+        "WHERE code IN ('Sahm_Value', 'Sahm_Rule_Indicator')"
     ).fetchone()
     connection.close()
 

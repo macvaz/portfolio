@@ -133,13 +133,13 @@ The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 
 
 - `macro_constants.py` — column names for macro and market signals.
 - `batch.py` — wires FRED series IDs to column names.
-- `data/fixtures/alert_description.json` — alert thresholds and metadata.
+- `data/fixtures/macro_health_check_description.json` — macro health check thresholds and metadata.
 
 **Adding a new FRED series / alert**
 
 1. Add the column name to `macro_constants.py`.
 2. Add the FRED series to `FRED_SERIES` in `batch.py`.
-3. Add the alert definition to `data/fixtures/alert_description.json`.
+3. Add the check definition to `data/fixtures/macro_health_check_description.json`.
 
 When the batch pipeline runs, the latest macro and market signals are printed to the console.
 

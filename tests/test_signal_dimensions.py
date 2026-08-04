@@ -4,9 +4,9 @@ import json
 from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db
-from portfolio.storage.models import AlertDescription
+from portfolio.storage.models import MacroHealthCheckDescription
 from portfolio.common.alert_descriptions import (
-    DEFAULT_ALERT_DESCRIPTION_FIXTURE,
+    DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE,
     load_alert_description_fixture,
 )
 
@@ -58,7 +58,7 @@ def test_init_db_seeds_alert_descriptions_from_fixture(tmp_path):
     fixture_rows = load_alert_description_fixture()
     with get_session(db_path) as session:
         stored = session.exec(
-            select(AlertDescription).order_by(AlertDescription.code)
+            select(MacroHealthCheckDescription).order_by(MacroHealthCheckDescription.code)
         ).all()
 
     assert len(stored) == len(fixture_rows)
@@ -86,7 +86,9 @@ def test_init_db_seeds_alert_descriptions_from_fixture(tmp_path):
 
 
 def test_alert_description_fixture_is_valid_json():
-    payload = json.loads(DEFAULT_ALERT_DESCRIPTION_FIXTURE.read_text(encoding="utf-8"))
+    payload = json.loads(
+        DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE.read_text(encoding="utf-8")
+    )
     assert isinstance(payload, list)
     assert all(
         {

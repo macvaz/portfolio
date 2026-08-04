@@ -78,3 +78,57 @@ def test_migrate_drop_user_password(tmp_path):
 
     assert columns == {"id", "name", "is_default"}
     assert users == [(1, "user@example.com")]
+
+
+def test_migrate_rename_alert_description_table(tmp_path):
+    db_path = tmp_path / "portfolio.db"
+    connection = sqlite3.connect(db_path)
+    connection.execute(
+        "CREATE TABLE alert_description ("
+        "code VARCHAR NOT NULL PRIMARY KEY, "
+        "description VARCHAR NOT NULL, "
+        "source VARCHAR NOT NULL DEFAULT 'fred', "
+        "series_id VARCHAR, "
+        "series_start DATE, "
+        "threshold REAL, "
+        "operator VARCHAR, "
+        "role VARCHAR NOT NULL DEFAULT 'alert', "
+        "domain VARCHAR"
+        ")"
+    )
+    connection.execute(
+        "INSERT INTO alert_description (code, description, threshold, operator) "
+        "VALUES ('Breakeven_Inflation', 'Test', 2.5, 'gte')"
+    )
+    connection.execute(
+        "CREATE TABLE alert ("
+        "id INTEGER NOT NULL PRIMARY KEY, "
+        "code VARCHAR NOT NULL, "
+        "date DATE NOT NULL, "
+        "value REAL NOT NULL, "
+        "UNIQUE (code, date)"
+        ")"
+    )
+    connection.commit()
+    connection.close()
+
+    init_db(db_path)
+
+    connection = sqlite3.connect(db_path)
+    tables = {
+        row[0]
+        for row in connection.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        )
+    }
+    row = connection.execute(
+        "SELECT code, threshold FROM macro_health_check_description "
+        "WHERE code = 'Breakeven_Inflation'"
+    ).fetchone()
+    connection.close()
+
+    assert "macro_health_check_description" in tables
+    assert "macro_health_check" in tables
+    assert "alert_description" not in tables
+    assert "alert" not in tables
+    assert row == ("Breakeven_Inflation", 2.5)

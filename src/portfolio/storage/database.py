@@ -6,7 +6,7 @@ from pathlib import Path
 from sqlalchemy import event, func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
-from portfolio.storage.models import Alert, AlertDescription, Fund, Metric, Portfolio, User
+from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription, Fund, Metric, Portfolio, User
 from portfolio.storage.fixtures.alerts import (
     insert_alert_descriptions_from_fixture,
     sync_alert_catalog_from_fixture,
@@ -519,23 +519,76 @@ def _migrate_rename_signal_tables_to_alert(db_path: Path | None = None) -> None:
         connection.commit()
 
 
+def _migrate_rename_alert_description_table(db_path: Path | None = None) -> None:
+    """Rename ``alert_description`` to ``macro_health_check_description``."""
+    old_name = "alert_description"
+    new_name = "macro_health_check_description"
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if old_name not in tables:
+            return
+
+        if new_name in tables:
+            # create_all may have created an empty new table alongside the legacy one.
+            connection.execute(text(f"DROP TABLE {new_name}"))
+
+        connection.execute(text(f"ALTER TABLE {old_name} RENAME TO {new_name}"))
+        connection.execute(text("DROP INDEX IF EXISTS ix_alert_description_domain"))
+        connection.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS "
+                "ix_macro_health_check_description_domain "
+                f"ON {new_name} (domain)"
+            )
+        )
+        connection.commit()
+
+
+def _migrate_rename_alert_table(db_path: Path | None = None) -> None:
+    """Rename ``alert`` to ``macro_health_check``."""
+    old_name = "alert"
+    new_name = "macro_health_check"
+    engine = get_engine(db_path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if old_name not in tables:
+            return
+
+        if new_name in tables:
+            connection.execute(text(f"DROP TABLE {new_name}"))
+
+        connection.execute(text(f"ALTER TABLE {old_name} RENAME TO {new_name}"))
+        connection.commit()
+
+
 def _migrate_sahm_rule_indicator_alerts(db_path: Path | None = None) -> None:
     """Copy legacy SAHM_RULE readings into ``Sahm_Rule_Indicator`` when missing."""
     with get_session(db_path) as session:
         legacy_rows = session.exec(
-            select(Alert).where(Alert.code == "SAHM_RULE")
+            select(MacroHealthCheck).where(MacroHealthCheck.code == "SAHM_RULE")
         ).all()
         for legacy in legacy_rows:
             existing = session.exec(
-                select(Alert).where(
-                    Alert.code == "Sahm_Rule_Indicator",
-                    Alert.date == legacy.date,
+                select(MacroHealthCheck).where(
+                    MacroHealthCheck.code == "Sahm_Rule_Indicator",
+                    MacroHealthCheck.date == legacy.date,
                 )
             ).first()
             if existing is not None:
                 continue
             session.add(
-                Alert(
+                MacroHealthCheck(
                     code="Sahm_Rule_Indicator",
                     date=legacy.date,
                     value=legacy.value,
@@ -548,14 +601,14 @@ def reset_alert_tables_from_fixture(
     db_path: Path | None = None,
     fixture_path: Path | None = None,
 ) -> None:
-    """Clear alert data and reload ``alert_description`` from the JSON fixture."""
+    """Clear alert data and reload catalog from the JSON fixture."""
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
     SQLModel.metadata.create_all(engine)
 
     with get_session(db_path) as session:
-        session.exec(delete(Alert))
-        session.exec(delete(AlertDescription))
+        session.exec(delete(MacroHealthCheck))
+        session.exec(delete(MacroHealthCheckDescription))
         session.commit()
         insert_alert_descriptions_from_fixture(session, fixture_path)
         session.commit()
@@ -581,6 +634,8 @@ def init_db(db_path: Path | None = None) -> None:
         _migrate_signal_dimension_unified(db_path)
         _migrate_rename_signal_tables_to_alert(db_path)
         _migrate_alert_description_unified(db_path)
+        _migrate_rename_alert_description_table(db_path)
+        _migrate_rename_alert_table(db_path)
         _migrate_sahm_rule_indicator_alerts(db_path)
         _initialized_paths.add(key)
 
@@ -775,14 +830,14 @@ def upsert_alerts(
     with get_session(db_path) as session:
         for code, value in alerts.items():
             existing = session.exec(
-                select(Alert).where(
-                    Alert.code == code,
-                    Alert.date == observation_date,
+                select(MacroHealthCheck).where(
+                    MacroHealthCheck.code == code,
+                    MacroHealthCheck.date == observation_date,
                 )
             ).first()
             if existing is None:
                 session.add(
-                    Alert(code=code, date=observation_date, value=value)
+                    MacroHealthCheck(code=code, date=observation_date, value=value)
                 )
             else:
                 existing.value = value
@@ -794,7 +849,7 @@ from portfolio.common.alert_descriptions import alert_label, is_alert_active
 
 
 def _series_item_from_description(
-    description: AlertDescription,
+    description: MacroHealthCheckDescription,
     value: float,
 ) -> dict:
     identifier = description.series_id
@@ -825,14 +880,14 @@ def _series_item_from_description(
 def get_latest_alerts(db_path: Path | None = None) -> dict | None:
     init_db(db_path)
     with get_session(db_path) as session:
-        latest_date = session.exec(select(func.max(Alert.date))).one()
+        latest_date = session.exec(select(func.max(MacroHealthCheck.date))).one()
         if latest_date is None:
             return None
 
         stored_alerts = session.exec(
-            select(Alert).where(Alert.date == latest_date)
+            select(MacroHealthCheck).where(MacroHealthCheck.date == latest_date)
         ).all()
-        descriptions = session.exec(select(AlertDescription)).all()
+        descriptions = session.exec(select(MacroHealthCheckDescription)).all()
 
     values_by_code = {alert.code: alert.value for alert in stored_alerts}
     series: list[dict] = []

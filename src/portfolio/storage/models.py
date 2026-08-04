@@ -43,8 +43,8 @@ class Portfolio(SQLModel, table=True):
     weighted_assets: float
 
 
-class AlertDescription(SQLModel, table=True):
-    __tablename__ = "alert_description"
+class MacroHealthCheckDescription(SQLModel, table=True):
+    __tablename__ = "macro_health_check_description"
 
     code: str = Field(primary_key=True)
     description: str
@@ -57,11 +57,13 @@ class AlertDescription(SQLModel, table=True):
     domain: str | None = Field(default=None, index=True)
 
 
-class Alert(SQLModel, table=True):
-    __tablename__ = "alert"
+class MacroHealthCheck(SQLModel, table=True):
+    __tablename__ = "macro_health_check"
     __table_args__ = (UniqueConstraint("code", "date"),)
 
     id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(foreign_key="alert_description.code", index=True)
+    code: str = Field(
+        foreign_key="macro_health_check_description.code", index=True
+    )
     date: datetime.date = Field(index=True)
     value: float

@@ -3,7 +3,7 @@ import datetime
 from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db
-from portfolio.storage.models import Alert, AlertDescription
+from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
 from portfolio.common.alert_descriptions import load_alert_description_fixture
 
 
@@ -13,7 +13,7 @@ def test_init_db_prunes_removed_alert_descriptions(tmp_path):
 
     with get_session(db_path) as session:
         session.add(
-            AlertDescription(
+            MacroHealthCheckDescription(
                 code="MACRO_CRISIS_VOTES",
                 description="Legacy",
                 threshold=2.0,
@@ -23,7 +23,7 @@ def test_init_db_prunes_removed_alert_descriptions(tmp_path):
         )
         session.flush()
         session.add(
-            Alert(
+            MacroHealthCheck(
                 code="MACRO_CRISIS_VOTES",
                 date=datetime.date(2024, 6, 4),
                 value=0.0,
@@ -35,8 +35,8 @@ def test_init_db_prunes_removed_alert_descriptions(tmp_path):
 
     fixture_codes = {row["code"] for row in load_alert_description_fixture()}
     with get_session(db_path) as session:
-        descriptions = session.exec(select(AlertDescription)).all()
-        alerts = session.exec(select(Alert)).all()
+        descriptions = session.exec(select(MacroHealthCheckDescription)).all()
+        alerts = session.exec(select(MacroHealthCheck)).all()
 
     assert {description.code for description in descriptions} == fixture_codes
     assert all(alert.code in fixture_codes for alert in alerts)

@@ -3,7 +3,9 @@
 import json
 from pathlib import Path
 
-DEFAULT_ALERT_DESCRIPTION_FIXTURE = Path("data/fixtures/alert_description.json")
+DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE = Path(
+    "data/fixtures/macro_health_check_description.json"
+)
 
 ALERT_LABELS = {
     "High_Yield_Spread": "High yield spread",
@@ -53,7 +55,7 @@ def fred_series_from_fixture(
 def load_alert_description_fixture(
     fixture_path: Path | None = None,
 ) -> list[dict[str, str | float]]:
-    path = fixture_path or DEFAULT_ALERT_DESCRIPTION_FIXTURE
+    path = fixture_path or DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE
     with path.open(encoding="utf-8") as handle:
         rows = json.load(handle)
 

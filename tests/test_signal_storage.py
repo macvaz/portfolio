@@ -4,7 +4,7 @@ import pandas as pd
 from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db, upsert_alerts
-from portfolio.storage.models import Alert
+from portfolio.storage.models import MacroHealthCheck
 from portfolio.batch.alert_storage import extract_alert_values, persist_latest_alerts
 from portfolio.common.indexes import latest_index_date, save_index_csv
 from portfolio.common.macro_constants import SP500_DEATH_CROSS, YIELD_SPREAD_10Y3M
@@ -39,9 +39,9 @@ def test_upsert_alerts_updates_existing_value(tmp_path):
 
     with get_session(db_path) as session:
         stored = session.exec(
-            select(Alert).where(
-                Alert.code == "Breakeven_Inflation",
-                Alert.date == observation_date,
+            select(MacroHealthCheck).where(
+                MacroHealthCheck.code == "Breakeven_Inflation",
+                MacroHealthCheck.date == observation_date,
             )
         ).one()
 
@@ -85,7 +85,7 @@ def test_persist_latest_alerts_uses_index_file_date(tmp_path):
     with get_session(db_path) as session:
         stored = {
             alert.code: alert.value
-            for alert in session.exec(select(Alert)).all()
+            for alert in session.exec(select(MacroHealthCheck)).all()
         }
 
     assert stored["Breakeven_Inflation"] == 2.3

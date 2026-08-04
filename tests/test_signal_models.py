@@ -4,7 +4,7 @@ from datetime import date
 from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db
-from portfolio.storage.models import Alert, AlertDescription
+from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
 
 
 def test_alert_tables_are_created(tmp_path):
@@ -20,8 +20,10 @@ def test_alert_tables_are_created(tmp_path):
     }
     connection.close()
 
-    assert "alert_description" in tables
-    assert "alert" in tables
+    assert "macro_health_check_description" in tables
+    assert "macro_health_check" in tables
+    assert "alert" not in tables
+    assert "alert_description" not in tables
 
 
 def test_alert_description_and_alert_persist(tmp_path):
@@ -30,7 +32,7 @@ def test_alert_description_and_alert_persist(tmp_path):
 
     with get_session(db_path) as session:
         session.add(
-            Alert(
+            MacroHealthCheck(
                 code="Breakeven_Inflation",
                 date=date(2026, 6, 1),
                 value=2.3,
@@ -39,8 +41,8 @@ def test_alert_description_and_alert_persist(tmp_path):
         session.commit()
 
     with get_session(db_path) as session:
-        description = session.get(AlertDescription, "Breakeven_Inflation")
-        alert = session.exec(select(Alert)).first()
+        description = session.get(MacroHealthCheckDescription, "Breakeven_Inflation")
+        alert = session.exec(select(MacroHealthCheck)).first()
 
     assert description.operator == "gte"
     assert description.threshold == 2.5

@@ -1,22 +1,22 @@
-"""Seed and sync alert_description rows from the JSON fixture."""
+"""Seed and sync macro health check description rows from the JSON fixture."""
 
 import datetime
 from pathlib import Path
 
 from sqlmodel import delete, select
 
-from portfolio.storage.models import Alert, AlertDescription
+from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
 from portfolio.common.alert_descriptions import load_alert_description_fixture
 
 
-def _description_from_row(row: dict) -> AlertDescription:
+def _description_from_row(row: dict) -> MacroHealthCheckDescription:
     threshold = row.get("threshold")
     operator = row.get("operator")
     raw_series_start = row.get("series_start")
     series_start = None
     if raw_series_start:
         series_start = datetime.date.fromisoformat(str(raw_series_start))
-    return AlertDescription(
+    return MacroHealthCheckDescription(
         code=str(row["code"]),
         description=str(row["description"]),
         source=str(row.get("source", "fred")),
@@ -52,9 +52,9 @@ def sync_alert_catalog_from_fixture(
     fixture_codes = {
         str(row["code"]) for row in load_alert_description_fixture(fixture_path)
     }
-    for description in session.exec(select(AlertDescription)).all():
+    for description in session.exec(select(MacroHealthCheckDescription)).all():
         if description.code in fixture_codes:
             continue
-        session.exec(delete(Alert).where(Alert.code == description.code))
+        session.exec(delete(MacroHealthCheck).where(MacroHealthCheck.code == description.code))
         session.delete(description)
     seed_alert_descriptions(session, fixture_path)
