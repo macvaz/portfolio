@@ -1,5 +1,6 @@
 from collections.abc import Generator
 import datetime
+import html
 from pathlib import Path
 
 from sqlalchemy import event, func, text
@@ -696,7 +697,7 @@ def save_fund(
         session.merge(
             Fund(
                 isin=isin,
-                name=name,
+                name=html.unescape(name),
                 fund_id=fund_id,
                 performance_id=performance_id,
                 universe=universe,

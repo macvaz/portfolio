@@ -96,10 +96,27 @@
     return "metric-neutral";
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function fundDisplayName(fund) {
+    // Names may arrive already entity-encoded from older imports.
+    const raw = String(fund?.name || fund?.isin || "");
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = raw;
+    return textarea.value;
+  }
+
   function renderFundName(fund) {
+    const name = escapeHtml(fundDisplayName(fund));
     const nameLink = fund.morningstar_url
-      ? `<a href="${fund.morningstar_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${fund.name}</a>`
-      : `<span class="fund-name">${fund.name}</span>`;
+      ? `<a href="${fund.morningstar_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${name}</a>`
+      : `<span class="fund-name">${name}</span>`;
     return `
       <div class="fund-name-wrap">
         <div class="fund-delete-popup">
@@ -316,13 +333,13 @@
   function renderWeightsSummaryRow(funds) {
     const items = funds
       .map((fund) => {
-        const label = String(fund.name || fund.isin || "")
-          .replace(/&/g, "&amp;")
-          .replace(/"/g, "&quot;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;");
+        const name = escapeHtml(fundDisplayName(fund));
+        const nameHtml = fund.morningstar_url
+          ? `<a href="${fund.morningstar_url}" class="fund-link weights-summary-name" target="_blank" rel="noopener noreferrer">${name}</a>`
+          : `<span class="fund-name weights-summary-name">${name}</span>`;
         return `
-      <div class="weights-summary-item" data-label="${label}">
+      <div class="weights-summary-item">
+        ${nameHtml}
         <span class="metric-value">${formatWeight(fund.weight)}%</span>
       </div>`;
       })
@@ -482,20 +499,41 @@
     }
   }
 
-  function updatePortfolioTableTer(summary) {
+  function updatePortfolioTableMeta(metrics) {
+    const asOfEl = document.getElementById("portfolio-table-as-of");
     const terEl = document.getElementById("portfolio-table-ter");
-    if (!terEl) {
-      return;
+    const sepEl = document.getElementById("portfolio-table-meta-sep");
+    const asOf = metrics?.as_of;
+    const ter = metrics?.portfolio_summary?.ter;
+
+    let hasAsOf = false;
+    if (asOfEl) {
+      if (asOf) {
+        asOfEl.textContent = `as of ${asOf}`;
+        asOfEl.hidden = false;
+        hasAsOf = true;
+      } else {
+        asOfEl.textContent = "";
+        asOfEl.hidden = true;
+      }
     }
-    const ter = summary?.ter;
-    const hasTer = ter !== null && ter !== undefined && !Number.isNaN(ter);
-    if (!hasTer) {
-      terEl.hidden = true;
-      terEl.textContent = "";
-      return;
+
+    let hasTer = false;
+    if (terEl) {
+      const validTer = ter !== null && ter !== undefined && !Number.isNaN(ter);
+      if (validTer) {
+        terEl.textContent = `TER ${Number(ter).toFixed(2)} %`;
+        terEl.hidden = false;
+        hasTer = true;
+      } else {
+        terEl.hidden = true;
+        terEl.textContent = "";
+      }
     }
-    terEl.textContent = `TER ${Number(ter).toFixed(2)} %`;
-    terEl.hidden = false;
+
+    if (sepEl) {
+      sepEl.hidden = !(hasTer && hasAsOf);
+    }
   }
 
   function updatePortfolioTableTitle(portfolios) {
@@ -823,7 +861,7 @@
     managementData = { curve, metrics, portfolios };
 
     updatePortfolioTableTitle(portfolios);
-    updatePortfolioTableTer(metrics.portfolio_summary);
+    updatePortfolioTableMeta(metrics);
 
     document.getElementById("portfolio-legend").innerHTML = formatPortfolioLegendHtml(curve);
     document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
@@ -889,7 +927,7 @@
     document.getElementById("portfolio-body").innerHTML = "";
     document.getElementById("portfolio-summary").innerHTML = "";
     document.getElementById("favorites-body").innerHTML = "";
-    updatePortfolioTableTer(null);
+    updatePortfolioTableMeta(null);
   }
 
   window.ManagementView = {

@@ -7,6 +7,7 @@ Public API:
 - morningstar_quote_url: build a quote-page URL from a performance ID
 """
 
+import html
 import json
 
 import pandas as pd
@@ -61,7 +62,7 @@ def parse_morningstar_search(payload: dict) -> dict:
 
     return {
         "isin": str(isin).upper(),
-        "name": str(name),
+        "name": html.unescape(str(name)),
         "security_id": str(security_id),
         "performance_id": str(performance_id),
         "universe": str(universe) if universe else None,

@@ -494,7 +494,7 @@
 
     setTacticalMessage("");
     setTacticalContent(true);
-    asOf.textContent = snapshot.date ? `— as of ${snapshot.date}` : "";
+    asOf.textContent = snapshot.date ? `- as of ${snapshot.date}` : "";
     renderAlertHistory(history);
   }
 

@@ -1,7 +1,5 @@
 """Portfolio metrics payload: funds, weights, and stored metrics from the database."""
 
-from datetime import date
-
 from portfolio.storage.database import get_fund_metrics, list_funds, list_user_portfolio
 from portfolio.datasource.morningstar import morningstar_quote_url
 from portfolio.common.metrics import (
@@ -9,6 +7,7 @@ from portfolio.common.metrics import (
     compute_portfolio_metrics,
     compute_portfolio_ter,
 )
+from portfolio.common.navs import latest_nav_as_of
 
 
 def _fund_row(
@@ -57,9 +56,10 @@ def get_portfolio_metrics(user_id: int, db_path=None, funds_dir=None) -> dict:
         if fund["isin"] not in portfolio_isins
     ]
     total_weight = round(sum(fund["weight"] for fund in portfolio), 2)
+    as_of = latest_nav_as_of(portfolio_isins, funds_dir)
 
     return {
-        "as_of": date.today().isoformat(),
+        "as_of": as_of.isoformat() if as_of else None,
         "portfolio": portfolio,
         "favorites": favorites,
         "portfolio_summary": {
