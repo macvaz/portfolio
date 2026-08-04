@@ -34,7 +34,7 @@ portfolio/
 │   │   ├── api.py                  # FastAPI app shell
 │   │   └── services/
 │   │       ├── portfolio/          # Funds, positions, curve, metrics, risk
-│   │       └── alerts/             # Tactical alerts + history
+│   │       └── macro/              # Macro health series + history
 │   ├── common/                     # Shared pure helpers (no api/batch/storage imports)
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
 │   │   ├── series.py               # FRED macro series CSV I/O
@@ -54,7 +54,7 @@ portfolio/
 │       ├── sp500.py                # Long-term SP500 via Morningstar
 │       ├── navs.py                 # Bulk NAV download from DB funds
 │       ├── metrics.py              # Persist computed fund metrics
-│       └── alert_storage.py        # Persist latest tactical alerts
+│       └── alert_storage.py        # Persist latest macro health data
 └── tests/
 ```
 
@@ -153,7 +153,7 @@ Fund ISINs and portfolios are stored in `data/portfolio.db` (SQLite).
 uv run api.py
 ```
 
-Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, and tactical alerts.
+Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, and macro health.
 
 ### API endpoints
 
@@ -172,7 +172,7 @@ Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, a
 | `GET` | `/api/portfolio/metrics?portfolio_id=` | Portfolio metrics tables |
 | `GET` | `/api/portfolio/risk_report?portfolio_id=` | QuantStats risk report (HTML) |
 | `POST` | `/api/portfolio/risk_report?portfolio_id=` | Save positions and generate risk report |
-| `GET` | `/api/signals` | Tactical macro and market signals |
+| `GET` | `/api/macro` | Macro health series and monthly history |
 
 **Save portfolio body:**
 

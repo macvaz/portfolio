@@ -1,4 +1,4 @@
-"""Download FRED + SP500 series and compute tactical market signals."""
+"""Download FRED + SP500 series and compute macro market signals."""
 
 import logging
 from pathlib import Path

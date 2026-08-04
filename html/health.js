@@ -12,16 +12,16 @@
       : MONTH_COMPARE_WINDOW;
   }
 
-  function setTacticalLoading(isLoading) {
-    document.getElementById("tactical-loading").hidden = !isLoading;
+  function setMacroLoading(isLoading) {
+    document.getElementById("macro-loading").hidden = !isLoading;
   }
 
-  function setTacticalContent(isVisible) {
-    document.getElementById("tactical-content").hidden = !isVisible;
+  function setMacroContent(isVisible) {
+    document.getElementById("macro-content").hidden = !isVisible;
   }
 
-  function setTacticalMessage(message) {
-    const messageEl = document.getElementById("tactical-message");
+  function setMacroMessage(message) {
+    const messageEl = document.getElementById("macro-message");
     messageEl.textContent = message;
     messageEl.hidden = !message;
   }
@@ -203,7 +203,7 @@
     }));
   }
 
-  // Within-domain order for the month-compare table (alerts + context mixed).
+  // Within-domain order for the month-compare table (thresholds + context mixed).
   const COMPARE_SERIES_ORDER = [
     "Treasury_10Y_Yield",
     "Breakeven_Inflation",
@@ -371,9 +371,9 @@
         const cell = (row.values || [])[index] || {};
         const label = escapeHtml(column.label || column.code);
         return `
-          <div class="tactical-month-metric">
-            <span class="tactical-month-metric-label">${label}</span>
-            <span class="tactical-month-metric-value">${renderAlertHistoryCell(cell, column.code)}</span>
+          <div class="macro-month-metric">
+            <span class="macro-month-metric-label">${label}</span>
+            <span class="macro-month-metric-value">${renderAlertHistoryCell(cell, column.code)}</span>
           </div>`;
       })
       .join("");
@@ -387,24 +387,24 @@
     const eligibleCount = row.eligible_count ?? 0;
     return `
       <article
-        class="tactical-month-card${isCurrent ? " tactical-month-card--current" : ""}"
+        class="macro-month-card${isCurrent ? " macro-month-card--current" : ""}"
         data-month="${escapeHtml(row.month)}"
         role="button"
         tabindex="0"
         aria-label="Open month compare for ${monthLabel}"
       >
-        <header class="tactical-month-card-header">
-          <h3 class="tactical-month-card-title">${title}</h3>
-          <div class="tactical-month-card-risk">${renderActiveCountLabel(activeCount, eligibleCount)}</div>
+        <header class="macro-month-card-header">
+          <h3 class="macro-month-card-title">${title}</h3>
+          <div class="macro-month-card-risk">${renderActiveCountLabel(activeCount, eligibleCount)}</div>
         </header>
-        <div class="tactical-month-metrics">
+        <div class="macro-month-metrics">
           ${renderMonthMetricRows(row, columns)}
         </div>
       </article>`;
   }
 
   function renderAlertHistoryCards(history) {
-    const container = document.getElementById("tactical-month-cards");
+    const container = document.getElementById("macro-month-cards");
     if (!container) {
       return;
     }
@@ -422,7 +422,7 @@
       .map((row) => renderMonthCard(row, columns))
       .join("");
     const previousSection = previousRows.length
-      ? `<h3 class="tactical-months-label">Previous 12 months</h3>${previousCards}`
+      ? `<h3 class="macro-months-label">Previous 12 months</h3>${previousCards}`
       : "";
 
     container.innerHTML = `
@@ -475,41 +475,41 @@
     renderAlertHistoryCards(latestHistory);
   }
 
-  function renderAlerts(snapshot) {
-    const asOf = document.getElementById("tactical-as-of");
-    const alerts = snapshot.alerts || [];
+  function renderMacro(snapshot) {
+    const asOf = document.getElementById("macro-as-of");
+    const items = snapshot.items || [];
     const history = snapshot.history || { columns: [], context_columns: [], rows: [] };
     const hasData =
       snapshot.date &&
-      (alerts.length > 0 || history.rows.length > 0);
+      (items.length > 0 || history.rows.length > 0);
 
     if (!hasData) {
-      setTacticalContent(false);
-      setTacticalMessage("No macro health data yet. Run the data job to compute it.");
+      setMacroContent(false);
+      setMacroMessage("No macro health data yet. Run the data job to compute it.");
       renderAlertHistory({ columns: [], context_columns: [], rows: [] });
       asOf.textContent = "";
       closeMonthDetail();
       return;
     }
 
-    setTacticalMessage("");
-    setTacticalContent(true);
+    setMacroMessage("");
+    setMacroContent(true);
     asOf.textContent = snapshot.date ? `- as of ${snapshot.date}` : "";
     renderAlertHistory(history);
   }
 
-  async function loadTacticalAlerts() {
-    setTacticalLoading(true);
-    setTacticalMessage("");
+  async function loadMacroHealth() {
+    setMacroLoading(true);
+    setMacroMessage("");
 
     try {
-      const snapshot = await api.fetchJson(api.ALERTS_API);
-      renderAlerts(snapshot);
+      const snapshot = await api.fetchJson(api.MACRO_API);
+      renderMacro(snapshot);
     } catch (error) {
-      setTacticalContent(false);
-      setTacticalMessage(error.message);
+      setMacroContent(false);
+      setMacroMessage(error.message);
     } finally {
-      setTacticalLoading(false);
+      setMacroLoading(false);
     }
   }
 
@@ -517,7 +517,7 @@
     const screen = document.getElementById("month-detail-screen");
     const closeBtn = document.getElementById("month-detail-close");
     const table = document.getElementById("alerts-status-table");
-    const cards = document.getElementById("tactical-month-cards");
+    const cards = document.getElementById("macro-month-cards");
 
     closeBtn?.addEventListener("click", closeMonthDetail);
     screen?.addEventListener("click", (event) => {
@@ -543,7 +543,7 @@
       if (event.target.closest("a")) {
         return;
       }
-      const card = event.target.closest(".tactical-month-card[data-month]");
+      const card = event.target.closest(".macro-month-card[data-month]");
       if (!card) {
         return;
       }
@@ -554,7 +554,7 @@
       if (event.key !== "Enter" && event.key !== " ") {
         return;
       }
-      const card = event.target.closest(".tactical-month-card[data-month]");
+      const card = event.target.closest(".macro-month-card[data-month]");
       if (!card) {
         return;
       }
@@ -577,8 +577,7 @@
 
   bindMonthDetailUi();
 
-  window.TacticalView = {
-    loadTacticalAlerts,
-    loadTacticalSignals: loadTacticalAlerts,
+  window.MacroView = {
+    loadMacroHealth,
   };
 })();

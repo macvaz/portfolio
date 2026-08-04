@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from portfolio.api.services.alerts.router import router as alerts_router
+from portfolio.api.services.macro.router import router as macro_router
 from portfolio.api.services.portfolio.router import router as portfolio_router
 from portfolio.logging_config import configure_logging
 from portfolio.storage.database import init_db
@@ -30,7 +30,7 @@ def index() -> FileResponse:
 
 
 app.include_router(portfolio_router)
-app.include_router(alerts_router)
+app.include_router(macro_router)
 
 
 def main() -> None:

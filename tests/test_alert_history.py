@@ -1,7 +1,7 @@
 import pandas as pd
 
-from portfolio.api.services.alerts.history import (
-    build_monthly_alert_history,
+from portfolio.api.services.macro.history import (
+    build_monthly_macro_history,
 )
 from portfolio.common.indexes import save_index_csv
 from portfolio.common.series import save_series_csv
@@ -19,9 +19,9 @@ def _write_monthly_index(indexes_dir, index_id: str, values: dict[str, float]) -
     save_index_csv(index_id, frame, column_name="value", indexes_dir=indexes_dir)
 
 
-def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatch):
+def test_build_monthly_macro_history_pivots_alerts_by_month(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "portfolio.api.services.alerts.history.HISTORY_START_DATE",
+        "portfolio.api.services.macro.history.HISTORY_START_DATE",
         pd.Timestamp("2024-01-01"),
     )
     series_dir = tmp_path / "series"
@@ -51,7 +51,7 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
         },
     )
 
-    history = build_monthly_alert_history(series_dir, indexes_dir)
+    history = build_monthly_macro_history(series_dir, indexes_dir)
     columns = [column["code"] for column in history["columns"]]
     assert columns == [
         "Unemployment_Rate",
@@ -116,9 +116,9 @@ def test_build_monthly_alert_history_pivots_alerts_by_month(tmp_path, monkeypatc
     assert history["rows"][0]["eligible_count"] == 7
 
 
-def test_build_monthly_alert_history_fills_missing_months_from_1995(tmp_path, monkeypatch):
+def test_build_monthly_macro_history_fills_missing_months_from_1995(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "portfolio.api.services.alerts.history.HISTORY_START_DATE",
+        "portfolio.api.services.macro.history.HISTORY_START_DATE",
         pd.Timestamp("1995-01-01"),
     )
     series_dir = tmp_path / "series"
@@ -129,7 +129,7 @@ def test_build_monthly_alert_history_fills_missing_months_from_1995(tmp_path, mo
         {"1995-02-15": 5.4},
     )
 
-    history = build_monthly_alert_history(series_dir, indexes_dir)
+    history = build_monthly_macro_history(series_dir, indexes_dir)
     months = [row["month"] for row in history["rows"]]
 
     assert months == ["1995-02", "1995-01"]
@@ -156,9 +156,9 @@ def test_build_monthly_alert_history_fills_missing_months_from_1995(tmp_path, mo
     assert feb_1995["eligible_count"] == 4
 
 
-def test_build_monthly_alert_history_honors_series_start(tmp_path, monkeypatch):
+def test_build_monthly_macro_history_honors_series_start(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "portfolio.api.services.alerts.history.HISTORY_START_DATE",
+        "portfolio.api.services.macro.history.HISTORY_START_DATE",
         pd.Timestamp("2023-01-01"),
     )
     series_dir = tmp_path / "series"
@@ -169,7 +169,7 @@ def test_build_monthly_alert_history_honors_series_start(tmp_path, monkeypatch):
         {"2023-06-27": 8.5},
     )
 
-    history = build_monthly_alert_history(series_dir, indexes_dir)
+    history = build_monthly_macro_history(series_dir, indexes_dir)
     hy_idx = [
         index
         for index, column in enumerate(history["columns"])
@@ -184,9 +184,9 @@ def test_build_monthly_alert_history_honors_series_start(tmp_path, monkeypatch):
     assert june_2023["eligible_count"] == 7
 
 
-def test_build_monthly_alert_history_returns_empty_rows_without_series(
+def test_build_monthly_macro_history_returns_empty_rows_without_series(
     tmp_path, monkeypatch
 ):
-    history = build_monthly_alert_history(tmp_path / "series", tmp_path / "indexes")
+    history = build_monthly_macro_history(tmp_path / "series", tmp_path / "indexes")
     assert history["rows"] == []
     assert len(history["columns"]) == 8

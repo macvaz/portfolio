@@ -16,7 +16,7 @@ def test_is_alert_active_uses_threshold_direction():
     assert is_alert_active(4800.0, None, None) is None
 
 
-def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
+def test_get_macro_returns_latest_snapshot(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
@@ -40,7 +40,7 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     )
 
     client = TestClient(app)
-    response = client.get("/api/alerts")
+    response = client.get("/api/macro")
 
     assert response.status_code == 200
     payload = response.json()
@@ -50,13 +50,13 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     assert isinstance(payload["history"]["context_columns"], list)
     assert isinstance(payload["history"]["rows"], list)
     assert len(payload["series"]) == 6
-    assert len(payload["alerts"]) == 7
+    assert len(payload["items"]) == 7
     assert "Treasury_10Y_Yield" not in {item["code"] for item in payload["series"]}
-    assert "SOFR" not in {item["code"] for item in payload["alerts"]}
+    assert "SOFR" not in {item["code"] for item in payload["items"]}
 
     context_codes = {item["code"] for item in payload["context"]}
     assert context_codes == {"Treasury_10Y_Yield", "SOFR"}
-    assert "Treasury_10Y_Yield" not in {item["code"] for item in payload["alerts"]}
+    assert "Treasury_10Y_Yield" not in {item["code"] for item in payload["items"]}
     sofr = next(item for item in payload["context"] if item["code"] == "SOFR")
     assert sofr["label"] == "SOFR"
     assert sofr["identifier"] == "SOFR"
@@ -92,10 +92,10 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     }
     assert "SP500_Death_Cross" not in series_codes
 
-    alerts_by_code = {item["code"]: item for item in payload["alerts"]}
-    assert alerts_by_code["SP500_Death_Cross"]["active"] is True
-    assert alerts_by_code["Yield_Spread_10Y3M"]["active"] is True
-    assert alerts_by_code["Unemployment_Rate"]["active"] is False
+    items_by_code = {item["code"]: item for item in payload["items"]}
+    assert items_by_code["SP500_Death_Cross"]["active"] is True
+    assert items_by_code["Yield_Spread_10Y3M"]["active"] is True
+    assert items_by_code["Unemployment_Rate"]["active"] is False
 
     unemployment = next(
         item for item in payload["series"] if item["code"] == "Unemployment_Rate"
@@ -111,7 +111,7 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     assert breakeven["label"] == "Breakeven inflation"
     assert breakeven["identifier"] == "T10YIE"
 
-    active_codes = {item["code"] for item in payload["alerts"] if item["active"]}
+    active_codes = {item["code"] for item in payload["items"] if item["active"]}
     assert active_codes == {
         "SP500_Death_Cross",
         "Financial_Stress_Index",
@@ -120,21 +120,21 @@ def test_list_alerts_returns_latest_snapshot(tmp_path, monkeypatch):
     }
 
 
-def test_list_alerts_returns_empty_snapshot_when_no_data(tmp_path, monkeypatch):
+def test_get_macro_returns_empty_snapshot_when_no_data(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     init_db(db_path)
 
     client = TestClient(app)
-    response = client.get("/api/alerts")
+    response = client.get("/api/macro")
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["date"] is None
     assert payload["series"] == []
     assert payload["context"] == []
-    assert payload["alerts"] == []
+    assert payload["items"] == []
     assert "columns" in payload["history"]
     assert "context_columns" in payload["history"]
     assert "rows" in payload["history"]

@@ -46,7 +46,7 @@ def download(
         db_path=db_path,
     )
     if observation_date is not None:
-        logger.info("Stored tactical alerts for %s.", observation_date.isoformat())
+        logger.info("Stored macro health data for %s.", observation_date.isoformat())
 
     logger.info("Downloading fund NAVs from Morningstar...")
     store_fund_navs_from_db(

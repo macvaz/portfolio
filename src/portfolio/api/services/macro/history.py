@@ -13,7 +13,7 @@ from portfolio.common.market import load_market_dataframe
 
 HISTORY_START_DATE = pd.Timestamp("1995-01-01")
 
-ALERT_HISTORY_COLUMN_ORDER = (
+MACRO_HISTORY_COLUMN_ORDER = (
     "Unemployment_Rate",
     "High_Yield_Spread",
     "Financial_Stress_Index",
@@ -41,11 +41,11 @@ HISTORY_DISPLAY_ONLY_COLUMNS: dict[str, dict[str, str | None]] = {
 }
 
 
-def _is_thresholded_alert(description: dict) -> bool:
+def _is_thresholded_series(description: dict) -> bool:
     return is_alert_role(description) and description.get("threshold") is not None
 
 
-def _count_monthly_alerts(
+def _count_monthly_actives(
     timestamp: pd.Timestamp,
     columns: list[dict],
     values: list[dict],
@@ -56,7 +56,7 @@ def _count_monthly_alerts(
     for column, cell in zip(columns, values, strict=True):
         code = column["code"]
         description = descriptions_by_code[code]
-        if not _is_thresholded_alert(description):
+        if not _is_thresholded_series(description):
             continue
         if _month_before_series_start(timestamp, description.get("series_start")):
             continue
@@ -78,7 +78,7 @@ def load_market_dataframe_from_series(
     series_dir: Path | None = None,
     indexes_dir: Path | None = None,
 ) -> pd.DataFrame:
-    """Load the market DataFrame used by alert history (shared builder)."""
+    """Load the market DataFrame used by macro history (shared builder)."""
     return load_market_dataframe(series_dir, indexes_dir)
 
 
@@ -121,10 +121,10 @@ def _column_payload(
     }
 
 
-def _alert_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
+def _macro_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
     fixture_by_code = {str(row["code"]): row for row in fixture}
     columns: list[dict[str, str]] = []
-    for code in ALERT_HISTORY_COLUMN_ORDER:
+    for code in MACRO_HISTORY_COLUMN_ORDER:
         row = fixture_by_code.get(code)
         if row is None:
             display_only = HISTORY_DISPLAY_ONLY_COLUMNS.get(code)
@@ -197,12 +197,12 @@ def _month_cell_value(
     return {"value": value, "active": active}
 
 
-def build_monthly_alert_history(
+def build_monthly_macro_history(
     series_dir: Path | None = None,
     indexes_dir: Path | None = None,
 ) -> dict:
     fixture = load_alert_description_fixture()
-    columns = _alert_history_columns(fixture)
+    columns = _macro_history_columns(fixture)
     context_columns = _context_history_columns(fixture)
     market_df = load_market_dataframe(series_dir, indexes_dir)
     if market_df.empty:
@@ -244,7 +244,7 @@ def build_monthly_alert_history(
             for column in context_columns
         ]
 
-        active_count, eligible_count = _count_monthly_alerts(
+        active_count, eligible_count = _count_monthly_actives(
             timestamp,
             columns,
             values,

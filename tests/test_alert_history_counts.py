@@ -1,9 +1,9 @@
 import pandas as pd
 
-from portfolio.api.services.alerts.history import _count_monthly_alerts
+from portfolio.api.services.macro.history import _count_monthly_actives
 
 
-def test_count_monthly_alerts_uses_series_start_for_eligible_total():
+def test_count_monthly_actives_uses_series_start_for_eligible_total():
     timestamp = pd.Timestamp("2003-06-30")
     columns = [
         {"code": "Unemployment_Rate"},
@@ -30,7 +30,7 @@ def test_count_monthly_alerts_uses_series_start_for_eligible_total():
         },
     }
 
-    active_count, eligible_count = _count_monthly_alerts(
+    active_count, eligible_count = _count_monthly_actives(
         timestamp,
         columns,
         values,

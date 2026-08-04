@@ -80,11 +80,11 @@
   }
 
   function updateToolbarForTab(tabName) {
-    const isTactical = tabName === "tactical";
-    setLayoutHidden(document.getElementById("portfolio-picker"), isTactical);
-    setLayoutHidden(document.getElementById("add-fund-form"), isTactical);
+    const isMacro = tabName === "macro";
+    setLayoutHidden(document.getElementById("portfolio-picker"), isMacro);
+    setLayoutHidden(document.getElementById("add-fund-form"), isMacro);
 
-    if (isTactical) {
+    if (isMacro) {
       hidePortfolioCreateInput();
     }
   }
@@ -135,7 +135,7 @@
 
     document.getElementById("management-panel").hidden = tabName !== "management";
     document.getElementById("risk-panel").hidden = tabName !== "risk";
-    document.getElementById("tactical-panel").hidden = tabName !== "tactical";
+    document.getElementById("macro-panel").hidden = tabName !== "macro";
     updateToolbarForTab(tabName);
   }
 
@@ -151,8 +151,8 @@
       return;
     }
 
-    if (activeTab === "tactical") {
-      await window.TacticalView.loadTacticalAlerts();
+    if (activeTab === "macro") {
+      await window.MacroView.loadMacroHealth();
     }
   }
 
@@ -168,9 +168,9 @@
       return;
     }
 
-    if (tabName === "tactical") {
+    if (tabName === "macro") {
       showError("");
-      await window.TacticalView.loadTacticalAlerts();
+      await window.MacroView.loadMacroHealth();
       return;
     }
 

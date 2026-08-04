@@ -14,7 +14,7 @@ class SeriesItem(BaseModel):
     domain: str | None = None
 
 
-class AlertItem(BaseModel):
+class MacroItem(BaseModel):
     code: str
     description: str
     value: float
@@ -24,20 +24,20 @@ class AlertItem(BaseModel):
     source_url: str | None = None
 
 
-class AlertHistoryCell(BaseModel):
+class MacroHistoryCell(BaseModel):
     value: float | None = None
     active: bool | None = None
 
 
-class AlertHistoryRow(BaseModel):
+class MacroHistoryRow(BaseModel):
     month: str
-    values: list[AlertHistoryCell]
-    context_values: list[AlertHistoryCell] = []
+    values: list[MacroHistoryCell]
+    context_values: list[MacroHistoryCell] = []
     active_count: int = 0
     eligible_count: int = 0
 
 
-class AlertHistoryColumn(BaseModel):
+class MacroHistoryColumn(BaseModel):
     code: str
     label: str
     description: str
@@ -49,15 +49,15 @@ class AlertHistoryColumn(BaseModel):
     domain: str | None = None
 
 
-class AlertHistory(BaseModel):
-    columns: list[AlertHistoryColumn] = []
-    context_columns: list[AlertHistoryColumn] = []
-    rows: list[AlertHistoryRow] = []
+class MacroHistory(BaseModel):
+    columns: list[MacroHistoryColumn] = []
+    context_columns: list[MacroHistoryColumn] = []
+    rows: list[MacroHistoryRow] = []
 
 
-class AlertSnapshotResponse(BaseModel):
+class MacroSnapshotResponse(BaseModel):
     date: str | None = None
     series: list[SeriesItem] = []
     context: list[SeriesItem] = []
-    alerts: list[AlertItem] = []
-    history: AlertHistory = AlertHistory()
+    items: list[MacroItem] = []
+    history: MacroHistory = MacroHistory()
