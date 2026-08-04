@@ -54,6 +54,7 @@ def _register_fund(fund: dict) -> dict:
         fund["security_id"],
         fund.get("performance_id"),
         fund.get("universe"),
+        fund.get("ter"),
     )
     try:
         path = download_and_store_fund_nav(
@@ -78,6 +79,20 @@ def _register_fund(fund: dict) -> dict:
             fund.get("performance_id"), fund.get("universe")
         ),
     }
+
+
+def _parse_optional_ter(raw) -> float | None:
+    if raw is None or raw == "":
+        return None
+    try:
+        ter = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=400, detail="TER must be a number"
+        ) from exc
+    if ter < 0:
+        raise HTTPException(status_code=400, detail="TER cannot be negative")
+    return ter
 
 
 @router.get("/portfolios", response_model=list[PortfolioListItem])
@@ -130,10 +145,14 @@ def get_funds() -> list[dict]:
 @router.post("/funds/import", response_model=FundResponse)
 def import_fund_from_morningstar(body: dict) -> dict:
     """Import a fund from a Morningstar legacy-search JSON payload."""
+    payload = dict(body)
+    ter = _parse_optional_ter(payload.pop("ter", None))
     try:
-        fund = parse_morningstar_search(body)
+        fund = parse_morningstar_search(payload)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if ter is not None:
+        fund["ter"] = ter
     return _register_fund(fund)
 
 

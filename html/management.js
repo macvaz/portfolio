@@ -284,13 +284,14 @@
   function renderWeightsSummaryRow(funds) {
     const items = funds
       .map((fund) => {
-        const name = fund.morningstar_url
-          ? `<a href="${fund.morningstar_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${fund.name}</a>`
-          : `<span class="fund-name">${fund.name}</span>`;
+        const label = String(fund.name || fund.isin || "")
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
         return `
-      <div class="weights-summary-item">
-        <span class="weights-summary-name">${name}</span>
-        <span class="weights-summary-weight">${formatWeight(fund.weight)}%</span>
+      <div class="weights-summary-item" data-label="${label}">
+        <span class="metric-value">${formatWeight(fund.weight)}%</span>
       </div>`;
       })
       .join("");

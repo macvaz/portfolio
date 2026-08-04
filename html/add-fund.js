@@ -7,6 +7,7 @@
   const form = document.getElementById("add-fund-import-form");
   const isinInput = document.getElementById("add-fund-isin");
   const jsonInput = document.getElementById("add-fund-json");
+  const terInput = document.getElementById("add-fund-ter");
   const msLink = document.getElementById("add-fund-ms-link");
   const msLinkPlaceholder = document.getElementById("add-fund-ms-link-placeholder");
   const cancelBtn = document.getElementById("add-fund-cancel");
@@ -18,6 +19,14 @@
   function isValidIsin(value) {
     const isin = value.trim().toUpperCase();
     return isin.length === 12 && /^[A-Z0-9]{12}$/.test(isin);
+  }
+
+  function parseTer(value) {
+    const ter = Number.parseFloat(String(value).trim().replace(",", "."));
+    if (!Number.isFinite(ter) || ter < 0) {
+      return null;
+    }
+    return ter;
   }
 
   function morningstarLegacySearchUrl(isin) {
@@ -33,6 +42,7 @@
     cancelBtn.disabled = submitting;
     isinInput.disabled = submitting;
     jsonInput.disabled = submitting;
+    terInput.disabled = submitting;
     submitBtn.textContent = submitting ? "Adding fund…" : "Add fund";
   }
 
@@ -60,6 +70,7 @@
     onComplete = completeCallback;
     isinInput.value = initialIsin.trim().toUpperCase();
     jsonInput.value = "";
+    terInput.value = "";
     setSubmitting(false);
     screen.hidden = false;
     screen.removeAttribute("hidden");
@@ -101,12 +112,19 @@
       return;
     }
 
+    const ter = parseTer(terInput.value);
+    if (ter === null) {
+      window.AppShell?.showError("Enter a valid TER (0 or greater).");
+      terInput.focus();
+      return;
+    }
+
     setSubmitting(true);
     try {
       await api.fetchJson(`${api.PORTFOLIO_API}/funds/import`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, ter }),
       });
       const callback = onComplete;
       close();

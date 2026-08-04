@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=179" />
+    <link rel="stylesheet" href="/static/style.css?v=185" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -356,6 +356,19 @@
             required
           ></textarea>
 
+          <label class="add-fund-label" for="add-fund-ter">TER (%)</label>
+          <input
+            id="add-fund-ter"
+            class="add-fund-ter"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            inputmode="decimal"
+            placeholder="e.g. 0.42"
+            required
+          />
+
           <div class="add-fund-actions">
             <button type="button" class="secondary" id="add-fund-cancel">Cancel</button>
             <button type="submit" id="add-fund-submit">Add fund</button>
@@ -366,10 +379,10 @@
 
     <script src="/static/api.js?v=14"></script>
     <script src="/static/portfolios.js?v=11"></script>
-    <script src="/static/management.js?v=94"></script>
+    <script src="/static/management.js?v=95"></script>
     <script src="/static/risk.js?v=10"></script>
     <script src="/static/health.js?v=58"></script>
-    <script src="/static/add-fund.js?v=4"></script>
-    <script src="/static/app.js?v=45"></script>
+    <script src="/static/add-fund.js?v=5"></script>
+    <script src="/static/app.js?v=46"></script>
   </body>
 </html>

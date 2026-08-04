@@ -143,13 +143,6 @@ button:disabled {
   color: inherit;
   cursor: pointer;
   opacity: 0.55;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.portfolio-picker:not(.is-creating).is-create-revealed .portfolio-create-btn {
-  visibility: visible;
-  pointer-events: auto;
 }
 
 .portfolio-create-btn:hover {
@@ -157,6 +150,7 @@ button:disabled {
   background: transparent;
 }
 
+.portfolio-picker.is-creating .portfolio-create-btn,
 .portfolio-create-btn.is-invisible {
   visibility: hidden;
   pointer-events: none;
@@ -1411,6 +1405,12 @@ body.is-month-detail-open {
   border-color: #1f5eff;
 }
 
+.add-fund-ter {
+  width: 100%;
+  max-width: 12rem;
+  box-sizing: border-box;
+}
+
 .add-fund-actions {
   display: flex;
   justify-content: flex-end;
@@ -1905,6 +1905,8 @@ body.is-month-detail-open {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-width: 0;
+    width: 100%;
   }
 
   .fund-table:not(.alert-table--history) tfoot {
@@ -1962,6 +1964,10 @@ body.is-month-detail-open {
     border: 1px solid rgba(255, 153, 0, 0.28);
     border-radius: 10px;
     box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.08);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .fund-table:not(.alert-table--history) td {
@@ -2139,17 +2145,21 @@ body.is-month-detail-open {
     border: 1px solid rgba(255, 153, 0, 0.28);
     border-radius: 10px;
     box-shadow: 0 0 0 1px rgba(255, 153, 0, 0.08);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .fund-table:not(.alert-table--history) .weights-summary-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+    display: block;
     width: 100%;
+    max-width: 100%;
     min-width: 0;
     padding: 0;
     text-align: left;
     font-variant-numeric: normal;
+    overflow: hidden;
   }
 
   .fund-table:not(.alert-table--history) .weights-summary-card::before {
@@ -2161,33 +2171,41 @@ body.is-month-detail-open {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+    width: 100%;
+    min-width: 0;
   }
 
   .weights-summary-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) 4.75rem;
     align-items: center;
     column-gap: 0.65rem;
-    min-height: 1.55rem;
-  }
-
-  .weights-summary-name {
+    width: 100%;
     min-width: 0;
-    font-weight: 500;
-    font-size: 0.9rem;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .weights-summary-name .fund-link {
-    text-decoration: underline;
-  }
-
-  .weights-summary-weight {
+    min-height: 1.55rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+  }
+
+  .weights-summary-item::before {
+    content: attr(data-label);
+    grid-column: 1;
+    min-width: 0;
+    color: #666;
+    font-weight: 500;
+    font-size: 0.82rem;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .weights-summary-item > .metric-value {
+    grid-column: 2;
+    justify-self: end;
+    width: 100%;
+    text-align: right;
     font-weight: 600;
     white-space: nowrap;
   }

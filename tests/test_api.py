@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from portfolio.api.api import app
 from portfolio.storage.database import (
     create_user,
+    get_fund,
     get_fund_metrics,
     init_db,
     save_fund,
@@ -203,7 +204,8 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
                         "universe": "FO",
                     },
                 }
-            ]
+            ],
+            "ter": 0.42,
         },
     )
     assert response.status_code == 200
@@ -220,6 +222,7 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
     assert nav_path.read_text(encoding="utf-8").startswith("date,nav\n")
     metrics = get_fund_metrics("ES0182527038", db_path)
     assert metrics["pct_1w"] == 1.0
+    assert get_fund("ES0182527038", db_path)["ter"] == 0.42
 
 
 def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
