@@ -4,6 +4,8 @@
   let performanceChart = null;
   let managementData = null;
   let savingWeights = false;
+  let saveWeightsTimer = null;
+  let saveWeightsStartedAt = null;
   let curveStartDate = null;
 
   const METRIC_COLUMNS = [
@@ -26,6 +28,36 @@
     if (!el) return;
     el.textContent = message;
     el.hidden = !message;
+  }
+
+  function setSavingWeightsUi(isSaving) {
+    const loading = document.getElementById("management-loading");
+    const view = document.getElementById("management-view");
+
+    if (saveWeightsTimer !== null) {
+      clearInterval(saveWeightsTimer);
+      saveWeightsTimer = null;
+    }
+
+    if (!isSaving) {
+      saveWeightsStartedAt = null;
+      if (managementData) {
+        loading.hidden = true;
+        view.hidden = false;
+      }
+      return;
+    }
+
+    saveWeightsStartedAt = Date.now();
+    loading.hidden = false;
+    view.hidden = true;
+
+    const tick = () => {
+      const seconds = Math.floor((Date.now() - saveWeightsStartedAt) / 1000);
+      loading.textContent = `Saving portfolio and generating risk report… ${seconds}s`;
+    };
+    tick();
+    saveWeightsTimer = setInterval(tick, 1000);
   }
 
   function formatWeight(value) {
@@ -478,6 +510,7 @@
     const positions = collectWeightPositions();
     savingWeights = true;
     showError("");
+    setSavingWeightsUi(true);
 
     try {
       await api.fetchJson(api.withPortfolioId(`${api.PORTFOLIO_API}/positions`), {
@@ -491,6 +524,7 @@
     } catch (error) {
       showError(error.message);
     } finally {
+      setSavingWeightsUi(false);
       savingWeights = false;
     }
   }
@@ -843,6 +877,7 @@
   function resetManagement() {
     managementData = null;
     savingWeights = false;
+    setSavingWeightsUi(false);
     curveStartDate = null;
     if (performanceChart) {
       performanceChart.destroy();
