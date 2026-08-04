@@ -819,8 +819,16 @@
               color: "rgba(0, 0, 0, 0.06)",
             },
             ticks: {
+              align: "start",
               maxTicksLimit: 12,
               maxRotation: 0,
+              callback(value) {
+                const label = this.getLabelForValue(value);
+                if (typeof label === "string" && /^\d{4}-\d{2}/.test(label)) {
+                  return label.slice(0, 7);
+                }
+                return label;
+              },
             },
           },
           y: {
