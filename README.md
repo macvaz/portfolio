@@ -51,7 +51,7 @@ portfolio/
 │   │   └── morningstar.py
 │   └── batch/                      # Offline / batch pipeline
 │       ├── download.py             # Pipeline orchestration
-│       ├── signals.py              # FRED + SP500 download pipeline
+│       ├── macro.py                # FRED + SP500 download pipeline
 │       ├── sp500.py                # Long-term SP500 via Morningstar
 │       ├── navs.py                 # Bulk NAV download from DB funds
 │       ├── metrics.py              # Persist computed fund metrics
@@ -119,7 +119,7 @@ The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 
 **Pipeline**
 
 1. `batch.py` defines which FRED series to download (`FRED_SERIES`).
-2. `signals.py` downloads the series (or skips FRED when no API key), aligns macros onto the SP500 calendar with forward-fill via `common/market.py`, and stores CSVs.
+2. `macro.py` downloads the series (or skips FRED when no API key), aligns macros onto the SP500 calendar with forward-fill via `common/market.py`, and stores CSVs.
 3. Market signals (SP500 moving averages and death cross) are computed on the shared market DataFrame (also used by alert history).
 
 **Current macro indicators**

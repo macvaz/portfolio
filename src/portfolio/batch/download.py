@@ -5,7 +5,7 @@ from portfolio.api.services.risk.risk_report import warm_all_risk_report_caches
 from portfolio.batch.alert_storage import persist_latest_alerts
 from portfolio.batch.metrics import update_all_fund_metrics
 from portfolio.batch.navs import store_fund_navs_from_db
-from portfolio.batch.signals import compute_signals
+from portfolio.batch.macro import compute_signals
 from portfolio.common.indexes import DEFAULT_INDEXES_DIR
 from portfolio.common.navs import DEFAULT_FUNDS_DIR
 from portfolio.common.series import DEFAULT_SERIES_DIR

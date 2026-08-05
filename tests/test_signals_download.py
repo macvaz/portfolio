@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from portfolio.batch.signals import download_data
+from portfolio.batch.macro import download_data
 from portfolio.datasource.errors import DownloadError
 
 
@@ -18,9 +18,9 @@ def test_download_data_stores_fred_series_and_index(tmp_path):
         )
 
     with patch(
-        "portfolio.batch.signals.download_fred_data", side_effect=fake_download
+        "portfolio.batch.macro.download_fred_data", side_effect=fake_download
     ), patch(
-        "portfolio.batch.signals.download_sp500",
+        "portfolio.batch.macro.download_sp500",
         return_value=pd.DataFrame(
             {"SP500": [4800.0]},
             index=pd.to_datetime(["2024-01-02"]),
@@ -50,8 +50,8 @@ def test_download_data_skips_fred_without_api_key(tmp_path):
     series_dir = tmp_path / "series"
     indexes_dir = tmp_path / "indexes"
 
-    with patch("portfolio.batch.signals.download_fred_data") as mock_fred, patch(
-        "portfolio.batch.signals.download_sp500",
+    with patch("portfolio.batch.macro.download_fred_data") as mock_fred, patch(
+        "portfolio.batch.macro.download_sp500",
         return_value=pd.DataFrame(
             {"SP500": [4800.0]},
             index=pd.to_datetime(["2024-01-02"]),
@@ -74,10 +74,10 @@ def test_download_data_skips_fred_without_api_key(tmp_path):
 
 def test_download_data_raises_when_fred_series_fails(tmp_path):
     with patch(
-        "portfolio.batch.signals.download_fred_data",
+        "portfolio.batch.macro.download_fred_data",
         side_effect=DownloadError("Failed to download FRED series 'UNRATE': boom"),
     ), patch(
-        "portfolio.batch.signals.download_sp500",
+        "portfolio.batch.macro.download_sp500",
         return_value=pd.DataFrame(
             {"SP500": [4800.0]},
             index=pd.to_datetime(["2024-01-02"]),
