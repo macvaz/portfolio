@@ -8,8 +8,13 @@ from sqlmodel import Session, SQLModel, create_engine, delete, select
 
 from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription, Fund, Metric, Portfolio, User
 from portfolio.storage.fixtures.macro_health_checks import (
-    insert_alert_descriptions_from_fixture,
-    sync_alert_catalog_from_fixture,
+    insert_health_check_descriptions_from_fixture,
+    sync_health_check_catalog_from_fixture,
+)
+from portfolio.common.health_check_descriptions import (
+    HEALTH_CHECK_ROLE,
+    health_check_label,
+    is_health_check_active,
 )
 
 CANONICAL_DB_PATH = Path("data/portfolio.db")
@@ -572,7 +577,7 @@ def _migrate_rename_alert_table(db_path: Path | None = None) -> None:
         connection.commit()
 
 
-def _migrate_sahm_rule_indicator_alerts(db_path: Path | None = None) -> None:
+def _migrate_sahm_rule_indicator_health_checks(db_path: Path | None = None) -> None:
     """Copy legacy SAHM_RULE readings into ``Sahm_Rule_Indicator`` when missing."""
     with get_session(db_path) as session:
         legacy_rows = session.exec(
@@ -597,11 +602,36 @@ def _migrate_sahm_rule_indicator_alerts(db_path: Path | None = None) -> None:
         session.commit()
 
 
-def reset_alert_tables_from_fixture(
+def _migrate_health_check_role_values(db_path: Path | None = None) -> None:
+    """Rename legacy role ``alert`` to ``health_check`` on description rows."""
+    path = _resolve_db_path(db_path)
+    if not path.exists():
+        return
+
+    engine = get_engine(path)
+    with engine.connect() as connection:
+        tables = {
+            row[0]
+            for row in connection.execute(
+                text("SELECT name FROM sqlite_master WHERE type='table'")
+            )
+        }
+        if "macro_health_check_description" not in tables:
+            return
+        connection.execute(
+            text(
+                "UPDATE macro_health_check_description "
+                "SET role = 'health_check' WHERE role = 'alert'"
+            )
+        )
+        connection.commit()
+
+
+def reset_health_check_tables_from_fixture(
     db_path: Path | None = None,
     fixture_path: Path | None = None,
 ) -> None:
-    """Clear alert data and reload catalog from the JSON fixture."""
+    """Clear health-check data and reload catalog from the JSON fixture."""
     path = _resolve_db_path(db_path)
     engine = get_engine(path)
     SQLModel.metadata.create_all(engine)
@@ -610,7 +640,7 @@ def reset_alert_tables_from_fixture(
         session.exec(delete(MacroHealthCheck))
         session.exec(delete(MacroHealthCheckDescription))
         session.commit()
-        insert_alert_descriptions_from_fixture(session, fixture_path)
+        insert_health_check_descriptions_from_fixture(session, fixture_path)
         session.commit()
 
 
@@ -636,13 +666,13 @@ def init_db(db_path: Path | None = None) -> None:
         _migrate_alert_description_unified(db_path)
         _migrate_rename_alert_description_table(db_path)
         _migrate_rename_alert_table(db_path)
-        _migrate_sahm_rule_indicator_alerts(db_path)
+        _migrate_sahm_rule_indicator_health_checks(db_path)
+        _migrate_health_check_role_values(db_path)
         _initialized_paths.add(key)
 
     with get_session(db_path) as session:
-        sync_alert_catalog_from_fixture(session)
+        sync_health_check_catalog_from_fixture(session)
         session.commit()
-
 
 def create_user(name: str, db_path: Path | None = None) -> User:
     init_db(db_path)
@@ -822,13 +852,13 @@ def save_fund_metrics(
         session.commit()
 
 
-def upsert_alerts(
-    alerts: dict[str, float],
+def upsert_health_checks(
+    values: dict[str, float],
     observation_date: datetime.date,
     db_path: Path | None = None,
 ) -> None:
     with get_session(db_path) as session:
-        for code, value in alerts.items():
+        for code, value in values.items():
             existing = session.exec(
                 select(MacroHealthCheck).where(
                     MacroHealthCheck.code == code,
@@ -845,9 +875,6 @@ def upsert_alerts(
         session.commit()
 
 
-from portfolio.common.alert_descriptions import alert_label, is_alert_active
-
-
 def _series_item_from_description(
     description: MacroHealthCheckDescription,
     value: float,
@@ -858,10 +885,12 @@ def _series_item_from_description(
         if description.source == "fred" and identifier
         else None
     )
-    active = is_alert_active(value, description.threshold, description.operator)
+    active = is_health_check_active(
+        value, description.threshold, description.operator
+    )
     return {
         "code": description.code,
-        "label": alert_label(description.code),
+        "label": health_check_label(description.code),
         "description": description.description,
         "value": value,
         "threshold": description.threshold,
@@ -877,29 +906,29 @@ def _series_item_from_description(
     }
 
 
-def get_latest_alerts(db_path: Path | None = None) -> dict | None:
+def get_latest_health_checks(db_path: Path | None = None) -> dict | None:
     init_db(db_path)
     with get_session(db_path) as session:
         latest_date = session.exec(select(func.max(MacroHealthCheck.date))).one()
         if latest_date is None:
             return None
 
-        stored_alerts = session.exec(
+        stored = session.exec(
             select(MacroHealthCheck).where(MacroHealthCheck.date == latest_date)
         ).all()
         descriptions = session.exec(select(MacroHealthCheckDescription)).all()
 
-    values_by_code = {alert.code: alert.value for alert in stored_alerts}
+    values_by_code = {row.code: row.value for row in stored}
     series: list[dict] = []
     context: list[dict] = []
-    alerts: list[dict] = []
+    items: list[dict] = []
 
     for description in descriptions:
         value = values_by_code.get(description.code)
         if value is None:
             continue
 
-        role = getattr(description, "role", "alert") or "alert"
+        role = getattr(description, "role", HEALTH_CHECK_ROLE) or HEALTH_CHECK_ROLE
         item = _series_item_from_description(description, value)
 
         if role == "context":
@@ -911,7 +940,7 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
             series.append(item)
 
         if item["active"] is not None:
-            alerts.append(
+            items.append(
                 {
                     "code": item["code"],
                     "description": item["description"],
@@ -925,7 +954,7 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
 
     series.sort(key=lambda item: item.get("label") or item["code"])
     context.sort(key=lambda item: item.get("label") or item["code"])
-    alerts.sort(
+    items.sort(
         key=lambda item: (not item["active"], item.get("identifier") or item["code"])
     )
 
@@ -933,7 +962,7 @@ def get_latest_alerts(db_path: Path | None = None) -> dict | None:
         "date": latest_date.isoformat(),
         "series": series,
         "context": context,
-        "alerts": alerts,
+        "items": items,
     }
 
 

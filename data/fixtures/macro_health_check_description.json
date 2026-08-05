@@ -7,7 +7,7 @@
     "series_start": "1990-01-01",
     "threshold": 5.0,
     "operator": "gte",
-    "role": "alert",
+    "role": "health_check",
     "domain": "labor_market"
   },
   {
@@ -18,7 +18,7 @@
     "series_start": "2023-06-27",
     "threshold": 9.0,
     "operator": "gte",
-    "role": "alert",  
+    "role": "health_check",  
     "domain": "credit_market"
   },
   {
@@ -29,7 +29,7 @@
     "series_start": "1994-01-07",
     "threshold": 1.0,
     "operator": "gte",
-    "role": "alert",
+    "role": "health_check",
     "domain": "credit_market"
   },
   {
@@ -40,7 +40,7 @@
     "series_start": "1990-01-02",
     "threshold": 0.0,
     "operator": "lt",
-    "role": "alert",
+    "role": "health_check",
     "domain": "interest_rates"
   },
   {
@@ -51,7 +51,7 @@
     "series_start": "2003-01-02",
     "threshold": 2.0,
     "operator": "gte",
-    "role": "alert",
+    "role": "health_check",
     "domain": "interest_rates"
   },
   {
@@ -62,7 +62,7 @@
     "series_start": "2003-01-02",
     "threshold": 2.5,
     "operator": "gte",
-    "role": "alert",
+    "role": "health_check",
     "domain": "interest_rates"
   },
   {
@@ -73,7 +73,7 @@
     "series_start": "1970-01-02",
     "threshold": 1.0,
     "operator": "lt",
-    "role": "alert",
+    "role": "health_check",
     "domain": "equity_market"
   },
   {

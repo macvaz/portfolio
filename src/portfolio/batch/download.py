@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 
 from portfolio.api.services.risk.risk_report import warm_all_risk_report_caches
-from portfolio.batch.alert_storage import persist_latest_alerts
+from portfolio.batch.health_check_storage import persist_latest_health_checks
 from portfolio.batch.metrics import update_all_fund_metrics
 from portfolio.batch.navs import store_fund_navs_from_db
-from portfolio.batch.macro import compute_signals
+from portfolio.batch.macro import compute_macro
 from portfolio.common.indexes import DEFAULT_INDEXES_DIR
 from portfolio.common.navs import DEFAULT_FUNDS_DIR
 from portfolio.common.series import DEFAULT_SERIES_DIR
@@ -28,7 +28,7 @@ def download(
 ):
     logger.info("Downloading macro series from FRED...")
     try:
-        market_df = compute_signals(
+        market_df = compute_macro(
             fred_api_key,
             fred_series,
             start_date,
@@ -37,10 +37,10 @@ def download(
             indexes_dir=indexes_dir,
         )
     except DownloadError as exc:
-        logger.error("Market signal download failed: %s", exc)
+        logger.error("Macro download failed: %s", exc)
         raise
 
-    observation_date = persist_latest_alerts(
+    observation_date = persist_latest_health_checks(
         market_df,
         indexes_dir=indexes_dir,
         db_path=db_path,

@@ -37,5 +37,5 @@ def download_sp500(
     start_date: str,
     end_date: str,
 ) -> pd.DataFrame:
-    """Download daily S&P 500 close levels for the signals pipeline."""
+    """Download daily S&P 500 close levels for the macro pipeline."""
     return _download_sp500_closes(start_date, end_date).to_frame()

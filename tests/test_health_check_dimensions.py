@@ -5,14 +5,14 @@ from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db
 from portfolio.storage.models import MacroHealthCheckDescription
-from portfolio.common.alert_descriptions import (
+from portfolio.common.health_check_descriptions import (
     DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE,
-    load_alert_description_fixture,
+    load_health_check_description_fixture,
 )
 
 
-def test_alert_description_fixture_matches_expected_catalog():
-    rows = {row["code"]: row for row in load_alert_description_fixture()}
+def test_health_check_description_fixture_matches_expected_catalog():
+    rows = {row["code"]: row for row in load_health_check_description_fixture()}
 
     assert rows["Yield_Spread_10Y3M"]["threshold"] == 0.0
     assert rows["Yield_Spread_10Y3M"]["operator"] == "lt"
@@ -25,7 +25,7 @@ def test_alert_description_fixture_matches_expected_catalog():
     assert rows["SP500_Death_Cross"]["source"] == "computed"
     assert rows["SP500_Death_Cross"]["operator"] == "lt"
     assert rows["Unemployment_Rate"]["source"] == "fred"
-    assert rows["Unemployment_Rate"]["role"] == "alert"
+    assert rows["Unemployment_Rate"]["role"] == "health_check"
     assert rows["Treasury_10Y_Yield"]["series_id"] == "DGS10"
     assert rows["Treasury_10Y_Yield"]["role"] == "context"
     assert rows["Treasury_10Y_Yield"]["threshold"] == 4.5
@@ -37,8 +37,8 @@ def test_alert_description_fixture_matches_expected_catalog():
     assert rows["SOFR"]["role"] == "context"
 
 
-def test_fred_series_from_fixture_includes_context_and_alerts():
-    from portfolio.common.alert_descriptions import fred_series_from_fixture
+def test_fred_series_from_fixture_includes_context_and_health_checks():
+    from portfolio.common.health_check_descriptions import fred_series_from_fixture
 
     pairs = fred_series_from_fixture()
     by_id = dict(pairs)
@@ -51,11 +51,11 @@ def test_fred_series_from_fixture_includes_context_and_alerts():
     assert "SP500_Death_Cross" not in {code for _, code in pairs}
 
 
-def test_init_db_seeds_alert_descriptions_from_fixture(tmp_path):
+def test_init_db_seeds_health_check_descriptions_from_fixture(tmp_path):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
 
-    fixture_rows = load_alert_description_fixture()
+    fixture_rows = load_health_check_description_fixture()
     with get_session(db_path) as session:
         stored = session.exec(
             select(MacroHealthCheckDescription).order_by(MacroHealthCheckDescription.code)
@@ -74,7 +74,7 @@ def test_init_db_seeds_alert_descriptions_from_fixture(tmp_path):
         assert description.source == expected["source"]
         assert description.operator == expected["operator"]
         assert description.series_id == expected["series_id"]
-        assert description.role == expected.get("role", "alert")
+        assert description.role == expected.get("role", "health_check")
         assert description.domain == expected.get("domain")
         expected_start = expected.get("series_start")
         if expected_start is None:
@@ -85,7 +85,7 @@ def test_init_db_seeds_alert_descriptions_from_fixture(tmp_path):
             )
 
 
-def test_alert_description_fixture_is_valid_json():
+def test_health_check_description_fixture_is_valid_json():
     payload = json.loads(
         DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE.read_text(encoding="utf-8")
     )
@@ -105,5 +105,5 @@ def test_alert_description_fixture_is_valid_json():
         <= set(row)
         for row in payload
     )
-    assert {row["role"] for row in payload} == {"alert", "context"}
+    assert {row["role"] for row in payload} == {"health_check", "context"}
     assert all(isinstance(row["domain"], str) and row["domain"] for row in payload)

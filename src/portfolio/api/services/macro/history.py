@@ -2,12 +2,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from portfolio.common.alert_descriptions import (
-    alert_label,
-    is_alert_active,
-    is_alert_role,
+from portfolio.common.health_check_descriptions import (
+    health_check_label,
+    is_health_check_active,
+    is_health_check_role,
     is_context_role,
-    load_alert_description_fixture,
+    load_health_check_description_fixture,
 )
 from portfolio.common.market import load_market_dataframe
 
@@ -42,7 +42,7 @@ HISTORY_DISPLAY_ONLY_COLUMNS: dict[str, dict[str, str | None]] = {
 
 
 def _is_thresholded_series(description: dict) -> bool:
-    return is_alert_role(description) and description.get("threshold") is not None
+    return is_health_check_role(description) and description.get("threshold") is not None
 
 
 def _count_monthly_actives(
@@ -110,7 +110,7 @@ def _column_payload(
 ) -> dict[str, str | float | None]:
     return {
         "code": code,
-        "label": alert_label(code),
+        "label": health_check_label(code),
         "description": description,
         "series_start": series_start,
         "identifier": series_id,
@@ -139,7 +139,7 @@ def _macro_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
                 )
             )
             continue
-        if is_alert_role(row) and row.get("threshold") is not None:
+        if is_health_check_role(row) and row.get("threshold") is not None:
             columns.append(
                 _column_payload(
                     code=code,
@@ -189,7 +189,7 @@ def _month_cell_value(
     if raw is None or pd.isna(raw):
         return {"value": None, "active": None}
     value = float(raw)
-    active = is_alert_active(
+    active = is_health_check_active(
         value,
         description.get("threshold"),
         description.get("operator"),
@@ -201,7 +201,7 @@ def build_monthly_macro_history(
     series_dir: Path | None = None,
     indexes_dir: Path | None = None,
 ) -> dict:
-    fixture = load_alert_description_fixture()
+    fixture = load_health_check_description_fixture()
     columns = _macro_history_columns(fixture)
     context_columns = _context_history_columns(fixture)
     market_df = load_market_dataframe(series_dir, indexes_dir)

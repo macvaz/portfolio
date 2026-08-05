@@ -3,9 +3,9 @@ import datetime
 import pandas as pd
 from sqlmodel import select
 
-from portfolio.storage.database import get_session, init_db, upsert_alerts
+from portfolio.storage.database import get_session, init_db, upsert_health_checks
 from portfolio.storage.models import MacroHealthCheck
-from portfolio.batch.alert_storage import extract_alert_values, persist_latest_alerts
+from portfolio.batch.health_check_storage import extract_health_check_values, persist_latest_health_checks
 from portfolio.common.indexes import latest_index_date, save_index_csv
 from portfolio.common.macro_constants import SP500_DEATH_CROSS, YIELD_SPREAD_10Y3M
 
@@ -21,17 +21,17 @@ def test_latest_index_date_uses_last_row_in_file(tmp_path):
     assert latest_index_date(indexes_dir) == datetime.date(2024, 6, 4)
 
 
-def test_upsert_alerts_updates_existing_value(tmp_path):
+def test_upsert_health_checks_updates_existing_value(tmp_path):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
     observation_date = datetime.date(2024, 6, 4)
 
-    upsert_alerts(
+    upsert_health_checks(
         {"Breakeven_Inflation": 2.3},
         observation_date,
         db_path,
     )
-    upsert_alerts(
+    upsert_health_checks(
         {"Breakeven_Inflation": 2.5},
         observation_date,
         db_path,
@@ -48,7 +48,7 @@ def test_upsert_alerts_updates_existing_value(tmp_path):
     assert stored.value == 2.5
 
 
-def test_persist_latest_alerts_uses_index_file_date(tmp_path):
+def test_persist_latest_health_checks_uses_index_file_date(tmp_path):
     db_path = tmp_path / "portfolio.db"
     indexes_dir = tmp_path / "indexes"
     init_db(db_path)
@@ -74,7 +74,7 @@ def test_persist_latest_alerts_uses_index_file_date(tmp_path):
         index=pd.to_datetime(["2024-06-04"]),
     )
 
-    observation_date = persist_latest_alerts(
+    observation_date = persist_latest_health_checks(
         market_df,
         indexes_dir=indexes_dir,
         db_path=db_path,
@@ -84,8 +84,8 @@ def test_persist_latest_alerts_uses_index_file_date(tmp_path):
 
     with get_session(db_path) as session:
         stored = {
-            alert.code: alert.value
-            for alert in session.exec(select(MacroHealthCheck)).all()
+            row.code: row.value
+            for row in session.exec(select(MacroHealthCheck)).all()
         }
 
     assert stored["Breakeven_Inflation"] == 2.3
@@ -93,8 +93,8 @@ def test_persist_latest_alerts_uses_index_file_date(tmp_path):
     assert stored[SP500_DEATH_CROSS] == 1.02
 
 
-def test_extract_alert_values_skips_missing_columns():
+def test_extract_health_check_values_skips_missing_columns():
     row = pd.Series({"Breakeven_Inflation": 2.25})
-    values = extract_alert_values(row, ["Breakeven_Inflation", SP500_DEATH_CROSS])
+    values = extract_health_check_values(row, ["Breakeven_Inflation", SP500_DEATH_CROSS])
 
     assert values == {"Breakeven_Inflation": 2.25}

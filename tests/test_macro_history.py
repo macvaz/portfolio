@@ -19,7 +19,7 @@ def _write_monthly_index(indexes_dir, index_id: str, values: dict[str, float]) -
     save_index_csv(index_id, frame, column_name="value", indexes_dir=indexes_dir)
 
 
-def test_build_monthly_macro_history_pivots_alerts_by_month(tmp_path, monkeypatch):
+def test_build_monthly_macro_history_pivots_health_checks_by_month(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "portfolio.api.services.macro.history.HISTORY_START_DATE",
         pd.Timestamp("2024-01-01"),

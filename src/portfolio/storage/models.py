@@ -53,7 +53,7 @@ class MacroHealthCheckDescription(SQLModel, table=True):
     series_start: datetime.date | None = None
     threshold: float | None = None
     operator: str | None = None
-    role: str = Field(default="alert", index=True)
+    role: str = Field(default="health_check", index=True)
     domain: str | None = Field(default=None, index=True)
 
 

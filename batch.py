@@ -11,7 +11,7 @@ Path(os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")).mkdir(
 from dotenv import load_dotenv
 
 from portfolio.batch.download import download
-from portfolio.common.alert_descriptions import fred_series_from_fixture
+from portfolio.common.health_check_descriptions import fred_series_from_fixture
 from portfolio.logging_config import configure_logging
 
 load_dotenv()
@@ -21,7 +21,7 @@ FRED_SERIES = fred_series_from_fixture()
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Download portfolio data and signals.")
+    parser = argparse.ArgumentParser(description="Download portfolio data and macro health.")
     parser.add_argument(
         "--start-date",
         type=str,

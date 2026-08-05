@@ -3,12 +3,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from portfolio.storage.database import init_db, upsert_alerts
-from portfolio.common.alert_descriptions import load_alert_description_fixture
+from portfolio.storage.database import init_db, upsert_health_checks
+from portfolio.common.health_check_descriptions import (
+    load_health_check_description_fixture,
+)
 from portfolio.common.indexes import latest_index_date
 
 
-def extract_alert_values(row: pd.Series, codes: list[str]) -> dict[str, float]:
+def extract_health_check_values(row: pd.Series, codes: list[str]) -> dict[str, float]:
     values: dict[str, float] = {}
     for code in codes:
         if code not in row.index:
@@ -20,7 +22,7 @@ def extract_alert_values(row: pd.Series, codes: list[str]) -> dict[str, float]:
     return values
 
 
-def persist_latest_alerts(
+def persist_latest_health_checks(
     market_df: pd.DataFrame,
     *,
     indexes_dir: Path | None = None,
@@ -36,11 +38,13 @@ def persist_latest_alerts(
         observation_date = timestamp.date()
 
     row = market_df.loc[timestamp]
-    codes = [str(entry["code"]) for entry in load_alert_description_fixture()]
-    values = extract_alert_values(row, codes)
+    codes = [
+        str(entry["code"]) for entry in load_health_check_description_fixture()
+    ]
+    values = extract_health_check_values(row, codes)
     if not values:
         return None
 
     init_db(db_path)
-    upsert_alerts(values, observation_date, db_path)
+    upsert_health_checks(values, observation_date, db_path)
     return observation_date

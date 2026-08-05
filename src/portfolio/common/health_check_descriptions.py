@@ -1,4 +1,4 @@
-"""Alert catalog fixture loading and threshold evaluation (no DB)."""
+"""Macro health-check catalog fixture loading and threshold evaluation (no DB)."""
 
 import json
 from pathlib import Path
@@ -7,7 +7,7 @@ DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE = Path(
     "data/fixtures/macro_health_check_description.json"
 )
 
-ALERT_LABELS = {
+HEALTH_CHECK_LABELS = {
     "High_Yield_Spread": "High yield spread",
     "Financial_Stress_Index": "Financial stress",
     "Yield_Spread_10Y3M": "Curve inversion",
@@ -23,21 +23,24 @@ ALERT_LABELS = {
     "SOFR": "SOFR",
 }
 
-
-def alert_label(code: str) -> str:
-    return ALERT_LABELS.get(code, code.replace("_", " "))
-
-
-def alert_role(row: dict) -> str:
-    return str(row.get("role") or "alert")
+HEALTH_CHECK_ROLE = "health_check"
+CONTEXT_ROLE = "context"
 
 
-def is_alert_role(row: dict) -> bool:
-    return alert_role(row) == "alert"
+def health_check_label(code: str) -> str:
+    return HEALTH_CHECK_LABELS.get(code, code.replace("_", " "))
+
+
+def health_check_role(row: dict) -> str:
+    return str(row.get("role") or HEALTH_CHECK_ROLE)
+
+
+def is_health_check_role(row: dict) -> bool:
+    return health_check_role(row) == HEALTH_CHECK_ROLE
 
 
 def is_context_role(row: dict) -> bool:
-    return alert_role(row) == "context"
+    return health_check_role(row) == CONTEXT_ROLE
 
 
 def fred_series_from_fixture(
@@ -45,14 +48,14 @@ def fred_series_from_fixture(
 ) -> list[tuple[str, str]]:
     """Return ``(series_id, catalog_code)`` pairs for every FRED fixture row."""
     pairs: list[tuple[str, str]] = []
-    for entry in load_alert_description_fixture(fixture_path):
+    for entry in load_health_check_description_fixture(fixture_path):
         if entry.get("source") != "fred" or not entry.get("series_id"):
             continue
         pairs.append((str(entry["series_id"]), str(entry["code"])))
     return pairs
 
 
-def load_alert_description_fixture(
+def load_health_check_description_fixture(
     fixture_path: Path | None = None,
 ) -> list[dict[str, str | float]]:
     path = fixture_path or DEFAULT_MACRO_HEALTH_CHECK_DESCRIPTION_FIXTURE
@@ -65,7 +68,7 @@ def load_alert_description_fixture(
     return rows
 
 
-def is_alert_active(
+def is_health_check_active(
     value: float | None,
     threshold: float | None,
     operator: str | None,

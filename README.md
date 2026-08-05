@@ -1,6 +1,6 @@
 # Portfolio
 
-Python library to download and process mutual fund prices from Morningstar and macroeconomic series from FRED. It allows creating different investment portfolios while computing returns and risk reports. Additionally, it triggers low-frequency market and financial alarms to detect real worsening of economic and financial conditions.
+Python library to download and process mutual fund prices from Morningstar and macroeconomic series from FRED. It allows creating different investment portfolios while computing returns and risk reports. Additionally, it evaluates low-frequency macro health checks to detect real worsening of economic and financial conditions.
 
 ## Project structure
 
@@ -22,7 +22,7 @@ portfolio/
 │   ├── funds/                      # NAV CSV files ({ISIN}.csv)
 │   ├── series/                     # FRED macro series CSVs
 │   ├── indexes/                    # Market index CSVs (e.g. SP500)
-│   └── fixtures/                   # Alert catalog JSON fixture
+│   └── fixtures/                   # Macro health-check catalog JSON fixture
 ├── html/                           # Web UI (served by FastAPI)
 ├── src/portfolio/
 │   ├── storage/                    # Shared persistence (models + DB)
@@ -40,12 +40,11 @@ portfolio/
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
 │   │   ├── series.py               # FRED macro series CSV I/O
 │   │   ├── indexes.py              # Market index CSV I/O
-│   │   ├── market.py               # Shared SP500-aligned market frame
+│   │   ├── market.py               # Shared SP500-aligned market frame + indicators
 │   │   ├── equity.py               # Buy-and-hold / benchmark returns
 │   │   ├── metrics.py              # Metric computation only
-│   │   ├── signals.py              # Death-cross calculation
-│   │   ├── macro_constants.py      # Alert / series column names
-│   │   └── alert_descriptions.py   # Fixture load + threshold helpers
+│   │   ├── macro_constants.py      # Macro / series column names
+│   │   └── health_check_descriptions.py  # Fixture load + threshold helpers
 │   ├── datasource/                # External vendors (no DB)
 │   │   ├── fred.py
 │   │   └── morningstar.py
@@ -55,7 +54,7 @@ portfolio/
 │       ├── sp500.py                # Long-term SP500 via Morningstar
 │       ├── navs.py                 # Bulk NAV download from DB funds
 │       ├── metrics.py              # Persist computed fund metrics
-│       └── alert_storage.py        # Persist latest macro health data
+│       └── health_check_storage.py # Persist latest macro health data
 └── tests/
 ```
 
@@ -74,8 +73,8 @@ Rules:
 
 - **`datasource/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`batch`/`storage` imports.
 - **`common/`** — pure helpers and CSV I/O. May use `datasource`. Must **not** import `api`, `batch`, or `storage`.
-- **`storage/`** — SQLModel models, SQLite access, migrations, and alert-catalog seeding. Shared by `api` and `batch`. Must **not** import `api` or `batch`.
-- **`batch/`** — offline pipeline (download signals, NAVs, refresh metrics, store alerts). May use `common`, `datasource`, and `storage`. Must **not** import `api`.
+- **`storage/`** — SQLModel models, SQLite access, migrations, and health-check catalog seeding. Shared by `api` and `batch`. Must **not** import `api` or `batch`.
+- **`batch/`** — offline pipeline (download macro series, NAVs, refresh metrics, store health checks). May use `common`, `datasource`, and `storage`. Must **not** import `api`.
 - **`api/`** — FastAPI app and HTTP services. May use `common`, `datasource`, and `storage`. Must **not** import `batch`.
 
 The CLI entrypoint is `batch.py` / `bin/batch.sh`; they call into `portfolio.batch`.
@@ -92,7 +91,7 @@ This installs runtime dependencies plus dev tools (ruff, ty, pytest, httpx).
 
 ## Batch pipeline
 
-`batch.py` downloads macro signals from FRED, fund NAVs from Morningstar, and recomputes stored fund metrics for all funds in the database.
+`batch.py` downloads macro series from FRED, fund NAVs from Morningstar, and recomputes stored fund metrics for all funds in the database.
 
 **Environment**
 
@@ -112,7 +111,7 @@ uv run batch.py
 
 Fund NAV files are written to `data/funds/{ISIN}.csv`. Add funds first via the web UI or Morningstar JSON import before running the batch pipeline.
 
-## Macro signals
+## Macro health
 
 The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 500 trading days, and runs a metadata-driven pipeline of indicator functions.
 
@@ -120,11 +119,11 @@ The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 
 
 1. `batch.py` defines which FRED series to download (`FRED_SERIES`).
 2. `macro.py` downloads the series (or skips FRED when no API key), aligns macros onto the SP500 calendar with forward-fill via `common/market.py`, and stores CSVs.
-3. Market signals (SP500 moving averages and death cross) are computed on the shared market DataFrame (also used by alert history).
+3. Macro indicators (SP500 moving averages and death cross) are computed on the shared market DataFrame (also used by macro health history).
 
 **Current macro indicators**
 
-| Indicator | Input series | Alert / output |
+| Indicator | Input series | Health check / output |
 |-----------|--------------|----------------|
 | Inverted curve | 10Y–3M yield spread (`T10Y3M`) | Active when spread < 0 |
 | Breakeven inflation | 10-year breakeven inflation (`T10YIE`) | Active when rate ≥ 2.5% |
@@ -132,17 +131,17 @@ The batch pipeline downloads macroeconomic series from FRED, aligns them to S&P 
 
 **Files**
 
-- `macro_constants.py` — column names for macro and market signals.
+- `macro_constants.py` — column names for macro series and indicators.
 - `batch.py` — wires FRED series IDs to column names.
 - `data/fixtures/macro_health_check_description.json` — macro health check thresholds and metadata.
 
-**Adding a new FRED series / alert**
+**Adding a new FRED series / health check**
 
 1. Add the column name to `macro_constants.py`.
 2. Add the FRED series to `FRED_SERIES` in `batch.py`.
 3. Add the check definition to `data/fixtures/macro_health_check_description.json`.
 
-When the batch pipeline runs, the latest macro and market signals are printed to the console.
+When the batch pipeline runs, the latest macro health values are printed to the console.
 
 ## API and web UI
 

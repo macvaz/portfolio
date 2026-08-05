@@ -1,4 +1,4 @@
-"""Download FRED + SP500 series and compute macro market signals."""
+"""Download FRED + SP500 series and compute macro health indicators."""
 
 import logging
 from pathlib import Path
@@ -6,9 +6,10 @@ from pathlib import Path
 import pandas as pd
 
 from portfolio.batch.sp500 import download_sp500
-from portfolio.common.alert_descriptions import (
-    is_alert_active,
-    load_alert_description_fixture,
+from portfolio.common.health_check_descriptions import (
+    HEALTH_CHECK_ROLE,
+    is_health_check_active,
+    load_health_check_description_fixture,
 )
 from portfolio.common.indexes import DEFAULT_INDEXES_DIR, save_index_csv
 from portfolio.common.market import align_market_dataframe
@@ -19,7 +20,7 @@ from portfolio.datasource.fred import download_fred_data, init_client
 logger = logging.getLogger(__name__)
 
 
-def compute_signals(
+def compute_macro(
     fred_api_key: str | None,
     fred_series: list[tuple[str, str]],
     start_date: str,
@@ -35,7 +36,7 @@ def compute_signals(
         series_dir=series_dir,
         indexes_dir=indexes_dir,
     )
-    log_current_signals(market_df)
+    log_current_macro_health(market_df)
     return market_df
 
 
@@ -96,21 +97,21 @@ def download_data(
     return align_market_dataframe(sp500, macro_series_data)
 
 
-def log_current_signals(df: pd.DataFrame):
+def log_current_macro_health(df: pd.DataFrame):
     if df.empty:
         return
 
     row = df.iloc[-1]
     logger.info("Macro health")
-    for entry in load_alert_description_fixture():
+    for entry in load_health_check_description_fixture():
         code = str(entry["code"])
         if code not in row.index or pd.isna(row[code]):
             continue
         value = float(row[code])
         threshold = entry.get("threshold")
         operator = entry.get("operator")
-        active = is_alert_active(value, threshold, operator)
-        role = entry.get("role") or "alert"
+        active = is_health_check_active(value, threshold, operator)
+        role = entry.get("role") or HEALTH_CHECK_ROLE
         if active is None:
             logger.info("%s: %.2f (%s)", code, value, role)
         else:

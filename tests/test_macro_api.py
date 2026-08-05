@@ -3,17 +3,17 @@ import datetime
 from fastapi.testclient import TestClient
 
 from portfolio.api.api import app
-from portfolio.storage.database import init_db, upsert_alerts
-from portfolio.common.alert_descriptions import is_alert_active
+from portfolio.storage.database import init_db, upsert_health_checks
+from portfolio.common.health_check_descriptions import is_health_check_active
 
 
-def test_is_alert_active_uses_threshold_direction():
-    assert is_alert_active(1.2, 1.0, "gte") is True
-    assert is_alert_active(0.8, 1.0, "gte") is False
-    assert is_alert_active(-0.05, 0.0, "lt") is True
-    assert is_alert_active(0.12, 0.0, "lt") is False
-    assert is_alert_active(0.98, 1.0, "lt") is True
-    assert is_alert_active(4800.0, None, None) is None
+def test_is_health_check_active_uses_threshold_direction():
+    assert is_health_check_active(1.2, 1.0, "gte") is True
+    assert is_health_check_active(0.8, 1.0, "gte") is False
+    assert is_health_check_active(-0.05, 0.0, "lt") is True
+    assert is_health_check_active(0.12, 0.0, "lt") is False
+    assert is_health_check_active(0.98, 1.0, "lt") is True
+    assert is_health_check_active(4800.0, None, None) is None
 
 
 def test_get_macro_returns_latest_snapshot(tmp_path, monkeypatch):
@@ -23,7 +23,7 @@ def test_get_macro_returns_latest_snapshot(tmp_path, monkeypatch):
     init_db(db_path)
 
     observation_date = datetime.date(2024, 6, 4)
-    upsert_alerts(
+    upsert_health_checks(
         {
             "Unemployment_Rate": 3.8,
             "High_Yield_Spread": 3.25,

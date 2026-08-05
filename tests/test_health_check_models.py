@@ -7,7 +7,7 @@ from portfolio.storage.database import get_session, init_db
 from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
 
 
-def test_alert_tables_are_created(tmp_path):
+def test_health_check_tables_are_created(tmp_path):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
 
@@ -26,7 +26,7 @@ def test_alert_tables_are_created(tmp_path):
     assert "alert_description" not in tables
 
 
-def test_alert_description_and_alert_persist(tmp_path):
+def test_health_check_description_and_check_persist(tmp_path):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
 
@@ -42,10 +42,10 @@ def test_alert_description_and_alert_persist(tmp_path):
 
     with get_session(db_path) as session:
         description = session.get(MacroHealthCheckDescription, "Breakeven_Inflation")
-        alert = session.exec(select(MacroHealthCheck)).first()
+        check = session.exec(select(MacroHealthCheck)).first()
 
     assert description.operator == "gte"
     assert description.threshold == 2.5
-    assert alert.code == "Breakeven_Inflation"
-    assert alert.date == date(2026, 6, 1)
-    assert alert.value == 2.3
+    assert check.code == "Breakeven_Inflation"
+    assert check.date == date(2026, 6, 1)
+    assert check.value == 2.3
