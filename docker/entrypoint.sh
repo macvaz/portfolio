@@ -5,6 +5,9 @@ set -e
 # Local `python -m portfolio.api.api` defaults to 127.0.0.1 via PORTFOLIO_HOST.
 HOST="${PORTFOLIO_HOST:-0.0.0.0}"
 PORT="${PORTFOLIO_PORT:-8000}"
+MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/matplotlib}"
+export MPLCONFIGDIR
+mkdir -p "$MPLCONFIGDIR"
 
 case "$1" in
   api)

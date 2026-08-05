@@ -24,7 +24,8 @@ COPY --from=builder /app/.venv /app/.venv
 COPY docker/entrypoint.sh /app/docker/entrypoint.sh
 
 ENV PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app/src"
+    PYTHONPATH="/app/src" \
+    MPLCONFIGDIR="/tmp/matplotlib"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libgomp1 \

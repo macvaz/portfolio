@@ -1,6 +1,12 @@
 import argparse
 import os
 from datetime import date
+from pathlib import Path
+
+# Non-root containers often have no writable HOME; avoid Matplotlib writing to /.config.
+Path(os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")).mkdir(
+    parents=True, exist_ok=True
+)
 
 from dotenv import load_dotenv
 

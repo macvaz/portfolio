@@ -2,6 +2,11 @@ from contextlib import asynccontextmanager
 import os
 from pathlib import Path
 
+# Non-root containers often have no writable HOME; avoid Matplotlib writing to /.config.
+Path(os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")).mkdir(
+    parents=True, exist_ok=True
+)
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
