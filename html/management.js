@@ -10,21 +10,21 @@
 
   const METRIC_COLUMNS = [
     { key: "weight", format: "percent", weightColumn: true, label: "Weight (%)" },
-    { key: "beta_6m", format: "decimal2", label: "β (6m)", columnClass: "col-metric-beta" },
-    { key: "cor_6m", format: "decimal2", label: "Cor (6m)", columnClass: "col-metric-cor" },
+    { key: "pct_1w", format: "signedPercent", divider: true, label: "% 1w" },
+    { key: "pct_1m", format: "signedPercent", label: "% 1m" },
+    { key: "pct_6m", format: "signedPercent", label: "% 6m" },
+    { key: "pct_ytd", format: "signedPercent", label: "% YTD" },
+    { key: "sr_6m", format: "decimal2", colorize: true, label: "SR 6m", columnClass: "col-metric-sr" },
+    { key: "sr_1y", format: "decimal2", colorize: true, beforeDivider: true, label: "SR 1y", columnClass: "col-metric-sr" },
     {
       key: "vol_1y",
       format: "decimal2",
-      beforeDivider: true,
+      divider: true,
       label: "Vol (1y)",
       columnClass: "col-metric-vol",
     },
-    { key: "pct_1m", format: "signedPercent", divider: true, label: "% 1m" },
-    { key: "pct_3m", format: "signedPercent", label: "% 3m" },
-    { key: "pct_6m", format: "signedPercent", label: "% 6m" },
-    { key: "pct_ytd", format: "signedPercent", beforeDivider: true, label: "% YTD" },
-    { key: "sr_6m", format: "decimal2", colorize: true, divider: true, label: "SR 6m" },
-    { key: "sr_1y", format: "decimal2", colorize: true, label: "SR 1y" },
+    { key: "beta_6m", format: "decimal2", label: "β (6m)", columnClass: "col-metric-beta" },
+    { key: "cor_6m", format: "decimal2", label: "Cor (6m)", columnClass: "col-metric-cor" },
   ];
 
   const MOBILE_CARDS_MQ = window.matchMedia("(max-width: 720px)");

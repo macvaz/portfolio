@@ -634,15 +634,13 @@ button:disabled {
   min-width: 1100px;
 }
 
-/* Mid-width desktops: drop β / Cor / Vol so the table fits without horizontal scroll. */
+/* Mid-width desktops: drop Sharpe so the table fits; keep Vol + β / Cor. */
 @media (min-width: 721px) and (max-width: 1200px) {
   .fund-table:not(.alert-table) {
     min-width: 0;
   }
 
-  .fund-table:not(.alert-table) .col-metric-beta,
-  .fund-table:not(.alert-table) .col-metric-cor,
-  .fund-table:not(.alert-table) .col-metric-vol {
+  .fund-table:not(.alert-table) .col-metric-sr {
     display: none;
   }
 }
@@ -2123,17 +2121,17 @@ body.is-month-detail-open {
     display: none;
   }
 
-  /* Portfolio metrics card: performance first, Vol under YTD, hide Sharpe */
+  /* Portfolio metrics card: performance first, then Vol / β / Cor, hide Sharpe */
   #portfolio-table tfoot .summary-row td[data-label="SR 6m"],
   #portfolio-table tfoot .summary-row td[data-label="SR 1y"] {
     display: none !important;
   }
 
-  #portfolio-table tfoot .summary-row td[data-label="% 1m"] {
+  #portfolio-table tfoot .summary-row td[data-label="% 1w"] {
     order: 1;
   }
 
-  #portfolio-table tfoot .summary-row td[data-label="% 3m"] {
+  #portfolio-table tfoot .summary-row td[data-label="% 1m"] {
     order: 2;
   }
 
