@@ -10,7 +10,7 @@ from portfolio.common.indexes import DEFAULT_INDEXES_DIR
 from portfolio.common.navs import DEFAULT_FUNDS_DIR
 from portfolio.common.series import DEFAULT_SERIES_DIR
 from portfolio.datasource.errors import DownloadError
-from portfolio.storage.database import DEFAULT_DB_PATH
+from portfolio.storage.database import DEFAULT_DB_PATH, init_db
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ def download(
     series_dir: Path = DEFAULT_SERIES_DIR,
     indexes_dir: Path = DEFAULT_INDEXES_DIR,
 ):
+    init_db(db_path)
     logger.info("Downloading macro series from FRED...")
     try:
         market_df = compute_macro(

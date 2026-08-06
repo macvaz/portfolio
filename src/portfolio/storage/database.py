@@ -3,7 +3,7 @@ import datetime
 import html
 from pathlib import Path
 
-from sqlalchemy import event, func, text
+from sqlalchemy import event, func
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
 from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription, Fund, Metric, Portfolio, User
@@ -11,11 +11,16 @@ from portfolio.storage.fixtures.macro_health_checks import (
     insert_health_check_descriptions_from_fixture,
     sync_health_check_catalog_from_fixture,
 )
+from portfolio.storage.fixtures.funds import sync_funds_from_fixture
 from portfolio.common.health_check_descriptions import (
     HEALTH_CHECK_ROLE,
     health_check_label,
     is_health_check_active,
 )
+
+# Current SQLite schema version. Older in-place migrations were removed;
+# create tables from SQLModel metadata and sync fixture catalogs.
+SCHEMA_VERSION = "1.0"
 
 CANONICAL_DB_PATH = Path("data/portfolio.db")
 DEFAULT_DB_PATH = CANONICAL_DB_PATH
@@ -58,575 +63,6 @@ def get_db(db_path: Path | None = None) -> Generator[Session, None, None]:
         yield session
 
 
-def _migrate_legacy_funds_table(db_path: Path | None = None) -> None:
-    """Move rows from the legacy ``funds`` table into ``fund``."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "funds" not in tables:
-            return
-
-        rows = connection.execute(
-            text("SELECT isin, name, fund_id FROM funds")
-        ).fetchall()
-        if rows:
-            for isin, name, fund_id in rows:
-                connection.execute(
-                    text(
-                        "INSERT OR IGNORE INTO fund (isin, name, fund_id) "
-                        "VALUES (:isin, :name, :fund_id)"
-                    ),
-                    {"isin": isin, "name": name, "fund_id": fund_id},
-                )
-        connection.execute(text("DROP TABLE funds"))
-        connection.commit()
-
-
-def _migrate_fund_performance_id(db_path: Path | None = None) -> None:
-    """Add ``performance_id`` to ``fund`` when upgrading an existing database."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(fund)"))
-        }
-        if "performance_id" not in columns:
-            connection.execute(text("ALTER TABLE fund ADD COLUMN performance_id TEXT"))
-            connection.commit()
-
-
-def _migrate_fund_universe(db_path: Path | None = None) -> None:
-    """Add ``universe`` to ``fund`` when upgrading an existing database."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(fund)"))
-        }
-        if "universe" not in columns:
-            connection.execute(text("ALTER TABLE fund ADD COLUMN universe TEXT"))
-            connection.commit()
-
-
-def _migrate_fund_ter(db_path: Path | None = None) -> None:
-    """Add ``ter`` to ``fund`` when upgrading an existing database."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(fund)"))
-        }
-        if "ter" not in columns:
-            connection.execute(text("ALTER TABLE fund ADD COLUMN ter REAL"))
-            connection.commit()
-
-
-def _migrate_drop_user_password(db_path: Path | None = None) -> None:
-    """Remove ``hashed_password`` from ``user`` when upgrading an existing database."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "user" not in tables:
-            return
-
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(user)"))
-        }
-        if "hashed_password" not in columns:
-            return
-
-        connection.execute(
-            text(
-                "CREATE TABLE user_new ("
-                "id INTEGER NOT NULL PRIMARY KEY, "
-                "email VARCHAR NOT NULL"
-                ")"
-            )
-        )
-        connection.execute(
-            text("INSERT INTO user_new (id, email) SELECT id, email FROM user")
-        )
-        connection.execute(text("DROP TABLE user"))
-        connection.execute(text("ALTER TABLE user_new RENAME TO user"))
-        connection.execute(
-            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_user_email ON user (email)")
-        )
-        connection.commit()
-
-
-def _migrate_user_email_to_name(db_path: Path | None = None) -> None:
-    """Rename ``email`` to ``name`` on ``user`` when upgrading an existing database."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "user" not in tables:
-            return
-
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(user)"))
-        }
-        if "name" in columns or "email" not in columns:
-            return
-
-        connection.execute(text("ALTER TABLE user RENAME COLUMN email TO name"))
-        connection.execute(text("DROP INDEX IF EXISTS ix_user_email"))
-        connection.execute(
-            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_user_name ON user (name)")
-        )
-        connection.commit()
-
-
-def _migrate_user_is_default(db_path: Path | None = None) -> None:
-    """Add ``is_default`` to ``user`` and set Miguel_Agresiva as the default portfolio."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "user" not in tables:
-            return
-
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(user)"))
-        }
-        if "is_default" not in columns:
-            connection.execute(
-                text(
-                    "ALTER TABLE user ADD COLUMN is_default BOOLEAN NOT NULL DEFAULT 0"
-                )
-            )
-            connection.execute(
-                text("UPDATE user SET is_default = 1 WHERE name = 'Miguel_Agresiva'")
-            )
-            connection.commit()
-
-
-def _migrate_signal_dimension_metadata(db_path: Path | None = None) -> None:
-    """Add ``kind`` and nullable ``threshold`` to ``signal_dimension`` when upgrading."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "signal_dimension" not in tables:
-            return
-
-        columns = {
-            row[1]: row[3]
-            for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
-        }
-        if "kind" in columns and columns.get("threshold") == 0:
-            return
-
-        connection.execute(
-            text(
-                "CREATE TABLE signal_dimension_new ("
-                "code VARCHAR NOT NULL PRIMARY KEY, "
-                "description VARCHAR NOT NULL, "
-                "threshold REAL, "
-                "kind VARCHAR NOT NULL DEFAULT 'alert'"
-                ")"
-            )
-        )
-        connection.execute(
-            text(
-                "INSERT INTO signal_dimension_new (code, description, threshold, kind) "
-                "SELECT code, description, threshold, 'alert' FROM signal_dimension"
-            )
-        )
-        connection.execute(text("DROP TABLE signal_dimension"))
-        connection.execute(
-            text("ALTER TABLE signal_dimension_new RENAME TO signal_dimension")
-        )
-        connection.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_signal_dimension_kind "
-                "ON signal_dimension (kind)"
-            )
-        )
-        connection.commit()
-
-
-def _migrate_signal_dimension_series_id(db_path: Path | None = None) -> None:
-    """Add ``series_id`` to ``signal_dimension`` when upgrading an existing database."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "signal_dimension" not in tables:
-            return
-
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
-        }
-        if "series_id" in columns:
-            return
-
-        connection.execute(
-            text("ALTER TABLE signal_dimension ADD COLUMN series_id VARCHAR")
-        )
-        connection.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS ix_signal_dimension_series_id "
-                "ON signal_dimension (series_id)"
-            )
-        )
-        connection.commit()
-
-
-SIGNAL_CODE_RENAMES = {
-    "Alert_Inverted_Curve": "Yield_Spread_10Y3M",
-    "Alert_Financial_Stress": "Financial_Stress_Index",
-    "Sahm_Value": "Sahm_Rule_Indicator",
-    "SAHM_VALUE": "Sahm_Rule_Indicator",
-    "SAHM_RULE": "Sahm_Rule_Indicator",
-    "INVERTED_CURVE": "Yield_Spread_10Y3M",
-    "FINANCIAL_STRESS": "Financial_Stress_Index",
-    "HIGH_YIELD_SPREAD": "High_Yield_Spread",
-    "UNEMPLOYMENT_RATE": "Unemployment_Rate",
-    "UNEMPLOYMENT_HIGH": "Unemployment_Rate",
-    "REAL_RATES": "Real_Interest_Rates",
-    "REAL_YIELD_HIGH": "Real_Interest_Rates",
-    "Real_Yield_10Y": "Real_Interest_Rates",
-    "SP500_Death_Cross_Active": "SP500_Death_Cross",
-    "SP500_DEATH_CROSS_ACTIVE": "SP500_Death_Cross",
-    "SP500_Confirmed_Death_Cross": "SP500_Death_Cross",
-    "SP500_CONFIRMED_DEATH_CROSS": "SP500_Death_Cross",
-    "DEATH_CROSS": "SP500_Death_Cross",
-}
-
-
-def _migrate_signal_alert_codes(db_path: Path | None = None) -> None:
-    """Rename legacy alert codes to the uppercase convention without ``Alert_``."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "signal_dimension" not in tables:
-            return
-
-        connection.execute(text("PRAGMA foreign_keys = OFF"))
-        for old_code, new_code in SIGNAL_CODE_RENAMES.items():
-            old_exists = connection.execute(
-                text("SELECT 1 FROM signal_dimension WHERE code = :code"),
-                {"code": old_code},
-            ).fetchone()
-            if old_exists is None:
-                continue
-
-            new_exists = connection.execute(
-                text("SELECT 1 FROM signal_dimension WHERE code = :code"),
-                {"code": new_code},
-            ).fetchone()
-
-            if new_exists is not None:
-                old_signals = connection.execute(
-                    text("SELECT id, date FROM signal WHERE code = :code"),
-                    {"code": old_code},
-                ).fetchall()
-                for signal_id, signal_date in old_signals:
-                    duplicate = connection.execute(
-                        text(
-                            "SELECT 1 FROM signal "
-                            "WHERE code = :new_code AND date = :signal_date"
-                        ),
-                        {"new_code": new_code, "signal_date": signal_date},
-                    ).fetchone()
-                    if duplicate is not None:
-                        connection.execute(
-                            text("DELETE FROM signal WHERE id = :signal_id"),
-                            {"signal_id": signal_id},
-                        )
-                    else:
-                        connection.execute(
-                            text("UPDATE signal SET code = :new_code WHERE id = :id"),
-                            {"new_code": new_code, "id": signal_id},
-                        )
-                connection.execute(
-                    text("DELETE FROM signal_dimension WHERE code = :code"),
-                    {"code": old_code},
-                )
-                continue
-
-            connection.execute(
-                text("UPDATE signal SET code = :new_code WHERE code = :old_code"),
-                {"old_code": old_code, "new_code": new_code},
-            )
-            connection.execute(
-                text(
-                    "UPDATE signal_dimension SET code = :new_code "
-                    "WHERE code = :old_code"
-                ),
-                {"old_code": old_code, "new_code": new_code},
-            )
-        connection.execute(text("PRAGMA foreign_keys = ON"))
-        connection.commit()
-
-
-def _migrate_signal_dimension_comparison_code(db_path: Path | None = None) -> None:
-    """Add ``comparison_code`` to ``signal_dimension`` when upgrading."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "signal_dimension" not in tables:
-            return
-
-        columns = {
-            row[1] for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
-        }
-        if "comparison_code" in columns:
-            return
-
-        connection.execute(
-            text("ALTER TABLE signal_dimension ADD COLUMN comparison_code VARCHAR")
-        )
-        connection.commit()
-
-
-def _migrate_signal_dimension_unified(db_path: Path | None = None) -> None:
-    """Add ``source`` and ``operator`` to ``signal_dimension`` when upgrading."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "signal_dimension" not in tables:
-            return
-
-        columns = {
-            row[1]
-            for row in connection.execute(text("PRAGMA table_info(signal_dimension)"))
-        }
-        if "source" not in columns:
-            connection.execute(
-                text(
-                    "ALTER TABLE signal_dimension "
-                    "ADD COLUMN source VARCHAR NOT NULL DEFAULT 'fred'"
-                )
-            )
-        if "operator" not in columns:
-            connection.execute(
-                text("ALTER TABLE signal_dimension ADD COLUMN operator VARCHAR")
-            )
-        connection.commit()
-
-
-def _migrate_alert_description_unified(db_path: Path | None = None) -> None:
-    """Add ``source`` and ``operator`` to ``alert_description`` when upgrading."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "alert_description" not in tables:
-            return
-
-        columns = {
-            row[1]
-            for row in connection.execute(text("PRAGMA table_info(alert_description)"))
-        }
-        if "source" not in columns:
-            connection.execute(
-                text(
-                    "ALTER TABLE alert_description "
-                    "ADD COLUMN source VARCHAR NOT NULL DEFAULT 'fred'"
-                )
-            )
-        if "operator" not in columns:
-            connection.execute(
-                text("ALTER TABLE alert_description ADD COLUMN operator VARCHAR")
-            )
-        if "series_start" not in columns:
-            connection.execute(
-                text("ALTER TABLE alert_description ADD COLUMN series_start DATE")
-            )
-        if "role" not in columns:
-            connection.execute(
-                text(
-                    "ALTER TABLE alert_description "
-                    "ADD COLUMN role VARCHAR NOT NULL DEFAULT 'alert'"
-                )
-            )
-        if "domain" not in columns:
-            connection.execute(
-                text("ALTER TABLE alert_description ADD COLUMN domain VARCHAR")
-            )
-            connection.execute(
-                text(
-                    "CREATE INDEX IF NOT EXISTS ix_alert_description_domain "
-                    "ON alert_description (domain)"
-                )
-            )
-        connection.commit()
-
-
-def _migrate_rename_signal_tables_to_alert(db_path: Path | None = None) -> None:
-    """Rename legacy ``signal`` tables to ``alert`` / ``alert_description``."""
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "signal_dimension" in tables and "alert_description" in tables:
-            connection.execute(text("DROP TABLE alert_description"))
-            connection.execute(
-                text("ALTER TABLE signal_dimension RENAME TO alert_description")
-            )
-        elif "signal_dimension" in tables:
-            connection.execute(
-                text("ALTER TABLE signal_dimension RENAME TO alert_description")
-            )
-        if "signal" in tables and "alert" in tables:
-            connection.execute(text("DROP TABLE alert"))
-            connection.execute(text("ALTER TABLE signal RENAME TO alert"))
-        elif "signal" in tables:
-            connection.execute(text("ALTER TABLE signal RENAME TO alert"))
-        connection.commit()
-
-
-def _migrate_rename_alert_description_table(db_path: Path | None = None) -> None:
-    """Rename ``alert_description`` to ``macro_health_check_description``."""
-    old_name = "alert_description"
-    new_name = "macro_health_check_description"
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if old_name not in tables:
-            return
-
-        if new_name in tables:
-            # create_all may have created an empty new table alongside the legacy one.
-            connection.execute(text(f"DROP TABLE {new_name}"))
-
-        connection.execute(text(f"ALTER TABLE {old_name} RENAME TO {new_name}"))
-        connection.execute(text("DROP INDEX IF EXISTS ix_alert_description_domain"))
-        connection.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS "
-                "ix_macro_health_check_description_domain "
-                f"ON {new_name} (domain)"
-            )
-        )
-        connection.commit()
-
-
-def _migrate_rename_alert_table(db_path: Path | None = None) -> None:
-    """Rename ``alert`` to ``macro_health_check``."""
-    old_name = "alert"
-    new_name = "macro_health_check"
-    engine = get_engine(db_path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if old_name not in tables:
-            return
-
-        if new_name in tables:
-            connection.execute(text(f"DROP TABLE {new_name}"))
-
-        connection.execute(text(f"ALTER TABLE {old_name} RENAME TO {new_name}"))
-        connection.commit()
-
-
-def _migrate_sahm_rule_indicator_health_checks(db_path: Path | None = None) -> None:
-    """Copy legacy SAHM_RULE readings into ``Sahm_Rule_Indicator`` when missing."""
-    with get_session(db_path) as session:
-        legacy_rows = session.exec(
-            select(MacroHealthCheck).where(MacroHealthCheck.code == "SAHM_RULE")
-        ).all()
-        for legacy in legacy_rows:
-            existing = session.exec(
-                select(MacroHealthCheck).where(
-                    MacroHealthCheck.code == "Sahm_Rule_Indicator",
-                    MacroHealthCheck.date == legacy.date,
-                )
-            ).first()
-            if existing is not None:
-                continue
-            session.add(
-                MacroHealthCheck(
-                    code="Sahm_Rule_Indicator",
-                    date=legacy.date,
-                    value=legacy.value,
-                )
-            )
-        session.commit()
-
-
-def _migrate_health_check_role_values(db_path: Path | None = None) -> None:
-    """Rename legacy role ``alert`` to ``health_check`` on description rows."""
-    path = _resolve_db_path(db_path)
-    if not path.exists():
-        return
-
-    engine = get_engine(path)
-    with engine.connect() as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table'")
-            )
-        }
-        if "macro_health_check_description" not in tables:
-            return
-        connection.execute(
-            text(
-                "UPDATE macro_health_check_description "
-                "SET role = 'health_check' WHERE role = 'alert'"
-            )
-        )
-        connection.commit()
-
-
 def reset_health_check_tables_from_fixture(
     db_path: Path | None = None,
     fixture_path: Path | None = None,
@@ -645,37 +81,21 @@ def reset_health_check_tables_from_fixture(
 
 
 def init_db(db_path: Path | None = None) -> None:
+    """Create schema 1.0 tables if needed, then sync fixture catalogs."""
     path = _resolve_db_path(db_path)
     key = str(path.resolve())
     if key not in _initialized_paths:
         engine = get_engine(path)
         SQLModel.metadata.create_all(engine)
-        _migrate_legacy_funds_table(db_path)
-        _migrate_fund_performance_id(db_path)
-        _migrate_fund_universe(db_path)
-        _migrate_fund_ter(db_path)
-        _migrate_drop_user_password(db_path)
-        _migrate_user_email_to_name(db_path)
-        _migrate_user_is_default(db_path)
-        _migrate_signal_dimension_metadata(db_path)
-        _migrate_signal_dimension_series_id(db_path)
-        _migrate_signal_alert_codes(db_path)
-        _migrate_signal_dimension_comparison_code(db_path)
-        _migrate_signal_dimension_unified(db_path)
-        _migrate_rename_signal_tables_to_alert(db_path)
-        _migrate_alert_description_unified(db_path)
-        _migrate_rename_alert_description_table(db_path)
-        _migrate_rename_alert_table(db_path)
-        _migrate_sahm_rule_indicator_health_checks(db_path)
-        _migrate_health_check_role_values(db_path)
         _initialized_paths.add(key)
 
     with get_session(db_path) as session:
         sync_health_check_catalog_from_fixture(session)
+        sync_funds_from_fixture(session)
         session.commit()
 
+
 def create_user(name: str, db_path: Path | None = None) -> User:
-    init_db(db_path)
     with get_session(db_path) as session:
         user = User(name=name)
         session.add(user)
@@ -685,13 +105,11 @@ def create_user(name: str, db_path: Path | None = None) -> User:
 
 
 def get_user(user_id: int, db_path: Path | None = None) -> User | None:
-    init_db(db_path)
     with get_session(db_path) as session:
         return session.get(User, user_id)
 
 
 def list_users(db_path: Path | None = None) -> list[dict]:
-    init_db(db_path)
     with get_session(db_path) as session:
         users = session.exec(select(User).order_by(User.name)).all()
     return [
@@ -701,7 +119,6 @@ def list_users(db_path: Path | None = None) -> list[dict]:
 
 
 def delete_user(user_id: int, db_path: Path | None = None) -> bool:
-    init_db(db_path)
     with get_session(db_path) as session:
         user = session.get(User, user_id)
         if user is None:
@@ -713,7 +130,6 @@ def delete_user(user_id: int, db_path: Path | None = None) -> bool:
 
 
 def set_default_user(user_id: int, db_path: Path | None = None) -> dict | None:
-    init_db(db_path)
     with get_session(db_path) as session:
         user = session.get(User, user_id)
         if user is None:
@@ -727,7 +143,6 @@ def set_default_user(user_id: int, db_path: Path | None = None) -> dict | None:
 
 
 def get_fund(isin: str, db_path: Path | None = None) -> dict | None:
-    init_db(db_path)
     with get_session(db_path) as session:
         fund = session.get(Fund, isin)
     if fund is None:
@@ -743,7 +158,6 @@ def get_fund(isin: str, db_path: Path | None = None) -> dict | None:
 
 
 def list_funds(db_path: Path | None = None) -> list[dict]:
-    init_db(db_path)
     with get_session(db_path) as session:
         funds = session.exec(select(Fund).order_by(Fund.name)).all()
     return [
@@ -768,7 +182,6 @@ def save_fund(
     ter: float | None = None,
     db_path: Path | None = None,
 ) -> None:
-    init_db(db_path)
     isin = isin.upper()
     with get_session(db_path) as session:
         existing = session.get(Fund, isin)
@@ -793,7 +206,6 @@ def save_fund(
 
 
 def get_fund_metrics(isin: str, db_path: Path | None = None) -> dict[str, float | None]:
-    init_db(db_path)
     with get_session(db_path) as session:
         metric = session.get(Metric, isin.upper())
     if metric is None:
@@ -830,7 +242,6 @@ def save_fund_metrics(
     metrics: dict[str, float | None],
     db_path: Path | None = None,
 ) -> None:
-    init_db(db_path)
     isin = isin.upper()
     with get_session(db_path) as session:
         session.merge(
@@ -907,7 +318,6 @@ def _series_item_from_description(
 
 
 def get_latest_health_checks(db_path: Path | None = None) -> dict | None:
-    init_db(db_path)
     with get_session(db_path) as session:
         latest_date = session.exec(select(func.max(MacroHealthCheck.date))).one()
         if latest_date is None:
@@ -967,7 +377,6 @@ def get_latest_health_checks(db_path: Path | None = None) -> dict | None:
 
 
 def delete_fund(isin: str, db_path: Path | None = None) -> bool:
-    init_db(db_path)
     isin = isin.upper()
     with get_session(db_path) as session:
         fund = session.get(Fund, isin)
@@ -983,7 +392,6 @@ def delete_fund(isin: str, db_path: Path | None = None) -> bool:
 
 
 def list_user_portfolio(user_id: int, db_path: Path | None = None) -> list[dict]:
-    init_db(db_path)
     with get_session(db_path) as session:
         rows = session.exec(
             select(Portfolio, Fund)
@@ -1008,7 +416,6 @@ def list_user_portfolio(user_id: int, db_path: Path | None = None) -> list[dict]
 def save_user_portfolio(
     user_id: int, positions: list[dict[str, float | str]], db_path: Path | None = None
 ) -> list[dict]:
-    init_db(db_path)
     with get_session(db_path) as session:
         session.exec(delete(Portfolio).where(Portfolio.user_id == user_id))
         for position in positions:

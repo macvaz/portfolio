@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from portfolio.storage.database import init_db, upsert_health_checks
+from portfolio.storage.database import upsert_health_checks
 from portfolio.common.health_check_descriptions import (
     load_health_check_description_fixture,
 )
@@ -45,6 +45,5 @@ def persist_latest_health_checks(
     if not values:
         return None
 
-    init_db(db_path)
     upsert_health_checks(values, observation_date, db_path)
     return observation_date
