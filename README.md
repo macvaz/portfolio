@@ -159,9 +159,14 @@ When the batch pipeline runs, the latest macro health values are printed to the 
 
 ## API and web UI
 
-Fund ISINs and portfolios are stored in `data/portfolio.db` (SQLite). Schema **1.0** is created from the SQLModel models on first `init_db()`; there is no in-place migration chain from older table shapes. If you have a pre-1.0 database, recreate it (or restore from backup) rather than expecting automatic upgrades.
+Fund ISINs and portfolios are stored in `data/portfolio.db` (SQLite).
 
-`init_db()` runs once at **API startup** (FastAPI lifespan) and at the start of the **batch** pipeline. It creates tables if needed and syncs fund + macro health-check catalogs from `data/fixtures/`. CRUD helpers do not call `init_db()` themselves.
+**`init_db()`** (schema **1.0**) runs only when the **API** or **batch** process starts:
+
+1. Create tables from the SQLModel models if they do not exist yet (no legacy migration chain).
+2. Sync catalogs from fixtures: merge funds from `data/fixtures/fund.json`, and sync macro health-check descriptions from `data/fixtures/macro_health_check_description.json` (insert/update; health-check rows removed from the fixture are pruned).
+
+CRUD helpers do not call `init_db()`. A pre-1.0 database is not upgraded in place — recreate it if needed.
 
 **Start the API server:**
 

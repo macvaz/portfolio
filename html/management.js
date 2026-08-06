@@ -9,11 +9,11 @@
   let curveStartDate = null;
 
   const METRIC_COLUMNS = [
-    { key: "weight", format: "percent", weightColumn: true, label: "Weight (%)" },
+    { key: "weight", format: "percent", weightColumn: true, beforeDivider: true, label: "Weight (%)" },
     { key: "pct_1w", format: "signedPercent", divider: true, label: "% 1w" },
     { key: "pct_1m", format: "signedPercent", label: "% 1m" },
     { key: "pct_6m", format: "signedPercent", label: "% 6m" },
-    { key: "pct_ytd", format: "signedPercent", label: "% YTD" },
+    { key: "pct_ytd", format: "signedPercent", label: "% YTD", columnClass: "col-ytd" },
     { key: "sr_6m", format: "decimal2", colorize: true, label: "SR 6m", columnClass: "col-metric-sr" },
     { key: "sr_1y", format: "decimal2", colorize: true, beforeDivider: true, label: "SR 1y", columnClass: "col-metric-sr" },
     {
@@ -169,7 +169,7 @@
 
   function renderWeightInputCell(isin, weight, label) {
     const display = formatWeight(weight);
-    return `<td class="col-weight col-weight-editable" data-label="${label}">
+    return `<td class="col-weight col-weight-editable col-before-divider" data-label="${label}">
       <div class="weight-cell-slot">
         <span class="weight-display">${display}</span>
         <input
@@ -212,7 +212,7 @@
 
   function renderSummaryWeightCell(value, label) {
     const text = formatWeight(value);
-    return `<td class="col-weight col-weight-editable" data-label="${label}">
+    return `<td class="col-weight col-weight-editable col-before-divider" data-label="${label}">
       <div class="weight-cell-slot">
         <span class="weight-display">${text}</span>
       </div>

@@ -643,6 +643,11 @@ button:disabled {
   .fund-table:not(.alert-table) .col-metric-sr {
     display: none;
   }
+
+  /* SR is hidden, so % YTD sits next to the Vol bar — give it the before-divider gap. */
+  .fund-table:not(.alert-table) .col-ytd {
+    padding-right: 1.25rem;
+  }
 }
 
 .fund-table th,
@@ -770,13 +775,12 @@ button:disabled {
 }
 
 .fund-table .col-before-divider {
-  padding-right: 1.75rem;
+  padding-right: 1.25rem;
 }
 
 .fund-table .col-divider {
   position: relative;
-  padding-left: 1.75rem;
-  padding-right: 1.75rem;
+  padding-left: 1.25rem;
   width: 1%;
   white-space: nowrap;
 }
@@ -1708,12 +1712,11 @@ body.is-month-detail-open {
   }
 
   .fund-table .col-before-divider {
-    padding-right: 1rem;
+    padding-right: 0.85rem;
   }
 
   .fund-table .col-divider {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.85rem;
   }
 
   .alert-table {
