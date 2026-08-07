@@ -643,11 +643,6 @@ button:disabled {
   .fund-table:not(.alert-table) .col-metric-sr {
     display: none;
   }
-
-  /* SR is hidden, so % YTD sits next to the Vol bar — give it the before-divider gap. */
-  .fund-table:not(.alert-table) .col-ytd {
-    padding-right: 1.25rem;
-  }
 }
 
 .fund-table th,
@@ -656,6 +651,24 @@ button:disabled {
   text-align: right;
   white-space: nowrap;
   line-height: 1.15;
+}
+
+/* Compact trailing metrics: short values, relatively long headers. */
+.fund-table th.col-metric-vol,
+.fund-table td.col-metric-vol,
+.fund-table th.col-metric-beta,
+.fund-table td.col-metric-beta,
+.fund-table th.col-metric-cor,
+.fund-table td.col-metric-cor,
+.fund-table th.col-metric-sr,
+.fund-table td.col-metric-sr {
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+}
+
+.fund-table th.col-metric-vol.col-divider,
+.fund-table td.col-metric-vol.col-divider {
+  padding-left: 1.25rem;
 }
 
 .fund-table th {

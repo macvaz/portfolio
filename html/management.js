@@ -13,9 +13,7 @@
     { key: "pct_1w", format: "signedPercent", divider: true, label: "% 1w" },
     { key: "pct_1m", format: "signedPercent", label: "% 1m" },
     { key: "pct_6m", format: "signedPercent", label: "% 6m" },
-    { key: "pct_ytd", format: "signedPercent", label: "% YTD", columnClass: "col-ytd" },
-    { key: "sr_6m", format: "decimal2", colorize: true, label: "SR 6m", columnClass: "col-metric-sr" },
-    { key: "sr_1y", format: "decimal2", colorize: true, beforeDivider: true, label: "SR 1y", columnClass: "col-metric-sr" },
+    { key: "pct_ytd", format: "signedPercent", beforeDivider: true, label: "% YTD", columnClass: "col-ytd" },
     {
       key: "vol_1y",
       format: "decimal2",
@@ -25,6 +23,8 @@
     },
     { key: "beta_6m", format: "decimal2", label: "β (6m)", columnClass: "col-metric-beta" },
     { key: "cor_6m", format: "decimal2", label: "Cor (6m)", columnClass: "col-metric-cor" },
+    { key: "sr_6m", format: "decimal2", label: "SR 6m", columnClass: "col-metric-sr" },
+    { key: "sr_1y", format: "decimal2", label: "SR 1y", columnClass: "col-metric-sr" },
   ];
 
   const MOBILE_CARDS_MQ = window.matchMedia("(max-width: 720px)");
