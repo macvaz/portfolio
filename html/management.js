@@ -700,6 +700,79 @@
     return Number.isFinite(last) ? last : null;
   }
 
+  function dailyReturnFromCumulative(values, index) {
+    if (!values || index < 1) {
+      return null;
+    }
+    const previous = values[index - 1];
+    const current = values[index];
+    if (!Number.isFinite(previous) || !Number.isFinite(current)) {
+      return null;
+    }
+    return ((1 + current / 100) / (1 + previous / 100) - 1) * 100;
+  }
+
+  function formatSignedPercent(value, digits = 2) {
+    if (!Number.isFinite(value)) {
+      return "—";
+    }
+    const sign = value < 0 ? "-" : "";
+    return `${sign}${Math.abs(value).toFixed(digits)}%`;
+  }
+
+  function formatTooltipLineHtml(label, color, totalValue, dayValue) {
+    const totalText = formatSignedPercent(totalValue);
+    const dayText = dayValue === null ? "—" : formatSignedPercent(dayValue);
+    return (
+      `<span class="chart-tooltip-swatch" style="background:${color}"></span>` +
+      `<span class="chart-tooltip-text">${label}: <strong>${totalText}</strong> total, <strong>${dayText}</strong> day</span>`
+    );
+  }
+
+  function getOrCreateChartTooltip() {
+    return document.getElementById("chart-tooltip");
+  }
+
+  function externalChartTooltip(context) {
+    const tooltipEl = getOrCreateChartTooltip();
+    if (!tooltipEl) {
+      return;
+    }
+
+    const { chart, tooltip } = context;
+    if (tooltip.opacity === 0) {
+      tooltipEl.hidden = true;
+      return;
+    }
+
+    const title = tooltip.title?.[0] || "";
+    const lines = (tooltip.dataPoints || []).map((point) => {
+      const rawValues = point.dataset.rawValues;
+      const index = point.dataIndex;
+      const value = rawValues?.[index];
+      const displayValue = Number.isFinite(value) ? value : point.parsed.y;
+      const dayReturn = dailyReturnFromCumulative(rawValues, index);
+      const color = point.dataset.borderColor || point.dataset.backgroundColor || "#888";
+      return formatTooltipLineHtml(
+        point.dataset.label,
+        color,
+        displayValue,
+        dayReturn,
+      );
+    });
+
+    tooltipEl.innerHTML = [
+      title ? `<div class="chart-tooltip-title">${title}</div>` : "",
+      ...lines.map((line) => `<div class="chart-tooltip-line">${line}</div>`),
+    ].join("");
+
+    const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+    tooltipEl.hidden = false;
+    tooltipEl.style.opacity = String(tooltip.opacity);
+    tooltipEl.style.left = `${positionX + tooltip.caretX}px`;
+    tooltipEl.style.top = `${positionY + tooltip.caretY}px`;
+  }
+
   function formatMetricHtml(value, suffix) {
     if (value === null || value === undefined || !Number.isFinite(value)) {
       return "";
@@ -812,15 +885,8 @@
             display: false,
           },
           tooltip: {
-            boxPadding: 6,
-            callbacks: {
-              label(context) {
-                const rawValues = context.dataset.rawValues;
-                const value = rawValues?.[context.dataIndex];
-                const displayValue = Number.isFinite(value) ? value : context.parsed.y;
-                return `${context.dataset.label}: ${displayValue.toFixed(2)}%`;
-              },
-            },
+            enabled: false,
+            external: externalChartTooltip,
           },
         },
         scales: {
@@ -867,7 +933,7 @@
     performanceChart = new Chart(context, buildChartConfig(curve));
     canvas.title = curveStartDate
       ? `From ${curveStartDate} — double-click to reset`
-      : "Click a date to measure from there";
+      : "";
     canvas.ondblclick = () => {
       if (curveStartDate) {
         applyCurveStartDate(null);

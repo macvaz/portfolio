@@ -583,6 +583,57 @@ button:disabled {
   height: 380px;
 }
 
+.chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 12px));
+  pointer-events: none;
+  z-index: 5;
+  min-width: 12rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  transition: opacity 0.08s ease;
+}
+
+.chart-tooltip[hidden] {
+  display: none;
+}
+
+.chart-tooltip-title {
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+}
+
+.chart-tooltip-line {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.chart-tooltip-line + .chart-tooltip-line {
+  margin-top: 0.2rem;
+}
+
+.chart-tooltip-swatch {
+  flex: 0 0 auto;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+}
+
+.chart-tooltip-text {
+  min-width: 0;
+}
+
+.chart-tooltip strong {
+  font-weight: 700;
+}
+
 /* Tables */
 
 .table-panel {
