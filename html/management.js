@@ -29,6 +29,12 @@
 
   const MOBILE_CARDS_MQ = window.matchMedia("(max-width: 720px)");
   const MID_WIDTH_MQ = window.matchMedia("(min-width: 721px) and (max-width: 1200px)");
+  // Phones/tablets in any orientation — width alone fails in landscape.
+  const TOUCH_PRIMARY_MQ = window.matchMedia("(hover: none) and (pointer: coarse)");
+
+  function canSetChartStartDate() {
+    return !MOBILE_CARDS_MQ.matches && !TOUCH_PRIMARY_MQ.matches;
+  }
 
   function showError(message) {
     const el = document.getElementById("error");
@@ -865,6 +871,9 @@
           intersect: false,
         },
         onClick(event, _elements, chart) {
+          if (!canSetChartStartDate()) {
+            return;
+          }
           const points = chart.getElementsAtEventForMode(
             event,
             "index",
@@ -931,11 +940,11 @@
     }
 
     performanceChart = new Chart(context, buildChartConfig(curve));
-    canvas.title = curveStartDate
+    canvas.title = canSetChartStartDate() && curveStartDate
       ? `From ${curveStartDate} — double-click to reset`
       : "";
     canvas.ondblclick = () => {
-      if (curveStartDate) {
+      if (canSetChartStartDate() && curveStartDate) {
         applyCurveStartDate(null);
       }
     };
