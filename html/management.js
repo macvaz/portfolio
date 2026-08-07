@@ -739,6 +739,37 @@
     return document.getElementById("chart-tooltip");
   }
 
+  function positionChartTooltip(tooltipEl, chart, tooltip) {
+    const GAP = 12;
+    const canvas = chart.canvas;
+    const caretX = canvas.offsetLeft + tooltip.caretX;
+    const caretY = canvas.offsetTop + tooltip.caretY;
+    const areaLeft = canvas.offsetLeft;
+    const areaTop = canvas.offsetTop;
+    const areaRight = areaLeft + canvas.offsetWidth;
+    const areaBottom = areaTop + canvas.offsetHeight;
+
+    tooltipEl.style.left = "0px";
+    tooltipEl.style.top = "0px";
+    tooltipEl.style.transform = "none";
+    const tipW = tooltipEl.offsetWidth;
+    const tipH = tooltipEl.offsetHeight;
+
+    const spaceRight = areaRight - caretX - GAP;
+    const spaceLeft = caretX - areaLeft - GAP;
+    let left =
+      spaceRight >= tipW || spaceRight >= spaceLeft
+        ? caretX + GAP
+        : caretX - GAP - tipW;
+    left = Math.min(Math.max(left, areaLeft), Math.max(areaLeft, areaRight - tipW));
+
+    let top = caretY - tipH / 2;
+    top = Math.min(Math.max(top, areaTop), Math.max(areaTop, areaBottom - tipH));
+
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
+  }
+
   function externalChartTooltip(context) {
     const tooltipEl = getOrCreateChartTooltip();
     if (!tooltipEl) {
@@ -772,11 +803,9 @@
       ...lines.map((line) => `<div class="chart-tooltip-line">${line}</div>`),
     ].join("");
 
-    const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
     tooltipEl.hidden = false;
     tooltipEl.style.opacity = String(tooltip.opacity);
-    tooltipEl.style.left = `${positionX + tooltip.caretX}px`;
-    tooltipEl.style.top = `${positionY + tooltip.caretY}px`;
+    positionChartTooltip(tooltipEl, chart, tooltip);
   }
 
   function formatMetricHtml(value, suffix) {

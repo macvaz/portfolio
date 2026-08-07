@@ -585,7 +585,6 @@ button:disabled {
 
 .chart-tooltip {
   position: absolute;
-  transform: translate(-50%, calc(-100% - 12px));
   pointer-events: none;
   z-index: 5;
   min-width: 12rem;
@@ -2133,6 +2132,16 @@ body.is-month-detail-open {
     padding-left: 0;
     padding-right: 0;
     width: auto;
+  }
+
+  /* Beat desktop compact-metric / divider paddings in card mode. */
+  .fund-table:not(.alert-table--history) td.col-metric-vol,
+  .fund-table:not(.alert-table--history) td.col-metric-beta,
+  .fund-table:not(.alert-table--history) td.col-metric-cor,
+  .fund-table:not(.alert-table--history) td.col-metric-sr,
+  .fund-table:not(.alert-table--history) td.col-metric-vol.col-divider {
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .fund-table:not(.alert-table--history) .col-divider::before {
