@@ -2,7 +2,7 @@
 LOG_FILE="$LOGS_DIR/portfolio.log"
 
 set +e
-docker exec -t portfolio python batch.py >"$LOG_FILE" 2>&1
+docker exec portfolio python batch.py >"$LOG_FILE" 2>&1
 EXIT_CODE=$?
 set -e
 
