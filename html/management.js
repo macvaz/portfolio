@@ -247,40 +247,31 @@
     </tr>`;
   }
 
-  function shortFundLabel(name, used) {
-    const words = String(name || "")
-      .split(/[\s/\-_]+/)
-      .filter((word) => word.length > 2);
-    let base = words.length
-      ? words
-          .slice(0, 3)
-          .map((word) => word[0].toUpperCase())
-          .join("")
-      : String(name || "?").slice(0, 3).toUpperCase();
-    if (!base) {
-      base = "?";
-    }
-    let label = base;
-    let suffix = 2;
-    while (used.has(label)) {
-      label = `${base}${suffix}`;
-      suffix += 1;
-    }
-    used.add(label);
-    return label;
+  function buildFundNumberIds(funds) {
+    const byIsin = new Map();
+    funds.forEach((fund, index) => {
+      byIsin.set(fund.isin, index + 1);
+    });
+    return byIsin;
   }
 
   function correlationCellClass(value) {
     if (value === null || value === undefined || Number.isNaN(value)) {
       return "";
     }
-    if (value >= 0.7) {
-      return "corr-high";
+    if (value < 0) {
+      return "corr-negative";
     }
-    return "";
+    if (value < 0.5) {
+      return "corr-low";
+    }
+    if (value < 0.75) {
+      return "corr-mid";
+    }
+    return "corr-high";
   }
 
-  function renderCorrelationMatrixRow(correlation) {
+  function renderCorrelationMatrixRow(correlation, fundIds) {
     if (
       !correlation ||
       !Array.isArray(correlation.labels) ||
@@ -290,11 +281,10 @@
       return "";
     }
 
-    const used = new Set();
-    const labels = correlation.labels.map((item) => ({
+    const labels = correlation.labels.map((item, index) => ({
       isin: item.isin,
       name: item.name || item.isin,
-      short: shortFundLabel(item.name || item.isin, used),
+      id: fundIds?.get(item.isin) ?? index + 1,
     }));
 
     // Lower triangle only (no diagonal): columns are funds 0..n-2, rows are 1..n-1.
@@ -302,7 +292,7 @@
     const headerCells = columnLabels
       .map(
         (label) =>
-          `<th scope="col" title="${label.name}">${label.short}</th>`,
+          `<th scope="col" title="${escapeHtml(label.name)}">${label.id}</th>`,
       )
       .join("");
 
@@ -319,10 +309,10 @@
             const value = values[colIndex];
             const text = formatValue(value, "decimal2");
             const cls = correlationCellClass(value);
-            return `<td class="${cls}" title="${rowLabel.name} × ${colLabel.name}">${text}</td>`;
+            return `<td class="${cls}" title="${escapeHtml(rowLabel.name)} × ${escapeHtml(colLabel.name)}">${text}</td>`;
           })
           .join("");
-        return `<tr><th scope="row" title="${rowLabel.name}">${rowLabel.short}</th>${cells}</tr>`;
+        return `<tr><th scope="row" title="${escapeHtml(rowLabel.name)}">${rowLabel.id}</th>${cells}</tr>`;
       })
       .join("");
 
@@ -346,13 +336,15 @@
 
   function renderWeightsSummaryRow(funds) {
     const items = funds
-      .map((fund) => {
+      .map((fund, index) => {
+        const id = index + 1;
         const name = escapeHtml(fundDisplayName(fund));
         const nameHtml = fund.morningstar_url
           ? `<a href="${fund.morningstar_url}" class="fund-link weights-summary-name" target="_blank" rel="noopener noreferrer">${name}</a>`
           : `<span class="fund-name weights-summary-name">${name}</span>`;
         return `
       <div class="weights-summary-item">
+        <span class="weights-summary-id" aria-label="Fund ${id}">${id}</span>
         ${nameHtml}
         <span class="metric-value">${formatWeight(fund.weight)}%</span>
       </div>`;
@@ -989,10 +981,11 @@
     document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
     renderChart(curve);
     renderTableBody("portfolio-body", metrics.portfolio, { editableWeights: true });
+    const fundIds = buildFundNumberIds(metrics.portfolio);
     document.getElementById("portfolio-summary").innerHTML =
       renderWeightsSummaryRow(metrics.portfolio) +
       renderSummaryRow(metrics.portfolio_summary) +
-      renderCorrelationMatrixRow(metrics.correlation_matrix);
+      renderCorrelationMatrixRow(metrics.correlation_matrix, fundIds);
     renderTableBody("favorites-body", metrics.favorites, {
       editableWeights: true,
       forceZeroWeight: true,
