@@ -1,5 +1,13 @@
 [
   {
+    "isin": "LU0271695388",
+    "name": "Amundi S.F. - EUR Commodities A EUR ND",
+    "fund_id": "F0GBR05XN2",
+    "performance_id": "0P00001A2D",
+    "universe": "FO",
+    "ter": 1.11
+  },
+  {
     "isin": "ES0182527038",
     "name": "Cartesio Y FI",
     "fund_id": "F0GBR04VSJ",
@@ -72,12 +80,28 @@
     "ter": 0.06
   },
   {
+    "isin": "LU0397155978",
+    "name": "GSQuartix Modified Strategy on the Bloomberg Commodity IndexTotal Return Portfolio A EUR",
+    "fund_id": "F00000H2TI",
+    "performance_id": "0P0000NMRR",
+    "universe": "FO",
+    "ter": 1.15
+  },
+  {
     "isin": "ES0140794001",
     "name": "Gamma Global A FI",
     "fund_id": "F000016XFK",
     "performance_id": "0P0001MABK",
     "universe": "FO",
     "ter": 0.86
+  },
+  {
+    "isin": "ES0110407097",
+    "name": "Gestión Boutique VI Baelo Patrimonio FI",
+    "fund_id": "F0000107JE",
+    "performance_id": "0P0001CTGR",
+    "universe": "FO",
+    "ter": 0.58
   },
   {
     "isin": "LU2596603865",
@@ -174,5 +198,13 @@
     "performance_id": "0P00000OB8",
     "universe": "FO",
     "ter": 0.85
+  },
+  {
+    "isin": "ES0134751009",
+    "name": "WAM High Conviction A FI",
+    "fund_id": "F00001DOCW",
+    "performance_id": "0P0001OR4K",
+    "universe": "FO",
+    "ter": 0.44
   }
 ]
