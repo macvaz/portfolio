@@ -136,6 +136,14 @@
     "ter": 1.71
   },
   {
+    "isin": "IE00B51PLJ46",
+    "name": "Lazard Global Listed Infrastructure Equity Fund A Acc EUR Hedged",
+    "fund_id": "F00000OIA3",
+    "performance_id": "0P0000WF30",
+    "universe": "FO",
+    "ter": 0.92
+  },
+  {
     "isin": "IE00BF0GL329",
     "name": "Polar Capital Funds PLC - Artificial Intelligence Fund I Acc",
     "fund_id": "0P0001BO8Z",
