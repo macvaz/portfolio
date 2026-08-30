@@ -1047,9 +1047,33 @@
     updatePortfolioTableMeta(null);
   }
 
+  function getPortfolioAllocationFunds() {
+    if (!managementData?.metrics?.portfolio) {
+      return [];
+    }
+
+    const weightByIsin = new Map();
+    document.querySelectorAll("#portfolio-table .weight-input").forEach((input) => {
+      const pct = Number.parseFloat(input.value);
+      if (Number.isFinite(pct) && pct > 0) {
+        weightByIsin.set(input.dataset.isin, pct);
+      }
+    });
+
+    return managementData.metrics.portfolio
+      .map((fund) => ({
+        isin: fund.isin,
+        name: fundDisplayName(fund),
+        morningstar_url: fund.morningstar_url,
+        weight: weightByIsin.has(fund.isin) ? weightByIsin.get(fund.isin) : fund.weight,
+      }))
+      .filter((fund) => Number.isFinite(fund.weight) && fund.weight > 0);
+  }
+
   window.ManagementView = {
     loadManagement,
     resetManagement,
+    getPortfolioAllocationFunds,
     getCurveStartDate() {
       return curveStartDate;
     },
