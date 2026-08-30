@@ -112,6 +112,14 @@
     "ter": 0.89
   },
   {
+    "isin": "ES0147897005",
+    "name": "Impassive Wealth FI",
+    "fund_id": "F00001155A",
+    "performance_id": "0P0001EKFI",
+    "universe": "FO",
+    "ter": 0.72
+  },
+  {
     "isin": "IE00B579F325",
     "name": "Invesco Physical Gold ETC",
     "fund_id": "0P00019OGB",
@@ -214,5 +222,13 @@
     "performance_id": "0P0001OR4K",
     "universe": "FO",
     "ter": 0.44
+  },
+  {
+    "isin": "GB00BJYDH287",
+    "name": "WisdomTree Physical Bitcoin",
+    "fund_id": "0P0001M4WC",
+    "performance_id": "0P0001M4WC",
+    "universe": "FE",
+    "ter": 0.15
   }
 ]
