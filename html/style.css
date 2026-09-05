@@ -228,21 +228,6 @@ button:disabled {
   pointer-events: auto;
 }
 
-/* Keep star/delete on hover; allocation stays visible. */
-@media (hover: hover) and (pointer: fine) and (min-width: 721px) {
-  .portfolio-default-btn,
-  .portfolio-delete-btn {
-    display: none;
-  }
-
-  .portfolio-table-name-wrap:hover .portfolio-default-btn,
-  .portfolio-table-name-wrap:hover .portfolio-delete-btn,
-  .portfolio-table-name-wrap:focus-within .portfolio-default-btn,
-  .portfolio-table-name-wrap:focus-within .portfolio-delete-btn {
-    display: flex;
-  }
-}
-
 .portfolio-action-btn {
   display: flex;
   align-items: center;
@@ -676,7 +661,33 @@ button:disabled {
 }
 
 .portfolio-table-heading {
+  position: relative;
+  display: inline-block;
   min-width: 0;
+}
+
+.portfolio-delete-popup {
+  display: none;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  z-index: 30;
+  padding-right: 0.35rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Fav always visible; delete on hover in the left gutter (desktop only). */
+@media (hover: hover) and (pointer: fine) and (min-width: 721px) {
+  .portfolio-table-heading:hover .portfolio-delete-popup,
+  .portfolio-table-heading:focus-within .portfolio-delete-popup,
+  .portfolio-delete-popup:hover {
+    display: block;
+    pointer-events: auto;
+  }
 }
 
 .table-subtitle {
@@ -2758,9 +2769,8 @@ body.is-allocation-open {
     pointer-events: auto;
   }
 
-  .portfolio-default-btn,
-  .portfolio-delete-btn {
-    display: none;
+  .portfolio-delete-popup {
+    display: none !important;
   }
 
   .portfolio-table-meta {

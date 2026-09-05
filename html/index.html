@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=238" />
+    <link rel="stylesheet" href="/static/style.css?v=242" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -150,59 +150,7 @@
           <section class="table-panel">
             <h2 class="table-title table-title--portfolio">
               <span class="portfolio-table-heading">
-              Portfolio:
-              <span class="portfolio-table-name-wrap">
-                <span class="portfolio-table-actions">
-                  <button
-                    type="button"
-                    id="portfolio-default-btn"
-                    class="portfolio-action-btn portfolio-default-btn"
-                    aria-label="Set as default portfolio"
-                    title="Set as default portfolio"
-                    hidden
-                  >
-                    <svg
-                      class="portfolio-default-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    id="portfolio-allocation-btn"
-                    class="portfolio-action-btn portfolio-allocation-btn"
-                    aria-label="Money allocation and daily returns"
-                    title="Money allocation and daily returns"
-                    hidden
-                  >
-                    <svg
-                      class="portfolio-action-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <rect x="4" y="2" width="16" height="20" rx="2" />
-                      <line x1="8" y1="6" x2="16" y2="6" />
-                      <line x1="8" y1="10" x2="10" y2="10" />
-                      <line x1="14" y1="10" x2="16" y2="10" />
-                      <line x1="8" y1="14" x2="10" y2="14" />
-                      <line x1="14" y1="14" x2="16" y2="14" />
-                      <line x1="8" y1="18" x2="16" y2="18" />
-                    </svg>
-                  </button>
+                <span class="portfolio-delete-popup">
                   <button
                     type="button"
                     id="portfolio-delete-btn"
@@ -230,8 +178,62 @@
                     </svg>
                   </button>
                 </span>
-                <span id="portfolio-table-name" class="portfolio-table-name"></span>
-              </span>
+                Portfolio:
+                <span class="portfolio-table-name-wrap">
+                  <span class="portfolio-table-actions">
+                    <button
+                      type="button"
+                      id="portfolio-default-btn"
+                      class="portfolio-action-btn portfolio-default-btn"
+                      aria-label="Set as default portfolio"
+                      title="Set as default portfolio"
+                      hidden
+                    >
+                      <svg
+                        class="portfolio-default-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      id="portfolio-allocation-btn"
+                      class="portfolio-action-btn portfolio-allocation-btn"
+                      aria-label="Money allocation and daily returns"
+                      title="Money allocation and daily returns"
+                      hidden
+                    >
+                      <svg
+                        class="portfolio-action-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <rect x="4" y="2" width="16" height="20" rx="2" />
+                        <line x1="8" y1="6" x2="16" y2="6" />
+                        <line x1="8" y1="10" x2="10" y2="10" />
+                        <line x1="14" y1="10" x2="16" y2="10" />
+                        <line x1="8" y1="14" x2="10" y2="14" />
+                        <line x1="14" y1="14" x2="16" y2="14" />
+                        <line x1="8" y1="18" x2="16" y2="18" />
+                      </svg>
+                    </button>
+                  </span>
+                  <span id="portfolio-table-name" class="portfolio-table-name"></span>
+                </span>
               </span>
               <span class="portfolio-table-meta">
                 <span id="portfolio-table-ter" class="portfolio-table-ter" hidden></span>
@@ -530,7 +532,7 @@
     <script src="/static/risk.js?v=14"></script>
     <script src="/static/health.js?v=62"></script>
     <script src="/static/add-fund.js?v=5"></script>
-    <script src="/static/allocation.js?v=14"></script>
+    <script src="/static/allocation.js?v=15"></script>
     <script src="/static/app.js?v=48"></script>
   </body>
 </html>

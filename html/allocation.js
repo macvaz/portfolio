@@ -26,8 +26,7 @@
   const DEFAULT_TOTAL = 500000;
 
   const amountFormatter = new Intl.NumberFormat(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   });
 
   let activeMode = "returns";
@@ -144,7 +143,7 @@
     moneyBodyEl.innerHTML = funds
       .map((fund) => {
         const weight = fund.weight;
-        const amount = total === null ? null : (total * weight) / 100;
+        const amount = total === null ? null : Math.round((total * weight) / 100);
         weightSum += weight;
         if (amount !== null) {
           amountSum += amount;
