@@ -515,6 +515,74 @@ def test_save_portfolio_allows_partial_weights(tmp_path, monkeypatch):
     assert response.json()[0]["weighted_assets"] == 0.35
 
 
+def test_recent_daily_returns_aligned_across_funds(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    funds_dir = tmp_path / "funds"
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
+    init_db(db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
+
+    import pandas as pd
+    from portfolio.common.navs import save_fund_nav_csv
+
+    def daily_navs(start: str, returns: list[float]) -> pd.DataFrame:
+        nav = 100.0
+        rows = [(start, nav)]
+        current = pd.Timestamp(start)
+        for daily_return in returns:
+            current += pd.Timedelta(days=1)
+            nav *= 1 + daily_return
+            rows.append((current.strftime("%Y-%m-%d"), nav))
+        return pd.DataFrame(
+            {"value": [row[1] for row in rows]},
+            index=pd.to_datetime([row[0] for row in rows]),
+        )
+
+    save_fund_nav_csv(
+        "ES0182527038",
+        daily_navs("2024-01-01", [0.01, 0.02, -0.01, 0.005, 0.003, 0.004]),
+        funds_dir=funds_dir,
+    )
+    save_fund_nav_csv(
+        "IE00BYX5NX33",
+        daily_navs("2024-01-01", [0.01, -0.02, 0.015, 0.002]),
+        funds_dir=funds_dir,
+    )
+
+    client = TestClient(app)
+    user_id = _create_user(db_path)
+    client.put(
+        "/api/portfolio/positions",
+        params={"portfolio_id": user_id},
+        json={
+            "positions": [
+                {"isin": "ES0182527038", "weighted_assets": 0.6},
+                {"isin": "IE00BYX5NX33", "weighted_assets": 0.4},
+            ]
+        },
+    )
+
+    response = client.get(
+        "/api/portfolio/recent_daily_returns",
+        params={"portfolio_id": user_id, "days": 5},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["dates"] == [
+        "2024-01-07",
+        "2024-01-06",
+        "2024-01-05",
+        "2024-01-04",
+        "2024-01-03",
+    ]
+    by_isin = {fund["isin"]: fund for fund in data["funds"]}
+    assert by_isin["ES0182527038"]["returns"] == [0.4, 0.3, 0.5, -1.0, 2.0]
+    assert by_isin["IE00BYX5NX33"]["returns"] == [None, None, 0.2, 1.5, -2.0]
+
+
 def test_save_portfolio_rejects_overweight_and_duplicate_isins(tmp_path, monkeypatch):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)

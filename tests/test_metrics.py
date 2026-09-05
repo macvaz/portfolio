@@ -4,6 +4,7 @@ import pandas as pd
 
 from portfolio.storage.database import get_fund_metrics, init_db, save_fund
 from portfolio.common.metrics import (
+    compute_aligned_recent_daily_returns,
     compute_fund_metrics,
     compute_metrics,
     compute_portfolio_correlation_matrix,
@@ -179,6 +180,41 @@ def test_compute_portfolio_correlation_matrix_requires_two_funds(tmp_path):
         )
         is None
     )
+
+
+def test_compute_aligned_recent_daily_returns(tmp_path):
+    funds_dir = tmp_path / "funds"
+    # Fund A has returns through 01-06; fund B stops earlier (missing latest days).
+    save_fund_nav_csv(
+        "AAA",
+        _daily_navs("2024-01-01", [0.01, 0.02, -0.01, 0.005, 0.003, 0.004]),
+        funds_dir=funds_dir,
+    )
+    save_fund_nav_csv(
+        "BBB",
+        _daily_navs("2024-01-01", [0.01, -0.02, 0.015, 0.002]),
+        funds_dir=funds_dir,
+    )
+
+    result = compute_aligned_recent_daily_returns(
+        [
+            {"isin": "AAA", "name": "Fund A", "weighted_assets": 0.6},
+            {"isin": "BBB", "name": "Fund B", "weighted_assets": 0.4},
+        ],
+        days=5,
+        funds_dir=funds_dir,
+    )
+
+    assert result["dates"] == [
+        "2024-01-07",
+        "2024-01-06",
+        "2024-01-05",
+        "2024-01-04",
+        "2024-01-03",
+    ]
+    by_isin = {fund["isin"]: fund for fund in result["funds"]}
+    assert by_isin["AAA"]["returns"] == [0.4, 0.3, 0.5, -1.0, 2.0]
+    assert by_isin["BBB"]["returns"] == [None, None, 0.2, 1.5, -2.0]
 
 
 def test_update_all_fund_metrics_persists_to_database(tmp_path):

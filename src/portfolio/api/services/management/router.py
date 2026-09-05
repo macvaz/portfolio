@@ -39,7 +39,7 @@ from portfolio.datasource.morningstar import (
     parse_morningstar_search,
 )
 from portfolio.datasource.errors import DownloadError
-from portfolio.common.metrics import compute_fund_metrics
+from portfolio.common.metrics import compute_fund_metrics, compute_aligned_recent_daily_returns
 from portfolio.common.navs import delete_fund_nav_csv, download_and_store_fund_nav
 
 router = APIRouter(prefix="/api/portfolio", tags=["management"])
@@ -186,6 +186,21 @@ def get_metrics(portfolio_id: int) -> dict:
     """Portfolio tables with real funds, weights, and stored metrics."""
     require_portfolio(portfolio_id)
     return get_portfolio_metrics(portfolio_id)
+
+
+@router.get("/recent_daily_returns")
+def get_recent_daily_returns(portfolio_id: int, days: int = 5) -> dict:
+    """Last N daily % returns per portfolio fund, aligned on shared calendar dates."""
+    require_portfolio(portfolio_id)
+    positions = [
+        position
+        for position in list_user_portfolio(portfolio_id)
+        if float(position["weighted_assets"]) > 0
+    ]
+    return compute_aligned_recent_daily_returns(
+        positions,
+        days=min(max(days, 1), 10),
+    )
 
 
 @router.get("/positions", response_model=list[PortfolioPositionResponse])

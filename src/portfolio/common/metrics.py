@@ -197,6 +197,73 @@ def compute_portfolio_ter(positions: list[dict]) -> float | None:
     return round(weighted_ter, 2)
 
 
+def compute_aligned_recent_daily_returns(
+    positions: list[dict],
+    *,
+    days: int = 5,
+    funds_dir: Path | None = None,
+) -> dict:
+    """Daily % returns for the last ``days`` dates, aligned across funds.
+
+    Dates are the most recent calendar dates that appear in any fund's return
+    series (union), sorted newest → oldest. Funds missing a NAV/return on a
+    given date get ``None`` for that cell.
+    """
+    days = max(1, int(days))
+    series_by_isin: dict[str, pd.Series] = {}
+    for position in positions:
+        isin = position["isin"]
+        if isin in series_by_isin:
+            continue
+        returns = load_fund_daily_returns(isin, funds_dir)
+        if returns is None or returns.empty:
+            continue
+        series_by_isin[isin] = returns
+
+    if not series_by_isin:
+        return {
+            "dates": [],
+            "funds": [
+                {
+                    "isin": position["isin"],
+                    "name": position.get("name") or position["isin"],
+                    "returns": [],
+                }
+                for position in positions
+            ],
+        }
+
+    all_dates = sorted(
+        {timestamp for series in series_by_isin.values() for timestamp in series.index}
+    )
+    recent_dates = list(reversed(all_dates[-days:]))
+    date_labels = [pd.Timestamp(timestamp).strftime("%Y-%m-%d") for timestamp in recent_dates]
+
+    funds_out: list[dict] = []
+    for position in positions:
+        isin = position["isin"]
+        series = series_by_isin.get(isin)
+        values: list[float | None] = []
+        if series is None:
+            values = [None] * len(recent_dates)
+        else:
+            aligned = series.reindex(recent_dates)
+            for value in aligned.tolist():
+                if value is None or pd.isna(value):
+                    values.append(None)
+                else:
+                    values.append(_round_metric(float(value) * 100))
+        funds_out.append(
+            {
+                "isin": isin,
+                "name": position.get("name") or isin,
+                "returns": values,
+            }
+        )
+
+    return {"dates": date_labels, "funds": funds_out}
+
+
 def compute_portfolio_correlation_matrix(
     positions: list[dict],
     funds_dir: Path | None = None,

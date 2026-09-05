@@ -212,26 +212,35 @@ button:disabled {
 
 .portfolio-table-name-wrap {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 0.35rem;
 }
 
 .portfolio-table-actions {
-  display: none;
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  z-index: 30;
-  transform: translateY(-50%);
-  padding-left: 0.35rem;
+  display: inline-flex;
+  position: static;
+  transform: none;
+  padding-left: 0;
   align-items: center;
   gap: 0.15rem;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
-.portfolio-table-name-wrap:hover .portfolio-table-actions,
-.portfolio-table-name-wrap .portfolio-table-actions:hover {
-  display: flex;
-  pointer-events: auto;
+/* Keep star/delete on hover; allocation stays visible. */
+@media (hover: hover) and (pointer: fine) and (min-width: 721px) {
+  .portfolio-default-btn,
+  .portfolio-delete-btn {
+    display: none;
+  }
+
+  .portfolio-table-name-wrap:hover .portfolio-default-btn,
+  .portfolio-table-name-wrap:hover .portfolio-delete-btn,
+  .portfolio-table-name-wrap:focus-within .portfolio-default-btn,
+  .portfolio-table-name-wrap:focus-within .portfolio-delete-btn {
+    display: flex;
+  }
 }
 
 .portfolio-action-btn {
@@ -1551,12 +1560,16 @@ body.is-allocation-open {
   padding: 1.25rem 1.5rem 1.5rem;
 }
 
+.allocation-screen.is-returns-mode .allocation-card {
+  width: min(960px, 100%);
+}
+
 .allocation-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .allocation-title {
@@ -1583,6 +1596,51 @@ body.is-allocation-open {
 .allocation-close:hover {
   background: rgba(0, 0, 0, 0.06);
   color: #333;
+}
+
+.allocation-mode-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.allocation-mode-tab {
+  margin: 0;
+  padding: 0.55rem 0.85rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: #555;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.allocation-mode-tab:hover {
+  background: transparent;
+  color: #1a1a1a;
+}
+
+.allocation-mode-tab.is-active {
+  color: #1a1a1a;
+  font-weight: 600;
+  border-bottom-color: var(--logo-orange);
+}
+
+@media (max-width: 900px) {
+  .allocation-mode-tabs {
+    display: none;
+  }
+
+  .allocation-screen.is-returns-mode .allocation-card {
+    width: min(720px, 100%);
+  }
+}
+
+.allocation-panel[hidden] {
+  display: none !important;
 }
 
 .allocation-lead {
@@ -1622,6 +1680,7 @@ body.is-allocation-open {
 .allocation-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 0.92rem;
 }
 
@@ -1629,7 +1688,7 @@ body.is-allocation-open {
 .allocation-table td {
   padding: 0.45rem 0.5rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .allocation-table thead th {
@@ -1647,8 +1706,34 @@ body.is-allocation-open {
   font-variant-numeric: tabular-nums;
 }
 
+.allocation-col-day {
+  width: 4.25rem;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+}
+
+.allocation-table thead .allocation-col-day {
+  font-weight: 600;
+  color: #555;
+  text-align: right;
+}
+
 .allocation-col-name {
-  min-width: 12rem;
+  width: auto;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.allocation-col-name .fund-link,
+.allocation-col-name .fund-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .allocation-total-row th,
@@ -2663,13 +2748,6 @@ body.is-allocation-open {
     display: none;
   }
 
-  .portfolio-table-name-wrap {
-    display: inline-flex;
-    align-items: center;
-    flex-direction: row-reverse;
-    gap: 0.35rem;
-  }
-
   .portfolio-table-meta {
     display: inline-flex;
   }
@@ -2721,21 +2799,6 @@ body.is-allocation-open {
 }
 
 @media (hover: none) and (min-width: 721px) {
-  .portfolio-table-name-wrap {
-    display: inline-flex;
-    align-items: center;
-    flex-direction: row-reverse;
-    gap: 0.35rem;
-  }
-
-  .portfolio-table-actions {
-    display: inline-flex;
-    position: static;
-    transform: none;
-    padding-left: 0;
-    pointer-events: auto;
-  }
-
   .fund-delete-popup {
     display: block;
     position: static;

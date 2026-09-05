@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=225" />
+    <link rel="stylesheet" href="/static/style.css?v=231" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -179,8 +179,8 @@
                     type="button"
                     id="portfolio-allocation-btn"
                     class="portfolio-action-btn portfolio-allocation-btn"
-                    aria-label="Calculate fund allocation"
-                    title="Calculate fund allocation"
+                    aria-label="Money allocation and daily returns"
+                    title="Money allocation and daily returns"
                     hidden
                   >
                     <svg
@@ -413,42 +413,103 @@
     <div id="allocation-screen" class="allocation-screen" hidden>
       <div class="allocation-card" role="dialog" aria-modal="true" aria-labelledby="allocation-title">
         <header class="allocation-header">
-          <h2 id="allocation-title" class="allocation-title">Fund allocation</h2>
+          <h2 id="allocation-title" class="allocation-title">Portfolio tools</h2>
           <button type="button" id="allocation-close" class="allocation-close" aria-label="Close">×</button>
         </header>
-        <p class="allocation-lead">
-          Enter the total amount to invest; each fund amount follows the current portfolio weights.
-        </p>
-        <label class="allocation-label" for="allocation-total">Total investable amount</label>
-        <input
-          id="allocation-total"
-          class="allocation-total"
-          type="number"
-          min="0"
-          step="0.01"
-          inputmode="decimal"
-          placeholder="e.g. 10000"
-        />
-        <div class="allocation-table-wrap">
-          <table class="allocation-table">
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col" class="allocation-col-weight">Weight (%)</th>
-                <th scope="col" class="allocation-col-amount">Amount</th>
-              </tr>
-            </thead>
-            <tbody id="allocation-body"></tbody>
-            <tfoot>
-              <tr class="allocation-total-row">
-                <th scope="row">Total</th>
-                <td id="allocation-weight-total" class="allocation-col-weight">—</td>
-                <td id="allocation-amount-total" class="allocation-col-amount">—</td>
-              </tr>
-            </tfoot>
-          </table>
+
+        <div class="allocation-mode-tabs" role="tablist" aria-label="Portfolio tool">
+          <button
+            type="button"
+            class="allocation-mode-tab is-active"
+            role="tab"
+            id="allocation-mode-money"
+            data-mode="money"
+            aria-selected="true"
+            aria-controls="allocation-panel-money"
+          >
+            Money allocation
+          </button>
+          <button
+            type="button"
+            class="allocation-mode-tab"
+            role="tab"
+            id="allocation-mode-returns"
+            data-mode="returns"
+            aria-selected="false"
+            aria-controls="allocation-panel-returns"
+          >
+            Daily returns
+          </button>
         </div>
-        <p id="allocation-empty" class="allocation-empty" hidden>No funds with a positive weight in this portfolio.</p>
+
+        <section
+          id="allocation-panel-money"
+          class="allocation-panel"
+          role="tabpanel"
+          aria-labelledby="allocation-mode-money"
+        >
+          <p class="allocation-lead">
+            Enter the total amount to invest; each fund amount follows the current portfolio weights.
+          </p>
+          <label class="allocation-label" for="allocation-total">Total investable amount</label>
+          <input
+            id="allocation-total"
+            class="allocation-total"
+            type="number"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            placeholder="e.g. 10000"
+          />
+          <div class="allocation-table-wrap">
+            <table class="allocation-table" id="allocation-money-table">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col" class="allocation-col-weight">Weight (%)</th>
+                  <th scope="col" class="allocation-col-amount">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="allocation-money-body"></tbody>
+              <tfoot>
+                <tr class="allocation-total-row">
+                  <th scope="row">Total</th>
+                  <td id="allocation-weight-total" class="allocation-col-weight">—</td>
+                  <td id="allocation-amount-total" class="allocation-col-amount">—</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p id="allocation-money-empty" class="allocation-empty" hidden>
+            No funds with a positive weight in this portfolio.
+          </p>
+        </section>
+
+        <section
+          id="allocation-panel-returns"
+          class="allocation-panel"
+          role="tabpanel"
+          aria-labelledby="allocation-mode-returns"
+          hidden
+        >
+          <p class="allocation-lead">
+            Daily % returns for the last five dates with any fund NAV. Missing days show as —.
+          </p>
+          <div class="allocation-table-wrap">
+            <table class="allocation-table" id="allocation-returns-table">
+              <thead>
+                <tr id="allocation-returns-head-row">
+                  <th scope="col">Name</th>
+                </tr>
+              </thead>
+              <tbody id="allocation-returns-body"></tbody>
+            </table>
+          </div>
+          <p id="allocation-returns-empty" class="allocation-empty" hidden>
+            No funds with a positive weight in this portfolio.
+          </p>
+          <p id="allocation-returns-loading" class="allocation-empty" hidden>Loading daily returns…</p>
+        </section>
       </div>
     </div>
 
@@ -458,7 +519,7 @@
     <script src="/static/risk.js?v=14"></script>
     <script src="/static/health.js?v=62"></script>
     <script src="/static/add-fund.js?v=5"></script>
-    <script src="/static/allocation.js?v=1"></script>
+    <script src="/static/allocation.js?v=6"></script>
     <script src="/static/app.js?v=48"></script>
   </body>
 </html>
