@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=223" />
+    <link rel="stylesheet" href="/static/style.css?v=225" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -173,6 +173,34 @@
                       aria-hidden="true"
                     >
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    id="portfolio-allocation-btn"
+                    class="portfolio-action-btn portfolio-allocation-btn"
+                    aria-label="Calculate fund allocation"
+                    title="Calculate fund allocation"
+                    hidden
+                  >
+                    <svg
+                      class="portfolio-action-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="4" y="2" width="16" height="20" rx="2" />
+                      <line x1="8" y1="6" x2="16" y2="6" />
+                      <line x1="8" y1="10" x2="10" y2="10" />
+                      <line x1="14" y1="10" x2="16" y2="10" />
+                      <line x1="8" y1="14" x2="10" y2="14" />
+                      <line x1="14" y1="14" x2="16" y2="14" />
+                      <line x1="8" y1="18" x2="16" y2="18" />
                     </svg>
                   </button>
                   <button
@@ -382,12 +410,55 @@
       </div>
     </div>
 
+    <div id="allocation-screen" class="allocation-screen" hidden>
+      <div class="allocation-card" role="dialog" aria-modal="true" aria-labelledby="allocation-title">
+        <header class="allocation-header">
+          <h2 id="allocation-title" class="allocation-title">Fund allocation</h2>
+          <button type="button" id="allocation-close" class="allocation-close" aria-label="Close">×</button>
+        </header>
+        <p class="allocation-lead">
+          Enter the total amount to invest; each fund amount follows the current portfolio weights.
+        </p>
+        <label class="allocation-label" for="allocation-total">Total investable amount</label>
+        <input
+          id="allocation-total"
+          class="allocation-total"
+          type="number"
+          min="0"
+          step="0.01"
+          inputmode="decimal"
+          placeholder="e.g. 10000"
+        />
+        <div class="allocation-table-wrap">
+          <table class="allocation-table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col" class="allocation-col-weight">Weight (%)</th>
+                <th scope="col" class="allocation-col-amount">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="allocation-body"></tbody>
+            <tfoot>
+              <tr class="allocation-total-row">
+                <th scope="row">Total</th>
+                <td id="allocation-weight-total" class="allocation-col-weight">—</td>
+                <td id="allocation-amount-total" class="allocation-col-amount">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p id="allocation-empty" class="allocation-empty" hidden>No funds with a positive weight in this portfolio.</p>
+      </div>
+    </div>
+
     <script src="/static/api.js?v=15"></script>
     <script src="/static/portfolios.js?v=11"></script>
-    <script src="/static/management.js?v=134"></script>
+    <script src="/static/management.js?v=132"></script>
     <script src="/static/risk.js?v=14"></script>
     <script src="/static/health.js?v=62"></script>
     <script src="/static/add-fund.js?v=5"></script>
-    <script src="/static/app.js?v=47"></script>
+    <script src="/static/allocation.js?v=1"></script>
+    <script src="/static/app.js?v=48"></script>
   </body>
 </html>
