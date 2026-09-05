@@ -8,6 +8,7 @@
   const moneyBodyEl = document.getElementById("allocation-money-body");
   const returnsHeadRowEl = document.getElementById("allocation-returns-head-row");
   const returnsBodyEl = document.getElementById("allocation-returns-body");
+  const returnsPortfolioRowEl = document.getElementById("allocation-returns-portfolio-row");
   const weightTotalEl = document.getElementById("allocation-weight-total");
   const amountTotalEl = document.getElementById("allocation-amount-total");
   const moneyEmptyEl = document.getElementById("allocation-money-empty");
@@ -17,7 +18,9 @@
   const openBtn = document.getElementById("portfolio-allocation-btn");
   const modeTabs = Array.from(document.querySelectorAll(".allocation-mode-tab"));
   const modeTabsEl = document.querySelector(".allocation-mode-tabs");
-  const returnsWideMq = window.matchMedia("(min-width: 901px)");
+  const returnsAvailableMq = window.matchMedia(
+    "(orientation: landscape), (min-width: 901px)",
+  );
 
   const amountFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 2,
@@ -30,7 +33,7 @@
   let recentReturnsLoaded = false;
 
   function returnsModeAvailable() {
-    return returnsWideMq.matches;
+    return returnsAvailableMq.matches;
   }
 
   function updateOpenButtonLabel() {
@@ -157,6 +160,29 @@
     amountTotalEl.textContent = total === null ? "—" : amountFormatter.format(amountSum);
   }
 
+  function computePortfolioDailyReturns(funds, dateCount) {
+    const weightSum = funds.reduce((sum, fund) => sum + Number(fund.weight || 0), 0);
+    if (!(weightSum > 0) || dateCount <= 0) {
+      return Array.from({ length: dateCount }, () => null);
+    }
+
+    return Array.from({ length: dateCount }, (_, index) => {
+      let contribution = 0;
+      let anyValue = false;
+      for (const fund of funds) {
+        const values = recentReturns.byIsin.get(fund.isin) || [];
+        const value = index < values.length ? values[index] : null;
+        if (value === null || value === undefined || Number.isNaN(value)) {
+          continue;
+        }
+        anyValue = true;
+        contribution += (Number(fund.weight) / weightSum) * Number(value);
+      }
+      // Missing fund days count as 0% for that weight; only — if nothing published.
+      return anyValue ? contribution : null;
+    });
+  }
+
   function renderReturnsRows(funds) {
     const dates = recentReturns.dates || [];
     const dateCount = dates.length;
@@ -172,6 +198,10 @@
 
     if (!funds.length) {
       returnsBodyEl.innerHTML = "";
+      if (returnsPortfolioRowEl) {
+        returnsPortfolioRowEl.hidden = true;
+        returnsPortfolioRowEl.innerHTML = `<th scope="row">Portfolio</th>`;
+      }
       returnsEmptyEl.hidden = false;
       return;
     }
@@ -195,6 +225,19 @@
           </tr>`;
       })
       .join("");
+
+    const portfolioReturns = computePortfolioDailyReturns(funds, dateCount);
+    if (returnsPortfolioRowEl) {
+      returnsPortfolioRowEl.hidden = false;
+      returnsPortfolioRowEl.innerHTML = `
+        <th scope="row">Portfolio</th>
+        ${portfolioReturns
+          .map((value) => {
+            const cls = dailyReturnClass(value);
+            return `<td class="allocation-col-day ${cls}">${formatDailyReturn(value)}</td>`;
+          })
+          .join("")}`;
+    }
   }
 
   function refreshMoney() {
@@ -335,10 +378,10 @@
     });
   });
 
-  if (typeof returnsWideMq.addEventListener === "function") {
-    returnsWideMq.addEventListener("change", syncReturnsAvailability);
-  } else if (typeof returnsWideMq.addListener === "function") {
-    returnsWideMq.addListener(syncReturnsAvailability);
+  if (typeof returnsAvailableMq.addEventListener === "function") {
+    returnsAvailableMq.addEventListener("change", syncReturnsAvailability);
+  } else if (typeof returnsAvailableMq.addListener === "function") {
+    returnsAvailableMq.addListener(syncReturnsAvailability);
   }
   syncReturnsAvailability();
 

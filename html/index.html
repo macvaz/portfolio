@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=231" />
+    <link rel="stylesheet" href="/static/style.css?v=234" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -493,7 +493,8 @@
           hidden
         >
           <p class="allocation-lead">
-            Daily % returns for the last five dates with any fund NAV. Missing days show as —.
+            Daily % returns for the last five dates with any fund NAV. Portfolio is the
+            weight-weighted combination; missing fund days count as 0% in that total.
           </p>
           <div class="allocation-table-wrap">
             <table class="allocation-table" id="allocation-returns-table">
@@ -503,6 +504,11 @@
                 </tr>
               </thead>
               <tbody id="allocation-returns-body"></tbody>
+              <tfoot>
+                <tr id="allocation-returns-portfolio-row" class="allocation-total-row" hidden>
+                  <th scope="row">Portfolio</th>
+                </tr>
+              </tfoot>
             </table>
           </div>
           <p id="allocation-returns-empty" class="allocation-empty" hidden>
@@ -519,7 +525,7 @@
     <script src="/static/risk.js?v=14"></script>
     <script src="/static/health.js?v=62"></script>
     <script src="/static/add-fund.js?v=5"></script>
-    <script src="/static/allocation.js?v=6"></script>
+    <script src="/static/allocation.js?v=10"></script>
     <script src="/static/app.js?v=48"></script>
   </body>
 </html>
