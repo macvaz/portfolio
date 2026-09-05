@@ -22,6 +22,8 @@
     "(orientation: landscape), (min-width: 901px)",
   );
 
+  const DEFAULT_TOTAL = 500000;
+
   const amountFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -331,7 +333,6 @@
 
     if (activeMode === "money") {
       refreshMoney();
-      totalInput.focus();
       return;
     }
 
@@ -343,7 +344,7 @@
   }
 
   async function open() {
-    totalInput.value = "";
+    totalInput.value = String(DEFAULT_TOTAL);
     recentReturns = { dates: [], byIsin: new Map() };
     recentReturnsLoaded = false;
     screen.hidden = false;
