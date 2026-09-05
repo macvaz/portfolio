@@ -116,6 +116,33 @@ def test_warm_all_risk_report_caches(tmp_path, monkeypatch):
     )
 
 
+def test_warm_skips_incomplete_weights(tmp_path, monkeypatch):
+    db_path, funds_dir, reports_dir, user_id, _ = _seed(tmp_path, monkeypatch)
+    save_user_portfolio(
+        user_id,
+        [{"isin": "ES0182527038", "weighted_assets": 0.4}],
+        db_path=db_path,
+    )
+    calls = {"n": 0}
+
+    def mock_report_html(*args, **kwargs):
+        calls["n"] += 1
+        return "<html>x</html>"
+
+    monkeypatch.setattr(
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
+        mock_report_html,
+    )
+    assert (
+        warm_user_risk_report_cache(
+            user_id, db_path=db_path, funds_dir=funds_dir, reports_dir=reports_dir
+        )
+        is None
+    )
+    assert calls["n"] == 0
+    assert list(reports_dir.glob("*.html")) == []
+
+
 def test_warm_empty_portfolio_clears_cache(tmp_path, monkeypatch):
     db_path, funds_dir, reports_dir, user_id, positions = _seed(tmp_path, monkeypatch)
     write_cached_risk_report(

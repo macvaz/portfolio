@@ -43,7 +43,7 @@
     el.hidden = !message;
   }
 
-  function setSavingWeightsUi(isSaving) {
+  function setSavingWeightsUi(isSaving, { generateRiskReport = false } = {}) {
     const loading = document.getElementById("management-loading");
     const view = document.getElementById("management-view");
 
@@ -67,7 +67,9 @@
 
     const tick = () => {
       const seconds = Math.floor((Date.now() - saveWeightsStartedAt) / 1000);
-      loading.textContent = `Saving portfolio and generating risk report… ${seconds}s`;
+      loading.textContent = generateRiskReport
+        ? `Saving portfolio and generating risk report… ${seconds}s`
+        : `Saving portfolio… ${seconds}s`;
     };
     tick();
     saveWeightsTimer = setInterval(tick, 1000);
@@ -128,8 +130,8 @@
   function renderFundName(fund) {
     const name = escapeHtml(fundDisplayName(fund));
     const nameLink = fund.morningstar_url
-      ? `<a href="${fund.morningstar_url}" class="fund-link" target="_blank" rel="noopener noreferrer">${name}</a>`
-      : `<span class="fund-name">${name}</span>`;
+      ? `<a href="${fund.morningstar_url}" class="fund-link" target="_blank" rel="noopener noreferrer" title="${name}">${name}</a>`
+      : `<span class="fund-name" title="${name}">${name}</span>`;
     return `
       <div class="fund-name-wrap">
         <div class="fund-delete-popup">
@@ -473,6 +475,14 @@
     return positions;
   }
 
+  function weightsAreComplete(positions) {
+    const total = positions.reduce(
+      (sum, position) => sum + Number(position.weighted_assets || 0),
+      0,
+    );
+    return Math.abs(total - 1) <= 0.01;
+  }
+
   async function fetchCurve(startDate = null) {
     let path = `${api.PORTFOLIO_API}/curve`;
     if (startDate) {
@@ -556,7 +566,9 @@
     const positions = collectWeightPositions();
     savingWeights = true;
     showError("");
-    setSavingWeightsUi(true);
+    setSavingWeightsUi(true, {
+      generateRiskReport: weightsAreComplete(positions),
+    });
 
     try {
       await api.fetchJson(api.withPortfolioId(`${api.PORTFOLIO_API}/positions`), {

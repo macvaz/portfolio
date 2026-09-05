@@ -747,7 +747,7 @@ button:disabled {
   text-align: left;
   min-width: 220px;
   max-width: 360px;
-  white-space: normal;
+  white-space: nowrap;
   padding-left: 0;
   overflow: visible;
 }
@@ -863,6 +863,16 @@ button:disabled {
   display: block;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+}
+
+.fund-table:not(.alert-table--history) .fund-name-wrap > .fund-link,
+.fund-table:not(.alert-table--history) .fund-name-wrap > .fund-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fund-link {
@@ -2471,6 +2481,13 @@ body.is-month-detail-open {
     display: flex;
     align-items: flex-start;
     gap: 0.35rem;
+  }
+
+  .fund-table:not(.alert-table--history) .fund-name-wrap > .fund-link,
+  .fund-table:not(.alert-table--history) .fund-name-wrap > .fund-name {
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
   }
 
   .fund-table:not(.alert-table--history) .fund-link {

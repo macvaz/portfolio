@@ -249,16 +249,62 @@ def test_full_risk_report_serves_from_cache(tmp_path, monkeypatch):
     assert dated.text == "<html><body>report-2</body></html>"
     assert calls["n"] == 2
 
-    # weight change warms a new full report
+    # weight change below 100% does not auto-warm a risk report
     client.put(
         "/api/portfolio/positions",
         params={"portfolio_id": user_id},
         json={"positions": [{"isin": "ES0182527038", "weighted_assets": 0.5}]},
     )
-    assert calls["n"] == 3
+    assert calls["n"] == 2
     third = client.get("/api/portfolio/risk_report", params={"portfolio_id": user_id})
     assert third.text == "<html><body>report-3</body></html>"
     assert calls["n"] == 3
+
+
+def test_save_partial_weights_skips_risk_report_warm(tmp_path, monkeypatch):
+    db_path = tmp_path / "portfolio.db"
+    funds_dir = tmp_path / "funds"
+    reports_dir = tmp_path / "risk_reports"
+    monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
+    monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
+    monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
+    monkeypatch.setattr(
+        "portfolio.api.services.risk.risk_report_cache.DEFAULT_RISK_REPORTS_DIR",
+        reports_dir,
+    )
+    init_db(db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    import pandas as pd
+    from portfolio.common.navs import save_fund_nav_csv
+
+    df = pd.DataFrame(
+        {"value": [100.0, 101.0, 102.0]},
+        index=pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
+    )
+    save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
+    save_fund_nav_csv("IE00BYX5MX67", df, funds_dir=funds_dir)
+
+    calls = {"n": 0}
+
+    def mock_report_html(*args, **kwargs):
+        calls["n"] += 1
+        return "<html>partial</html>"
+
+    monkeypatch.setattr(
+        "portfolio.api.services.risk.risk_report.generate_performance_report_html",
+        mock_report_html,
+    )
+
+    client = TestClient(app)
+    user_id = _create_user(db_path)
+    response = client.put(
+        "/api/portfolio/positions",
+        params={"portfolio_id": user_id},
+        json={"positions": [{"isin": "ES0182527038", "weighted_assets": 0.35}]},
+    )
+    assert response.status_code == 200
+    assert calls["n"] == 0
+    assert list(reports_dir.glob("*.html")) == []
 
 
 def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):

@@ -23,6 +23,17 @@ from portfolio.storage.database import list_user_portfolio, list_users
 
 logger = logging.getLogger(__name__)
 
+# Same tolerance as portfolio position validation in management schemas.
+WEIGHT_SUM_TOLERANCE = 0.01
+
+
+def portfolio_weights_are_complete(positions: list[dict]) -> bool:
+    """True when invested weights sum to ~100% (cash remainder is not allowed)."""
+    if not positions:
+        return False
+    total = sum(float(position["weighted_assets"]) for position in positions)
+    return abs(total - 1.0) <= WEIGHT_SUM_TOLERANCE
+
 
 def build_risk_report_html(
     positions: list[dict],
@@ -92,10 +103,22 @@ def warm_user_risk_report_cache(
     funds_dir: Path | None = None,
     reports_dir: Path | None = None,
 ) -> str | None:
-    """Rebuild and store the full-period report for one portfolio."""
+    """Rebuild and store the full-period report for one portfolio.
+
+    Skips generation when portfolio weights do not sum to ~100%, so partial
+    allocations on the management screen do not trigger an automatic rebuild.
+    """
     positions = list_user_portfolio(user_id, db_path)
     if not positions:
         invalidate_portfolio_risk_reports(user_id, reports_dir=reports_dir)
+        return None
+
+    if not portfolio_weights_are_complete(positions):
+        logger.info(
+            "Skipping risk report cache warm for portfolio %s: weights sum to %.4f",
+            user_id,
+            sum(float(position["weighted_assets"]) for position in positions),
+        )
         return None
 
     invalidate_portfolio_risk_reports(user_id, reports_dir=reports_dir)
