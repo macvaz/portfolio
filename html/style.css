@@ -1637,6 +1637,11 @@ body.is-allocation-open {
   .allocation-screen.is-returns-mode .allocation-card {
     width: min(720px, 100%);
   }
+
+  .allocation-col-weight,
+  .allocation-col-amount {
+    width: 5.25rem;
+  }
 }
 
 .allocation-panel[hidden] {
@@ -1700,14 +1705,19 @@ body.is-allocation-open {
 
 .allocation-col-weight,
 .allocation-col-amount {
-  width: 7rem;
+  width: 5.5rem;
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
+.allocation-table thead .allocation-col-weight,
+.allocation-table thead .allocation-col-amount {
+  text-align: right;
+}
+
 .allocation-col-day {
-  width: 4.25rem;
+  width: 3.5rem;
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
