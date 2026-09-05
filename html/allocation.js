@@ -9,6 +9,7 @@
   const returnsHeadRowEl = document.getElementById("allocation-returns-head-row");
   const returnsBodyEl = document.getElementById("allocation-returns-body");
   const returnsPortfolioRowEl = document.getElementById("allocation-returns-portfolio-row");
+  const returnsBenchmarkRowEl = document.getElementById("allocation-returns-benchmark-row");
   const weightTotalEl = document.getElementById("allocation-weight-total");
   const amountTotalEl = document.getElementById("allocation-amount-total");
   const moneyEmptyEl = document.getElementById("allocation-money-empty");
@@ -29,8 +30,8 @@
     maximumFractionDigits: 2,
   });
 
-  let activeMode = "money";
-  let recentReturns = { dates: [], byIsin: new Map() };
+  let activeMode = "returns";
+  let recentReturns = { dates: [], byIsin: new Map(), benchmark: null };
   let recentReturnsRequest = 0;
   let recentReturnsLoaded = false;
 
@@ -185,6 +186,32 @@
     });
   }
 
+  function renderSummaryReturnRow(rowEl, label, values, dateCount) {
+    if (!rowEl) {
+      return;
+    }
+    const cells = [];
+    for (let index = 0; index < dateCount; index += 1) {
+      const value = index < values.length ? values[index] : null;
+      const cls = dailyReturnClass(value);
+      cells.push(
+        `<td class="allocation-col-day ${cls}">${formatDailyReturn(value)}</td>`,
+      );
+    }
+    rowEl.hidden = false;
+    rowEl.innerHTML = `
+      <th scope="row">${escapeHtml(label)}</th>
+      ${cells.join("")}`;
+  }
+
+  function hideSummaryReturnRow(rowEl, label) {
+    if (!rowEl) {
+      return;
+    }
+    rowEl.hidden = true;
+    rowEl.innerHTML = `<th scope="row">${escapeHtml(label)}</th>`;
+  }
+
   function renderReturnsRows(funds) {
     const dates = recentReturns.dates || [];
     const dateCount = dates.length;
@@ -200,10 +227,11 @@
 
     if (!funds.length) {
       returnsBodyEl.innerHTML = "";
-      if (returnsPortfolioRowEl) {
-        returnsPortfolioRowEl.hidden = true;
-        returnsPortfolioRowEl.innerHTML = `<th scope="row">Portfolio</th>`;
-      }
+      hideSummaryReturnRow(returnsPortfolioRowEl, "Portfolio");
+      hideSummaryReturnRow(
+        returnsBenchmarkRowEl,
+        "SP500",
+      );
       returnsEmptyEl.hidden = false;
       return;
     }
@@ -229,17 +257,16 @@
       .join("");
 
     const portfolioReturns = computePortfolioDailyReturns(funds, dateCount);
-    if (returnsPortfolioRowEl) {
-      returnsPortfolioRowEl.hidden = false;
-      returnsPortfolioRowEl.innerHTML = `
-        <th scope="row">Portfolio</th>
-        ${portfolioReturns
-          .map((value) => {
-            const cls = dailyReturnClass(value);
-            return `<td class="allocation-col-day ${cls}">${formatDailyReturn(value)}</td>`;
-          })
-          .join("")}`;
-    }
+    renderSummaryReturnRow(returnsPortfolioRowEl, "Portfolio", portfolioReturns, dateCount);
+
+    const benchmark = recentReturns.benchmark;
+    const benchmarkValues = Array.isArray(benchmark?.returns) ? benchmark.returns : [];
+    renderSummaryReturnRow(
+      returnsBenchmarkRowEl,
+      "SP500",
+      benchmarkValues,
+      dateCount,
+    );
   }
 
   function refreshMoney() {
@@ -269,7 +296,7 @@
     returnsEmptyEl.hidden = true;
 
     if (api.getPortfolioId() === null) {
-      recentReturns = { dates: [], byIsin: new Map() };
+      recentReturns = { dates: [], byIsin: new Map(), benchmark: null };
       recentReturnsLoaded = true;
       returnsLoadingEl.hidden = true;
       return;
@@ -295,16 +322,27 @@
           order.map((item) => (item.index < values.length ? values[item.index] : null)),
         );
       });
+      const benchmarkPayload = payload.benchmark;
+      const benchmarkValues = Array.isArray(benchmarkPayload?.returns)
+        ? benchmarkPayload.returns
+        : [];
       recentReturns = {
         dates,
         byIsin,
+        benchmark: {
+          isin: benchmarkPayload?.isin || null,
+          name: benchmarkPayload?.name || "SP500",
+          returns: order.map((item) =>
+            item.index < benchmarkValues.length ? benchmarkValues[item.index] : null,
+          ),
+        },
       };
       recentReturnsLoaded = true;
     } catch (_error) {
       if (requestId !== recentReturnsRequest) {
         return;
       }
-      recentReturns = { dates: [], byIsin: new Map() };
+      recentReturns = { dates: [], byIsin: new Map(), benchmark: null };
       recentReturnsLoaded = true;
     } finally {
       if (requestId === recentReturnsRequest) {
@@ -345,12 +383,12 @@
 
   async function open() {
     totalInput.value = String(DEFAULT_TOTAL);
-    recentReturns = { dates: [], byIsin: new Map() };
+    recentReturns = { dates: [], byIsin: new Map(), benchmark: null };
     recentReturnsLoaded = false;
     screen.hidden = false;
     screen.removeAttribute("hidden");
     document.body.classList.add("is-allocation-open");
-    await setMode("money");
+    await setMode(returnsModeAvailable() ? "returns" : "money");
   }
 
   function close() {

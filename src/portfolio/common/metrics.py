@@ -7,6 +7,8 @@ import pandas as pd
 import quantstats as qs
 
 from portfolio.common.equity import (
+    BENCHMARK_ISIN,
+    BENCHMARK_NAME,
     TRADING_DAYS_PER_YEAR,
     align_return_series,
     build_portfolio_daily_returns,
@@ -207,7 +209,8 @@ def compute_aligned_recent_daily_returns(
 
     Dates are the most recent calendar dates that appear in any fund's return
     series (union), sorted newest → oldest. Funds missing a NAV/return on a
-    given date get ``None`` for that cell.
+    given date get ``None`` for that cell. Also includes benchmark (S&P 500)
+    returns aligned to the same dates.
     """
     days = max(1, int(days))
     series_by_isin: dict[str, pd.Series] = {}
@@ -220,6 +223,12 @@ def compute_aligned_recent_daily_returns(
             continue
         series_by_isin[isin] = returns
 
+    empty_benchmark = {
+        "isin": BENCHMARK_ISIN,
+        "name": BENCHMARK_NAME,
+        "returns": [],
+    }
+
     if not series_by_isin:
         return {
             "dates": [],
@@ -231,6 +240,7 @@ def compute_aligned_recent_daily_returns(
                 }
                 for position in positions
             ],
+            "benchmark": empty_benchmark,
         }
 
     all_dates = sorted(
@@ -239,29 +249,37 @@ def compute_aligned_recent_daily_returns(
     recent_dates = list(reversed(all_dates[-days:]))
     date_labels = [pd.Timestamp(timestamp).strftime("%Y-%m-%d") for timestamp in recent_dates]
 
+    def _aligned_pct_values(series: pd.Series | None) -> list[float | None]:
+        if series is None or series.empty:
+            return [None] * len(recent_dates)
+        aligned = series.reindex(recent_dates)
+        values: list[float | None] = []
+        for value in aligned.tolist():
+            if value is None or pd.isna(value):
+                values.append(None)
+            else:
+                values.append(_round_metric(float(value) * 100))
+        return values
+
     funds_out: list[dict] = []
     for position in positions:
         isin = position["isin"]
-        series = series_by_isin.get(isin)
-        values: list[float | None] = []
-        if series is None:
-            values = [None] * len(recent_dates)
-        else:
-            aligned = series.reindex(recent_dates)
-            for value in aligned.tolist():
-                if value is None or pd.isna(value):
-                    values.append(None)
-                else:
-                    values.append(_round_metric(float(value) * 100))
         funds_out.append(
             {
                 "isin": isin,
                 "name": position.get("name") or isin,
-                "returns": values,
+                "returns": _aligned_pct_values(series_by_isin.get(isin)),
             }
         )
 
-    return {"dates": date_labels, "funds": funds_out}
+    benchmark_returns = load_benchmark_daily_returns(funds_dir)
+    benchmark_out = {
+        "isin": BENCHMARK_ISIN,
+        "name": BENCHMARK_NAME,
+        "returns": _aligned_pct_values(benchmark_returns),
+    }
+
+    return {"dates": date_labels, "funds": funds_out, "benchmark": benchmark_out}
 
 
 def compute_portfolio_correlation_matrix(

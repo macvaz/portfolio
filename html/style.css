@@ -1752,7 +1752,8 @@ body.is-allocation-open {
   font-weight: 600;
 }
 
-#allocation-returns-portfolio-row th {
+#allocation-returns-portfolio-row th,
+#allocation-returns-benchmark-row th {
   text-align: left;
 }
 

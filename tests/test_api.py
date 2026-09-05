@@ -551,6 +551,11 @@ def test_recent_daily_returns_aligned_across_funds(tmp_path, monkeypatch):
         daily_navs("2024-01-01", [0.01, -0.02, 0.015, 0.002]),
         funds_dir=funds_dir,
     )
+    save_fund_nav_csv(
+        "IE00BYX5MX67",
+        daily_navs("2024-01-01", [0.005, -0.003, 0.004, 0.001, 0.002, 0.006]),
+        funds_dir=funds_dir,
+    )
 
     client = TestClient(app)
     user_id = _create_user(db_path)
@@ -581,6 +586,9 @@ def test_recent_daily_returns_aligned_across_funds(tmp_path, monkeypatch):
     by_isin = {fund["isin"]: fund for fund in data["funds"]}
     assert by_isin["ES0182527038"]["returns"] == [0.4, 0.3, 0.5, -1.0, 2.0]
     assert by_isin["IE00BYX5NX33"]["returns"] == [None, None, 0.2, 1.5, -2.0]
+    assert data["benchmark"]["name"] == "S&P 500"
+    assert data["benchmark"]["isin"] == "IE00BYX5MX67"
+    assert data["benchmark"]["returns"] == [0.6, 0.2, 0.1, 0.4, -0.3]
 
 
 def test_save_portfolio_rejects_overweight_and_duplicate_isins(tmp_path, monkeypatch):

@@ -195,6 +195,11 @@ def test_compute_aligned_recent_daily_returns(tmp_path):
         _daily_navs("2024-01-01", [0.01, -0.02, 0.015, 0.002]),
         funds_dir=funds_dir,
     )
+    save_fund_nav_csv(
+        "IE00BYX5MX67",
+        _daily_navs("2024-01-01", [0.005, -0.003, 0.004, 0.001, 0.002, 0.006]),
+        funds_dir=funds_dir,
+    )
 
     result = compute_aligned_recent_daily_returns(
         [
@@ -215,6 +220,9 @@ def test_compute_aligned_recent_daily_returns(tmp_path):
     by_isin = {fund["isin"]: fund for fund in result["funds"]}
     assert by_isin["AAA"]["returns"] == [0.4, 0.3, 0.5, -1.0, 2.0]
     assert by_isin["BBB"]["returns"] == [None, None, 0.2, 1.5, -2.0]
+    assert result["benchmark"]["isin"] == "IE00BYX5MX67"
+    assert result["benchmark"]["name"] == "S&P 500"
+    assert result["benchmark"]["returns"] == [0.6, 0.2, 0.1, 0.4, -0.3]
 
 
 def test_update_all_fund_metrics_persists_to_database(tmp_path):

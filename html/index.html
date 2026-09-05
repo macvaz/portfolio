@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=236" />
+    <link rel="stylesheet" href="/static/style.css?v=238" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -420,22 +420,22 @@
         <div class="allocation-mode-tabs" role="tablist" aria-label="Portfolio tool">
           <button
             type="button"
-            class="allocation-mode-tab is-active"
+            class="allocation-mode-tab"
             role="tab"
             id="allocation-mode-money"
             data-mode="money"
-            aria-selected="true"
+            aria-selected="false"
             aria-controls="allocation-panel-money"
           >
             Money allocation
           </button>
           <button
             type="button"
-            class="allocation-mode-tab"
+            class="allocation-mode-tab is-active"
             role="tab"
             id="allocation-mode-returns"
             data-mode="returns"
-            aria-selected="false"
+            aria-selected="true"
             aria-controls="allocation-panel-returns"
           >
             Daily returns
@@ -447,6 +447,7 @@
           class="allocation-panel"
           role="tabpanel"
           aria-labelledby="allocation-mode-money"
+          hidden
         >
           <p class="allocation-lead">
             Enter the total amount to invest; each fund amount follows the current portfolio weights.
@@ -491,11 +492,11 @@
           class="allocation-panel"
           role="tabpanel"
           aria-labelledby="allocation-mode-returns"
-          hidden
         >
           <p class="allocation-lead">
             Daily % returns for the last five dates with any fund NAV. Portfolio is the
             weight-weighted combination; missing fund days count as 0% in that total.
+            SP500 is shown for comparison on the same dates.
           </p>
           <div class="allocation-table-wrap">
             <table class="allocation-table" id="allocation-returns-table">
@@ -508,6 +509,9 @@
               <tfoot>
                 <tr id="allocation-returns-portfolio-row" class="allocation-total-row" hidden>
                   <th scope="row">Portfolio</th>
+                </tr>
+                <tr id="allocation-returns-benchmark-row" class="allocation-total-row allocation-benchmark-row" hidden>
+                  <th scope="row">SP500</th>
                 </tr>
               </tfoot>
             </table>
@@ -526,7 +530,7 @@
     <script src="/static/risk.js?v=14"></script>
     <script src="/static/health.js?v=62"></script>
     <script src="/static/add-fund.js?v=5"></script>
-    <script src="/static/allocation.js?v=11"></script>
+    <script src="/static/allocation.js?v=14"></script>
     <script src="/static/app.js?v=48"></script>
   </body>
 </html>
