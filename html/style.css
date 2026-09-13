@@ -1632,16 +1632,33 @@ body.is-allocation-open {
     width: 5.25rem;
   }
 
-  .allocation-col-name,
+  .allocation-table .allocation-col-name,
   #allocation-returns-portfolio-row th,
   #allocation-returns-benchmark-row th {
-    width: 3rem;
-    max-width: 3rem;
+    width: 7rem;
+    max-width: 7rem;
   }
 
+  /* Keep date/total columns at fixed size — don't stretch them when name shrinks. */
   #allocation-returns-table {
-    min-width: 25.5rem;
-    width: max(100%, 25.5rem);
+    width: max-content;
+    min-width: 0;
+  }
+
+  #allocation-returns-table .allocation-col-day {
+    width: 2.85rem;
+    max-width: 2.85rem;
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
+    font-size: 0.82rem;
+  }
+
+  #allocation-returns-table .allocation-col-before-total {
+    padding-right: 0.45rem;
+  }
+
+  #allocation-returns-table .allocation-col-total {
+    padding-left: 0.45rem;
   }
 }
 
@@ -1693,9 +1710,9 @@ body.is-allocation-open {
 }
 
 #allocation-returns-table {
-  /* Wider than a phone portrait card so the wrap can scroll horizontally. */
-  min-width: 34rem;
-  width: max(100%, 34rem);
+  /* Size to columns so narrowing the name doesn't widen the date columns. */
+  width: max-content;
+  min-width: 100%;
 }
 
 .allocation-table th,

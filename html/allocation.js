@@ -230,7 +230,7 @@
     const dateCount = dates.length;
 
     returnsHeadRowEl.innerHTML = `
-      <th scope="col">Name</th>
+      <th scope="col" class="allocation-col-name">Name</th>
       ${dates
         .map((date, index) => {
           const isOldest = index === dateCount - 1;
