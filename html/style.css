@@ -1573,6 +1573,9 @@ body.is-allocation-open {
 
 .allocation-card {
   width: min(720px, 100%);
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: #fff;
   border: 1px solid rgba(201, 162, 39, 0.35);
   border-radius: 12px;
@@ -1582,6 +1585,7 @@ body.is-allocation-open {
 
 .allocation-screen.is-returns-mode .allocation-card {
   width: min(960px, 100%);
+  max-width: 100%;
 }
 
 .allocation-header {
@@ -1665,6 +1669,8 @@ body.is-allocation-open {
 
 .allocation-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 .allocation-table {
@@ -1672,6 +1678,12 @@ body.is-allocation-open {
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 0.92rem;
+}
+
+#allocation-returns-table {
+  /* Wider than a phone portrait card so the wrap can scroll horizontally. */
+  min-width: 34rem;
+  width: max(100%, 34rem);
 }
 
 .allocation-table th,

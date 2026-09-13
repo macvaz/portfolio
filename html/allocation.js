@@ -18,9 +18,6 @@
   const closeBtn = document.getElementById("allocation-close");
   const returnsBtn = document.getElementById("portfolio-allocation-btn");
   const moneyBtn = document.getElementById("portfolio-money-btn");
-  const returnsAvailableMq = window.matchMedia(
-    "(orientation: landscape), (min-width: 901px)",
-  );
 
   const DEFAULT_TOTAL = 500000;
 
@@ -33,24 +30,12 @@
   let recentReturnsRequest = 0;
   let recentReturnsLoaded = false;
 
-  function returnsModeAvailable() {
-    return returnsAvailableMq.matches;
-  }
-
   function syncButtonVisibility(portfolioSelected) {
     if (moneyBtn) {
       moneyBtn.hidden = !portfolioSelected;
     }
     if (returnsBtn) {
-      // Daily returns only when the viewport can show that screen.
-      returnsBtn.hidden = !portfolioSelected || !returnsModeAvailable();
-    }
-  }
-
-  function syncReturnsAvailability() {
-    syncButtonVisibility(api.getPortfolioId() !== null);
-    if (!returnsModeAvailable() && activeMode === "returns" && !screen.hidden) {
-      close();
+      returnsBtn.hidden = !portfolioSelected;
     }
   }
 
@@ -381,9 +366,6 @@
   }
 
   async function setMode(mode) {
-    if (mode === "returns" && !returnsModeAvailable()) {
-      mode = "money";
-    }
     activeMode = mode === "returns" ? "returns" : "money";
 
     moneyPanel.hidden = activeMode !== "money";
@@ -407,9 +389,6 @@
 
   async function open(mode = "money") {
     const requested = mode === "returns" ? "returns" : "money";
-    if (requested === "returns" && !returnsModeAvailable()) {
-      return;
-    }
 
     totalInput.value = String(DEFAULT_TOTAL);
     recentReturns = { dates: [], byIsin: new Map(), benchmark: null };
@@ -444,12 +423,6 @@
     event.stopPropagation();
     close();
   });
-
-  if (typeof returnsAvailableMq.addEventListener === "function") {
-    returnsAvailableMq.addEventListener("change", syncReturnsAvailability);
-  } else if (typeof returnsAvailableMq.addListener === "function") {
-    returnsAvailableMq.addListener(syncReturnsAvailability);
-  }
 
   totalInput?.addEventListener("input", () => {
     if (activeMode === "money") {
