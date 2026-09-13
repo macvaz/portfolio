@@ -1631,6 +1631,18 @@ body.is-allocation-open {
   .allocation-col-amount {
     width: 5.25rem;
   }
+
+  .allocation-col-name,
+  #allocation-returns-portfolio-row th,
+  #allocation-returns-benchmark-row th {
+    width: 4rem;
+    max-width: 4rem;
+  }
+
+  #allocation-returns-table {
+    min-width: 26.5rem;
+    width: max(100%, 26.5rem);
+  }
 }
 
 .allocation-panel[hidden] {
