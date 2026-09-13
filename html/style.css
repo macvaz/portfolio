@@ -1635,8 +1635,8 @@ body.is-allocation-open {
   .allocation-table .allocation-col-name,
   #allocation-returns-portfolio-row th,
   #allocation-returns-benchmark-row th {
-    width: 7rem;
-    max-width: 7rem;
+    width: 8rem;
+    max-width: 8rem;
   }
 
   /* Keep date/total columns at fixed size — don't stretch them when name shrinks. */
