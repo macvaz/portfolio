@@ -16,9 +16,8 @@
   const returnsEmptyEl = document.getElementById("allocation-returns-empty");
   const returnsLoadingEl = document.getElementById("allocation-returns-loading");
   const closeBtn = document.getElementById("allocation-close");
-  const openBtn = document.getElementById("portfolio-allocation-btn");
-  const modeTabs = Array.from(document.querySelectorAll(".allocation-mode-tab"));
-  const modeTabsEl = document.querySelector(".allocation-mode-tabs");
+  const returnsBtn = document.getElementById("portfolio-allocation-btn");
+  const moneyBtn = document.getElementById("portfolio-money-btn");
   const returnsAvailableMq = window.matchMedia(
     "(orientation: landscape), (min-width: 901px)",
   );
@@ -29,7 +28,7 @@
     maximumFractionDigits: 0,
   });
 
-  let activeMode = "returns";
+  let activeMode = "money";
   let recentReturns = { dates: [], byIsin: new Map(), benchmark: null };
   let recentReturnsRequest = 0;
   let recentReturnsLoaded = false;
@@ -38,25 +37,20 @@
     return returnsAvailableMq.matches;
   }
 
-  function updateOpenButtonLabel() {
-    if (!openBtn) {
-      return;
+  function syncButtonVisibility(portfolioSelected) {
+    if (moneyBtn) {
+      moneyBtn.hidden = !portfolioSelected;
     }
-    const label = returnsModeAvailable()
-      ? "Money allocation and daily returns"
-      : "Money allocation";
-    openBtn.setAttribute("aria-label", label);
-    openBtn.title = label;
+    if (returnsBtn) {
+      // Daily returns only when the viewport can show that screen.
+      returnsBtn.hidden = !portfolioSelected || !returnsModeAvailable();
+    }
   }
 
   function syncReturnsAvailability() {
-    const available = returnsModeAvailable();
-    if (modeTabsEl) {
-      modeTabsEl.hidden = !available;
-    }
-    updateOpenButtonLabel();
-    if (!available && activeMode === "returns" && !screen.hidden) {
-      setMode("money");
+    syncButtonVisibility(api.getPortfolioId() !== null);
+    if (!returnsModeAvailable() && activeMode === "returns" && !screen.hidden) {
+      close();
     }
   }
 
@@ -185,22 +179,57 @@
     });
   }
 
+  function compoundReturns(values) {
+    // Daily values are newest → oldest; compound in chronological order.
+    if (!Array.isArray(values) || !values.length) {
+      return null;
+    }
+    let growth = 1;
+    let anyValue = false;
+    for (let index = values.length - 1; index >= 0; index -= 1) {
+      const value = values[index];
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        // Missing days count as 0% (no change).
+        continue;
+      }
+      anyValue = true;
+      growth *= 1 + Number(value) / 100;
+    }
+    return anyValue ? (growth - 1) * 100 : null;
+  }
+
+  function renderReturnCell(value, extraClass = "") {
+    const cls = ["allocation-col-day", dailyReturnClass(value), extraClass]
+      .filter(Boolean)
+      .join(" ");
+    return `<td class="${cls}">${formatDailyReturn(value)}</td>`;
+  }
+
+  function renderDailyReturnCells(values, dateCount) {
+    const cells = [];
+    for (let index = 0; index < dateCount; index += 1) {
+      const value = index < values.length ? values[index] : null;
+      const isOldest = index === dateCount - 1;
+      cells.push(renderReturnCell(value, isOldest ? "allocation-col-before-total" : ""));
+    }
+    return cells;
+  }
+
   function renderSummaryReturnRow(rowEl, label, values, dateCount) {
     if (!rowEl) {
       return;
     }
-    const cells = [];
+    const aligned = [];
     for (let index = 0; index < dateCount; index += 1) {
-      const value = index < values.length ? values[index] : null;
-      const cls = dailyReturnClass(value);
-      cells.push(
-        `<td class="allocation-col-day ${cls}">${formatDailyReturn(value)}</td>`,
-      );
+      aligned.push(index < values.length ? values[index] : null);
     }
+    const cells = renderDailyReturnCells(aligned, dateCount);
+    const total = compoundReturns(aligned);
     rowEl.hidden = false;
     rowEl.innerHTML = `
       <th scope="row">${escapeHtml(label)}</th>
-      ${cells.join("")}`;
+      ${cells.join("")}
+      ${renderReturnCell(total, "allocation-col-total")}`;
   }
 
   function hideSummaryReturnRow(rowEl, label) {
@@ -218,11 +247,13 @@
     returnsHeadRowEl.innerHTML = `
       <th scope="col">Name</th>
       ${dates
-        .map(
-          (date) =>
-            `<th scope="col" class="allocation-col-day" title="${escapeHtml(date)}">${formatDateHeader(date)}</th>`,
-        )
-        .join("")}`;
+        .map((date, index) => {
+          const isOldest = index === dateCount - 1;
+          const extra = isOldest ? " allocation-col-before-total" : "";
+          return `<th scope="col" class="allocation-col-day${extra}" title="${escapeHtml(date)}">${formatDateHeader(date)}</th>`;
+        })
+        .join("")}
+      <th scope="col" class="allocation-col-day allocation-col-total" title="Compounded return over the shown dates">Total</th>`;
 
     if (!funds.length) {
       returnsBodyEl.innerHTML = "";
@@ -239,18 +270,17 @@
     returnsBodyEl.innerHTML = funds
       .map((fund) => {
         const values = recentReturns.byIsin.get(fund.isin) || [];
-        const cells = [];
+        const aligned = [];
         for (let index = 0; index < dateCount; index += 1) {
-          const value = index < values.length ? values[index] : null;
-          const cls = dailyReturnClass(value);
-          cells.push(
-            `<td class="allocation-col-day ${cls}">${formatDailyReturn(value)}</td>`,
-          );
+          aligned.push(index < values.length ? values[index] : null);
         }
+        const cells = renderDailyReturnCells(aligned, dateCount);
+        const total = compoundReturns(aligned);
         return `
           <tr>
             <td class="allocation-col-name">${renderFundName(fund)}</td>
             ${cells.join("")}
+            ${renderReturnCell(total, "allocation-col-total")}
           </tr>`;
       })
       .join("");
@@ -356,12 +386,6 @@
     }
     activeMode = mode === "returns" ? "returns" : "money";
 
-    modeTabs.forEach((tab) => {
-      const isActive = tab.dataset.mode === activeMode;
-      tab.classList.toggle("is-active", isActive);
-      tab.setAttribute("aria-selected", isActive ? "true" : "false");
-    });
-
     moneyPanel.hidden = activeMode !== "money";
     returnsPanel.hidden = activeMode !== "returns";
     screen.classList.toggle("is-returns-mode", activeMode === "returns");
@@ -370,6 +394,7 @@
 
     if (activeMode === "money") {
       refreshMoney();
+      totalInput?.focus();
       return;
     }
 
@@ -380,14 +405,19 @@
     }
   }
 
-  async function open() {
+  async function open(mode = "money") {
+    const requested = mode === "returns" ? "returns" : "money";
+    if (requested === "returns" && !returnsModeAvailable()) {
+      return;
+    }
+
     totalInput.value = String(DEFAULT_TOTAL);
     recentReturns = { dates: [], byIsin: new Map(), benchmark: null };
     recentReturnsLoaded = false;
     screen.hidden = false;
     screen.removeAttribute("hidden");
     document.body.classList.add("is-allocation-open");
-    await setMode(returnsModeAvailable() ? "returns" : "money");
+    await setMode(requested);
   }
 
   function close() {
@@ -397,10 +427,16 @@
     document.body.classList.remove("is-allocation-open");
   }
 
-  openBtn?.addEventListener("click", (event) => {
+  moneyBtn?.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    open();
+    open("money");
+  });
+
+  returnsBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    open("returns");
   });
 
   closeBtn?.addEventListener("click", (event) => {
@@ -409,19 +445,11 @@
     close();
   });
 
-  modeTabs.forEach((tab) => {
-    tab.addEventListener("click", (event) => {
-      event.preventDefault();
-      setMode(tab.dataset.mode);
-    });
-  });
-
   if (typeof returnsAvailableMq.addEventListener === "function") {
     returnsAvailableMq.addEventListener("change", syncReturnsAvailability);
   } else if (typeof returnsAvailableMq.addListener === "function") {
     returnsAvailableMq.addListener(syncReturnsAvailability);
   }
-  syncReturnsAvailability();
 
   totalInput?.addEventListener("input", () => {
     if (activeMode === "money") {
@@ -448,10 +476,7 @@
     refresh,
     setMode,
     setButtonVisible(visible) {
-      if (!openBtn) {
-        return;
-      }
-      openBtn.hidden = !visible;
+      syncButtonVisibility(Boolean(visible));
     },
     isOpen() {
       return !screen.hidden;

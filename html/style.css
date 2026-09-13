@@ -299,6 +299,15 @@ button:disabled {
   background: rgba(201, 162, 39, 0.12);
 }
 
+.portfolio-money-btn {
+  color: #8a6d1f;
+}
+
+.portfolio-money-btn:hover {
+  color: #6f5718;
+  background: rgba(201, 162, 39, 0.12);
+}
+
 .portfolio-table-name {
   color: #0088cc;
 }
@@ -1609,42 +1618,7 @@ body.is-allocation-open {
   color: #333;
 }
 
-.allocation-mode-tabs {
-  display: flex;
-  gap: 0;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.allocation-mode-tab {
-  margin: 0;
-  padding: 0.55rem 0.85rem;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
-  color: #555;
-  font: inherit;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.allocation-mode-tab:hover {
-  background: transparent;
-  color: #1a1a1a;
-}
-
-.allocation-mode-tab.is-active {
-  color: #1a1a1a;
-  font-weight: 600;
-  border-bottom-color: var(--logo-orange);
-}
-
 @media (orientation: portrait) and (max-width: 900px) {
-  .allocation-mode-tabs {
-    display: none;
-  }
-
   .allocation-screen.is-returns-mode .allocation-card {
     width: min(720px, 100%);
   }
@@ -1728,7 +1702,7 @@ body.is-allocation-open {
 }
 
 .allocation-col-day {
-  width: 3.5rem;
+  width: 3.75rem;
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -1739,6 +1713,16 @@ body.is-allocation-open {
   font-weight: 600;
   color: #555;
   text-align: right;
+}
+
+.allocation-col-before-total {
+  padding-right: 0.75rem;
+}
+
+.allocation-col-total {
+  font-weight: 600;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+  padding-left: 0.75rem;
 }
 
 .allocation-col-name {

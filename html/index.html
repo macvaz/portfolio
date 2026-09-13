@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=242" />
+    <link rel="stylesheet" href="/static/style.css?v=250" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -205,10 +205,35 @@
                     </button>
                     <button
                       type="button"
+                      id="portfolio-money-btn"
+                      class="portfolio-action-btn portfolio-money-btn"
+                      aria-label="Money allocation"
+                      title="Money allocation"
+                      hidden
+                    >
+                      <svg
+                        class="portfolio-action-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <line x1="4" y1="19" x2="20" y2="19" />
+                        <line x1="8" y1="17" x2="8" y2="12" />
+                        <line x1="12" y1="17" x2="12" y2="7" />
+                        <line x1="16" y1="17" x2="16" y2="10" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
                       id="portfolio-allocation-btn"
                       class="portfolio-action-btn portfolio-allocation-btn"
-                      aria-label="Money allocation and daily returns"
-                      title="Money allocation and daily returns"
+                      aria-label="Daily returns"
+                      title="Daily returns"
                       hidden
                     >
                       <svg
@@ -419,36 +444,9 @@
           <button type="button" id="allocation-close" class="allocation-close" aria-label="Close">×</button>
         </header>
 
-        <div class="allocation-mode-tabs" role="tablist" aria-label="Portfolio tool">
-          <button
-            type="button"
-            class="allocation-mode-tab"
-            role="tab"
-            id="allocation-mode-money"
-            data-mode="money"
-            aria-selected="false"
-            aria-controls="allocation-panel-money"
-          >
-            Money allocation
-          </button>
-          <button
-            type="button"
-            class="allocation-mode-tab is-active"
-            role="tab"
-            id="allocation-mode-returns"
-            data-mode="returns"
-            aria-selected="true"
-            aria-controls="allocation-panel-returns"
-          >
-            Daily returns
-          </button>
-        </div>
-
         <section
           id="allocation-panel-money"
           class="allocation-panel"
-          role="tabpanel"
-          aria-labelledby="allocation-mode-money"
           hidden
         >
           <p class="allocation-lead">
@@ -492,13 +490,12 @@
         <section
           id="allocation-panel-returns"
           class="allocation-panel"
-          role="tabpanel"
-          aria-labelledby="allocation-mode-returns"
+          hidden
         >
           <p class="allocation-lead">
-            Daily % returns for the last five dates with any fund NAV. Portfolio is the
-            weight-weighted combination; missing fund days count as 0% in that total.
-            SP500 is shown for comparison on the same dates.
+            Daily % returns for the last five dates with any fund NAV. Total is the
+            compounded return over those dates. Portfolio is the weight-weighted
+            combination; missing fund days count as 0%. SP500 is shown for comparison.
           </p>
           <div class="allocation-table-wrap">
             <table class="allocation-table" id="allocation-returns-table">
@@ -532,7 +529,7 @@
     <script src="/static/risk.js?v=14"></script>
     <script src="/static/health.js?v=62"></script>
     <script src="/static/add-fund.js?v=5"></script>
-    <script src="/static/allocation.js?v=15"></script>
-    <script src="/static/app.js?v=48"></script>
+    <script src="/static/allocation.js?v=20"></script>
+    <script src="/static/app.js?v=50"></script>
   </body>
 </html>

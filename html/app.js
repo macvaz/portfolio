@@ -16,7 +16,6 @@
     const label = document.getElementById("portfolio-table-name");
     const deleteBtn = document.getElementById("portfolio-delete-btn");
     const defaultBtn = document.getElementById("portfolio-default-btn");
-    const allocationBtn = document.getElementById("portfolio-allocation-btn");
     if (!label) {
       return;
     }
