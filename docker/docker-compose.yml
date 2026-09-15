@@ -3,6 +3,7 @@ x-app-volumes: &app-volumes
   - ../html:/app/html:ro
   - ../api.py:/app/api.py:ro
   - ../batch.py:/app/batch.py:ro
+  - ../category_test.py:/app/category_test.py:ro
   - ../data:/app/data
 
 services:
@@ -10,6 +11,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    container_name: portfolio
     command: api
     ports:
       - "8000:8000"

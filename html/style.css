@@ -185,7 +185,8 @@ button:disabled {
   box-sizing: border-box;
 }
 
-#portfolio-select {
+#portfolio-select,
+#asset-classes-filter {
   cursor: pointer;
   color: #0088cc;
   border-color: #c8d0da;
@@ -193,13 +194,16 @@ button:disabled {
 }
 
 #portfolio-select:focus,
-#portfolio-select:focus-visible {
+#portfolio-select:focus-visible,
+#asset-classes-filter:focus,
+#asset-classes-filter:focus-visible {
   outline: none;
   border-color: #c8d0da;
   box-shadow: none;
 }
 
-#portfolio-select:disabled {
+#portfolio-select:disabled,
+#asset-classes-filter:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   color: inherit;
@@ -2863,4 +2867,73 @@ body.is-allocation-open {
     align-items: center;
     gap: 0.15rem;
   }
+}
+
+.asset-classes-table {
+  max-width: none;
+}
+
+.asset-classes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+}
+
+.asset-classes-toolbar .portfolio-select-slot > * {
+  min-width: 12rem;
+  max-width: 16rem;
+}
+
+.asset-classes-empty {
+  text-align: center;
+  color: #666;
+  padding: 1rem 0.5rem;
+}
+
+.asset-classes-table .col-rank {
+  width: 3rem;
+  text-align: right;
+  color: #666;
+}
+
+.asset-classes-table .col-asset-class {
+  width: 9rem;
+  color: #555;
+}
+
+.asset-classes-table .col-return {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  width: 5.5rem;
+}
+
+.asset-classes-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.asset-classes-table th.sortable:hover {
+  color: #1a1a1a;
+}
+
+.asset-classes-table th.sortable::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  margin-left: 0.25em;
+}
+
+.asset-classes-table th.sortable.is-sorted-desc::after {
+  content: "▼";
+  font-size: 0.65em;
+  opacity: 0.7;
+}
+
+.asset-classes-table th.sortable.is-sorted-asc::after {
+  content: "▲";
+  font-size: 0.65em;
+  opacity: 0.7;
 }

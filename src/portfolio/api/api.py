@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from portfolio.api.services.management.router import router as management_router
 from portfolio.api.services.macro.router import router as macro_router
 from portfolio.api.services.risk.router import router as risk_router
+from portfolio.api.services.categories.router import router as categories_router
 from portfolio.logging_config import configure_logging
 from portfolio.storage.database import init_db
 
@@ -38,6 +39,7 @@ def index() -> FileResponse:
 app.include_router(management_router)
 app.include_router(risk_router)
 app.include_router(macro_router)
+app.include_router(categories_router)
 
 
 def main() -> None:

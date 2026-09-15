@@ -3,15 +3,25 @@ import datetime
 import html
 from pathlib import Path
 
-from sqlalchemy import event, func
+from sqlalchemy import event, func, text
 from sqlmodel import Session, SQLModel, create_engine, delete, select
 
-from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription, Fund, Metric, Portfolio, User
+from portfolio.storage.models import (
+    Category,
+    CategoryMonthlyData,
+    MacroHealthCheck,
+    MacroHealthCheckDescription,
+    Fund,
+    Metric,
+    Portfolio,
+    User,
+)
 from portfolio.storage.fixtures.macro_health_checks import (
     insert_health_check_descriptions_from_fixture,
     sync_health_check_catalog_from_fixture,
 )
 from portfolio.storage.fixtures.funds import sync_funds_from_fixture
+from portfolio.storage.fixtures.categories import sync_categories_from_fixture
 from portfolio.common.health_check_descriptions import (
     HEALTH_CHECK_ROLE,
     health_check_label,
@@ -80,18 +90,38 @@ def reset_health_check_tables_from_fixture(
         session.commit()
 
 
+def _ensure_category_columns(engine) -> None:
+    """Add Category columns introduced after the initial table create."""
+    with engine.connect() as conn:
+        rows = conn.execute(text("PRAGMA table_info(category)")).fetchall()
+        if not rows:
+            return
+        existing = {row[1] for row in rows}
+        altered = False
+        if "fund_id" not in existing:
+            conn.execute(text("ALTER TABLE category ADD COLUMN fund_id VARCHAR"))
+            altered = True
+        if "asset_class" not in existing:
+            conn.execute(text("ALTER TABLE category ADD COLUMN asset_class VARCHAR"))
+            altered = True
+        if altered:
+            conn.commit()
+
+
 def init_db(db_path: Path | None = None) -> None:
     """Create schema 1.0 tables if needed, then sync fixture catalogs."""
     path = _resolve_db_path(db_path)
     key = str(path.resolve())
+    engine = get_engine(path)
     if key not in _initialized_paths:
-        engine = get_engine(path)
         SQLModel.metadata.create_all(engine)
         _initialized_paths.add(key)
+    _ensure_category_columns(engine)
 
     with get_session(db_path) as session:
         sync_health_check_catalog_from_fixture(session)
         sync_funds_from_fixture(session)
+        sync_categories_from_fixture(session)
         session.commit()
 
 
@@ -410,6 +440,121 @@ def list_user_portfolio(user_id: int, db_path: Path | None = None) -> list[dict]
             "weighted_assets": position.weighted_assets,
         }
         for position, fund in rows
+    ]
+
+
+def list_categories(db_path: Path | None = None) -> list[dict]:
+    with get_session(db_path) as session:
+        rows = session.exec(
+            select(Category).order_by(Category.name, Category.category_id)
+        ).all()
+    return [
+        {
+            "category_id": row.category_id,
+            "name": row.name,
+            "fund_id": row.fund_id,
+            "asset_class": row.asset_class,
+        }
+        for row in rows
+    ]
+
+
+def build_category_monthly_data(
+    points: list[tuple[datetime.date, float]],
+    *,
+    prior: dict[datetime.date, float] | None = None,
+) -> list[dict]:
+    """Attach period returns to each average-price point.
+
+    ``prior`` supplies already-stored (date → value) history so newly appended
+    points get a correct return vs the previous observation.
+    """
+    known = dict(prior or {})
+    ordered = sorted(points, key=lambda item: item[0])
+    out: list[dict] = []
+    for observation_date, value in ordered:
+        previous_dates = [d for d in known if d < observation_date]
+        return_pct = None
+        if previous_dates:
+            previous_value = known[max(previous_dates)]
+            if previous_value != 0:
+                return_pct = (float(value) / previous_value - 1.0) * 100.0
+        out.append(
+            {
+                "date": observation_date,
+                "value": float(value),
+                "return_pct": return_pct,
+                "partial": observation_date.day < 28,
+            }
+        )
+        known[observation_date] = float(value)
+    return out
+
+
+def merge_category_monthly_data(
+    category_id: str,
+    points: list[tuple[datetime.date, float]],
+    db_path: Path | None = None,
+) -> dict:
+    """Idempotently store monthly data: insert only dates not already present."""
+    with get_session(db_path) as session:
+        if session.get(Category, category_id) is None:
+            raise ValueError(f"Unknown category_id: {category_id}")
+
+        existing_rows = session.exec(
+            select(CategoryMonthlyData).where(
+                CategoryMonthlyData.category_id == category_id
+            )
+        ).all()
+        existing = {row.date: row.value for row in existing_rows}
+
+        novel = [(d, float(v)) for d, v in points if d not in existing]
+        skipped = len(points) - len(novel)
+        if not novel:
+            return {
+                "category_id": category_id,
+                "inserted": 0,
+                "skipped": skipped,
+            }
+
+        rows = build_category_monthly_data(novel, prior=existing)
+        for row in rows:
+            session.add(
+                CategoryMonthlyData(
+                    category_id=category_id,
+                    date=row["date"],
+                    value=row["value"],
+                    return_pct=row["return_pct"],
+                    partial=row["partial"],
+                )
+            )
+        session.commit()
+    return {
+        "category_id": category_id,
+        "inserted": len(novel),
+        "skipped": skipped,
+    }
+
+
+def list_category_monthly_data(
+    category_id: str,
+    db_path: Path | None = None,
+) -> list[dict]:
+    with get_session(db_path) as session:
+        rows = session.exec(
+            select(CategoryMonthlyData)
+            .where(CategoryMonthlyData.category_id == category_id)
+            .order_by(CategoryMonthlyData.date)
+        ).all()
+    return [
+        {
+            "category_id": row.category_id,
+            "date": row.date,
+            "value": row.value,
+            "return_pct": row.return_pct,
+            "partial": row.partial,
+        }
+        for row in rows
     ]
 
 

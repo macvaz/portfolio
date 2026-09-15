@@ -14,7 +14,20 @@ case "$1" in
     exec uvicorn portfolio.api.api:app --host "$HOST" --port "$PORT"
     ;;
   batch|job)
-    exec python batch.py
+    shift
+    if [ "${1:-}" = "categories" ]; then
+      shift
+      exec python -m portfolio.batch.categories "$@"
+    fi
+    exec python batch.py "$@"
+    ;;
+  categories)
+    shift
+    exec python -m portfolio.batch.categories "$@"
+    ;;
+  category_test)
+    shift
+    exec python category_test.py "$@"
     ;;
   *)
     exec "$@"

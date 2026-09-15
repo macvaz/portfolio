@@ -67,3 +67,28 @@ class MacroHealthCheck(SQLModel, table=True):
     )
     date: datetime.date = Field(index=True)
     value: float
+
+
+class Category(SQLModel, table=True):
+    """Morningstar fund category catalog entry."""
+
+    __tablename__ = "category"
+
+    category_id: str = Field(primary_key=True, max_length=32)
+    name: str = Field(index=True)
+    fund_id: str | None = Field(default=None, index=True)
+    asset_class: str | None = Field(default=None, index=True)
+
+
+class CategoryMonthlyData(SQLModel, table=True):
+    """Category average price and period return for one observation date."""
+
+    __tablename__ = "category_monthly_data"
+    __table_args__ = (UniqueConstraint("category_id", "date"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    category_id: str = Field(foreign_key="category.category_id", index=True)
+    date: datetime.date = Field(index=True)
+    value: float
+    return_pct: float | None = None
+    partial: bool = Field(default=False)

@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=260" />
+    <link rel="stylesheet" href="/static/style.css?v=267" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -52,6 +52,10 @@
               <button type="button" class="app-tab" data-tab="macro" role="option" aria-selected="false">
                 <span class="app-tab-full">Macro health</span>
                 <span class="app-tab-short">Macro</span>
+              </button>
+              <button type="button" class="app-tab" data-tab="asset-classes" role="option" aria-selected="false">
+                <span class="app-tab-full">Ranking</span>
+                <span class="app-tab-short">Ranking</span>
               </button>
             </div>
           </div>
@@ -352,6 +356,49 @@
           </div>
           <p id="macro-message" class="risk-message" hidden></p>
         </div>
+
+        <div id="asset-classes-panel" class="app-panel" hidden>
+          <div id="asset-classes-loading" class="management-loading">Loading ranking…</div>
+          <div id="asset-classes-content" hidden>
+            <section class="table-panel">
+              <h2 class="table-title">
+                Categories
+                <span id="asset-classes-as-of" class="alerts-summary"></span>
+              </h2>
+              <div class="asset-classes-toolbar">
+                <div class="portfolio-select-slot">
+                  <select id="asset-classes-filter" aria-label="Select asset class">
+                    <option value="">All asset classes</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-scroll">
+                <table class="fund-table asset-classes-table" id="asset-classes-table">
+                  <thead>
+                    <tr>
+                      <th class="col-rank">#</th>
+                      <th class="col-name sortable" data-sort="name" scope="col" aria-sort="none">Category</th>
+                      <th class="col-asset-class sortable" data-sort="asset_class" scope="col" aria-sort="none">Asset class</th>
+                      <th class="col-return sortable" data-sort="intramonth" scope="col" aria-sort="none">MTD</th>
+                      <th class="col-return sortable is-sorted is-sorted-desc" data-sort="1m" scope="col" aria-sort="descending">1m</th>
+                      <th class="col-return sortable" data-sort="2m" scope="col" aria-sort="none">2m</th>
+                      <th class="col-return sortable" data-sort="3m" scope="col" aria-sort="none">3m</th>
+                      <th class="col-return sortable" data-sort="6m" scope="col" aria-sort="none">6m</th>
+                      <th class="col-return sortable" data-sort="12m" scope="col" aria-sort="none">12m</th>
+                      <th class="col-return sortable" data-sort="2y" scope="col" aria-sort="none">2y</th>
+                      <th class="col-return sortable" data-sort="3y" scope="col" aria-sort="none">3y</th>
+                      <th class="col-return sortable" data-sort="5y" scope="col" aria-sort="none">5y</th>
+                      <th class="col-return sortable" data-sort="7y" scope="col" aria-sort="none">7y</th>
+                      <th class="col-return sortable" data-sort="10y" scope="col" aria-sort="none">10y</th>
+                    </tr>
+                  </thead>
+                  <tbody id="asset-classes-body"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+          <p id="asset-classes-message" class="risk-message" hidden></p>
+        </div>
       </section>
 
       <p id="error" class="error" hidden></p>
@@ -523,13 +570,14 @@
       </div>
     </div>
 
-    <script src="/static/api.js?v=15"></script>
+    <script src="/static/api.js?v=16"></script>
     <script src="/static/portfolios.js?v=11"></script>
     <script src="/static/management.js?v=132"></script>
     <script src="/static/risk.js?v=14"></script>
     <script src="/static/health.js?v=62"></script>
+    <script src="/static/asset-classes.js?v=8"></script>
     <script src="/static/add-fund.js?v=5"></script>
     <script src="/static/allocation.js?v=22"></script>
-    <script src="/static/app.js?v=50"></script>
+    <script src="/static/app.js?v=51"></script>
   </body>
 </html>

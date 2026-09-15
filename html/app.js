@@ -81,11 +81,11 @@
   }
 
   function updateToolbarForTab(tabName) {
-    const isMacro = tabName === "macro";
-    setLayoutHidden(document.getElementById("portfolio-picker"), isMacro);
-    setLayoutHidden(document.getElementById("add-fund-form"), isMacro);
+    const hidePortfolioChrome = tabName === "macro" || tabName === "asset-classes";
+    setLayoutHidden(document.getElementById("portfolio-picker"), hidePortfolioChrome);
+    setLayoutHidden(document.getElementById("add-fund-form"), hidePortfolioChrome);
 
-    if (isMacro) {
+    if (hidePortfolioChrome) {
       hidePortfolioCreateInput();
     }
   }
@@ -137,6 +137,7 @@
     document.getElementById("management-panel").hidden = tabName !== "management";
     document.getElementById("risk-panel").hidden = tabName !== "risk";
     document.getElementById("macro-panel").hidden = tabName !== "macro";
+    document.getElementById("asset-classes-panel").hidden = tabName !== "asset-classes";
     updateToolbarForTab(tabName);
   }
 
@@ -154,6 +155,11 @@
 
     if (activeTab === "macro") {
       await window.MacroView.loadMacroHealth();
+      return;
+    }
+
+    if (activeTab === "asset-classes") {
+      await window.AssetClassesView.loadAssetClasses();
     }
   }
 
@@ -172,6 +178,12 @@
     if (tabName === "macro") {
       showError("");
       await window.MacroView.loadMacroHealth();
+      return;
+    }
+
+    if (tabName === "asset-classes") {
+      showError("");
+      await window.AssetClassesView.loadAssetClasses();
       return;
     }
 
