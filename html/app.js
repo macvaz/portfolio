@@ -164,6 +164,9 @@
   }
 
   async function showTab(tabName) {
+    if (tabName === "asset-classes" && !rankingTabAvailable()) {
+      tabName = "management";
+    }
     setActiveTab(tabName);
 
     if (tabName === "management") {
@@ -192,6 +195,18 @@
       return;
     }
     await window.RiskView.loadRiskAnalysis();
+  }
+
+  const PORTRAIT_MQ = window.matchMedia("(orientation: portrait)");
+
+  function rankingTabAvailable() {
+    return !PORTRAIT_MQ.matches;
+  }
+
+  function syncRankingTabAvailability() {
+    if (activeTab === "asset-classes" && !rankingTabAvailable()) {
+      showTab("management").catch((err) => showError(err.message));
+    }
   }
 
   function restorePortfolioSelectValue() {
@@ -400,6 +415,13 @@
   } else if (typeof mobileHeaderMq.addListener === "function") {
     mobileHeaderMq.addListener(closeTabMenu);
   }
+
+  if (typeof PORTRAIT_MQ.addEventListener === "function") {
+    PORTRAIT_MQ.addEventListener("change", syncRankingTabAvailability);
+  } else if (typeof PORTRAIT_MQ.addListener === "function") {
+    PORTRAIT_MQ.addListener(syncRankingTabAvailability);
+  }
+  syncRankingTabAvailability();
 
   window.AppShell = {
     showError,

@@ -466,6 +466,12 @@ button:disabled {
   font-weight: 600;
 }
 
+@media (orientation: portrait) {
+  .app-tab--ranking {
+    display: none !important;
+  }
+}
+
 .app-tab.is-active::after {
   content: "";
   position: absolute;
