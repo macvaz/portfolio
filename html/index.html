@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/style.css?v=270" />
+    <link rel="stylesheet" href="/static/style.css?v=274" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
@@ -367,18 +367,18 @@
           <div id="asset-classes-loading" class="management-loading">Loading ranking…</div>
           <div id="asset-classes-content" hidden>
             <section class="table-panel">
-              <h2 class="table-title">
-                Categories
-                <span id="asset-classes-as-of" class="alerts-summary"></span>
-              </h2>
-              <div class="asset-classes-toolbar">
-                <div class="portfolio-select-slot">
+              <h2 class="table-title table-title--ranking">
+                <span class="asset-classes-heading">
+                  Categories
+                  <span id="asset-classes-as-of" class="alerts-summary"></span>
+                </span>
+                <span class="asset-classes-filter-slot portfolio-select-slot">
                   <select id="asset-classes-filter" aria-label="Select asset class">
                     <option value="">All asset classes</option>
                   </select>
-                </div>
-              </div>
-              <div class="table-scroll">
+                </span>
+              </h2>
+              <div class="table-scroll table-scroll--ranking">
                 <table class="fund-table asset-classes-table" id="asset-classes-table">
                   <thead>
                     <tr>

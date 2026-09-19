@@ -2877,17 +2877,47 @@ body.is-allocation-open {
 
 .asset-classes-table {
   max-width: none;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.asset-classes-toolbar {
+.table-scroll--ranking {
+  --delete-tooltip-gutter: 0;
+  max-height: calc(100vh - 9.5rem);
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.table-scroll--ranking::-webkit-scrollbar {
+  display: none;
+}
+
+.table-scroll--ranking .asset-classes-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #fcf9eb;
+}
+
+.table-title--ranking {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin: 0 0 0.75rem;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.asset-classes-toolbar .portfolio-select-slot > * {
-  min-width: 12rem;
+.asset-classes-heading {
+  min-width: 0;
+}
+
+.asset-classes-filter-slot {
+  flex: 0 0 auto;
+}
+
+.asset-classes-filter-slot > * {
+  min-width: 11rem;
   max-width: 16rem;
 }
 
@@ -2898,8 +2928,9 @@ body.is-allocation-open {
 }
 
 .asset-classes-table .col-rank {
-  width: 3rem;
-  text-align: right;
+  width: 2.5rem;
+  padding-left: 0;
+  text-align: left;
   color: #666;
 }
 
