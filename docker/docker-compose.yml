@@ -3,8 +3,14 @@ x-app-volumes: &app-volumes
   - ../html:/app/html:ro
   - ../api.py:/app/api.py:ro
   - ../batch.py:/app/batch.py:ro
+  - ../category.py:/app/category.py:ro
   - ../category_test.py:/app/category_test.py:ro
   - ../data:/app/data
+  - /tmp:/tmp
+
+# Example .env (project root):
+#   FRED_API_KEY=your_key_here
+#   MS_BEARER_TOKEN_PATH=/tmp/morningstar.token
 
 services:
   api:
@@ -18,6 +24,8 @@ services:
     volumes: *app-volumes
     env_file:
       - ../.env
+    environment:
+      MS_BEARER_TOKEN_PATH: ${MS_BEARER_TOKEN_PATH:-/tmp/morningstar.token}
 
   batch:
     build:
@@ -27,6 +35,8 @@ services:
     volumes: *app-volumes
     env_file:
       - ../.env
+    environment:
+      MS_BEARER_TOKEN_PATH: ${MS_BEARER_TOKEN_PATH:-/tmp/morningstar.token}
     profiles:
       - batch
     restart: "no"

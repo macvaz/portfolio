@@ -99,6 +99,7 @@ Create a `.env` file in the project root with your FRED API key:
 
 ```
 FRED_API_KEY=your_key_here
+MS_BEARER_TOKEN_PATH=/tmp/morningstar.token
 ```
 
 If `FRED_API_KEY` is not set, the batch pipeline skips FRED downloads, still refreshes SP500 from Morningstar, and continues with fund NAV downloads. FRED or Morningstar download failures abort the batch with a clear error.
@@ -110,6 +111,35 @@ uv run batch.py
 ```
 
 Fund NAV files are written to `data/funds/{ISIN}.csv`. Add funds first via the web UI or Morningstar JSON import before running the batch pipeline.
+
+## Category averages
+
+`category.py` downloads Morningstar category monthly averages (SAL performance chart) into the database. It requires `MS_BEARER_TOKEN_PATH` to point at a bearer token file (same convention as headless-browser).
+
+Obtain a token first (writes `/tmp/morningstar.token` by default), then run:
+
+```bash
+export MS_BEARER_TOKEN_PATH=/tmp/morningstar.token
+# from headless-browser, or:
+./bin/morningstar_token.sh
+
+uv run python category.py
+# optional filters:
+uv run python category.py --limit 5 --asset-class equity
+```
+
+**In Docker** (host `/tmp` is mounted; compose sets `MS_BEARER_TOKEN_PATH=/tmp/morningstar.token`):
+
+```bash
+docker exec portfolio python category.py
+docker exec portfolio python category.py --limit 5 --asset-class equity
+```
+
+Or via the entrypoint:
+
+```bash
+docker compose -f docker/docker-compose.yml run --rm batch categories
+```
 
 ## Macro health
 
@@ -217,6 +247,7 @@ Pass `api` or `batch` as the command (default is `api`).
 ```bash
 uv run api.py         # start API on http://localhost:8000
 ./bin/batch.sh        # run batch pipeline in the running portfolio container
+docker exec portfolio python category.py   # download category monthly averages
 ```
 
 Or with Docker Compose:
@@ -257,7 +288,7 @@ Open http://localhost:8000 for the API.
 
 ### Environment variables
 
-Compose and `docker run --env-file .env` inject variables into the container environment. The batch pipeline reads `FRED_API_KEY` from there (`batch.py` also calls `load_dotenv()`, which is only needed when a `.env` file is present on disk).
+Compose and `docker run --env-file .env` inject variables into the container environment. The batch pipeline reads `FRED_API_KEY` from there (`batch.py` also calls `load_dotenv()`, which is only needed when a `.env` file is present on disk). Category downloads read the Morningstar SAL bearer token from the file at `MS_BEARER_TOKEN_PATH` (same convention as headless-browser; default in compose: `/tmp/morningstar.token`, with host `/tmp` mounted into the container).
 
 If `FRED_API_KEY` is missing, FRED downloads are skipped; SP500 and fund NAVs still run. Failed downloads raise instead of writing empty files.
 
@@ -267,6 +298,7 @@ Create `.env` in the project root:
 
 ```
 FRED_API_KEY=your_key_here
+MS_BEARER_TOKEN_PATH=/tmp/morningstar.token
 ```
 
 ## Tests

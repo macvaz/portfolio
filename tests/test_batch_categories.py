@@ -1,9 +1,28 @@
 import datetime
 from pathlib import Path
 
-from portfolio.batch.categories import download_category_monthly_data
+from portfolio.batch.categories import (
+    download_category_monthly_data,
+    resolve_access_token,
+)
 from portfolio.datasource.errors import DownloadError
 from portfolio.storage.database import init_db, list_category_monthly_data
+
+
+def test_resolve_access_token_reads_ms_bearer_token_path(tmp_path, monkeypatch):
+    token_file = tmp_path / "morningstar.token"
+    token_file.write_text("eyJ-test-token\n", encoding="utf-8")
+    monkeypatch.delenv("MORNINGSTAR_ACCESS_TOKEN", raising=False)
+    monkeypatch.setenv("MS_BEARER_TOKEN_PATH", str(token_file))
+    assert resolve_access_token() == "eyJ-test-token"
+
+
+def test_resolve_access_token_prefers_env_over_file(tmp_path, monkeypatch):
+    token_file = tmp_path / "morningstar.token"
+    token_file.write_text("from-file", encoding="utf-8")
+    monkeypatch.setenv("MS_BEARER_TOKEN_PATH", str(token_file))
+    monkeypatch.setenv("MORNINGSTAR_ACCESS_TOKEN", "from-env")
+    assert resolve_access_token() == "from-env"
 
 
 def test_download_category_monthly_data_persists_rows(tmp_path, monkeypatch):

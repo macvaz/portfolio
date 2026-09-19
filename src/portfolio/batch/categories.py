@@ -24,6 +24,28 @@ from portfolio.storage.database import (
 logger = logging.getLogger(__name__)
 
 TOKEN_ENV = "MORNINGSTAR_ACCESS_TOKEN"
+TOKEN_PATH_ENV = "MS_BEARER_TOKEN_PATH"
+
+
+def resolve_access_token(cli_token: str | None = None) -> str | None:
+    """
+    Resolve the SAL bearer token.
+
+    Order: CLI ``--token``, env ``MORNINGSTAR_ACCESS_TOKEN``, then the file
+    pointed to by ``MS_BEARER_TOKEN_PATH`` (headless-browser convention).
+    """
+    if cli_token and cli_token.strip():
+        return cli_token.strip()
+    env_token = os.environ.get(TOKEN_ENV, "").strip()
+    if env_token:
+        return env_token
+    token_path = os.environ.get(TOKEN_PATH_ENV, "").strip()
+    if not token_path:
+        return None
+    path = Path(token_path)
+    if not path.is_file():
+        return None
+    return path.read_text(encoding="utf-8").strip() or None
 
 
 def download_category_monthly_data(
@@ -132,8 +154,11 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--token",
-        default=os.environ.get(TOKEN_ENV),
-        help=f"SAL access_token (default: env {TOKEN_ENV})",
+        default=None,
+        help=(
+            f"SAL access_token (default: env {TOKEN_ENV}, else file at "
+            f"{TOKEN_PATH_ENV})"
+        ),
     )
     parser.add_argument(
         "--limit",
@@ -164,12 +189,17 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     configure_logging(args.log_level)
-    if not args.token:
-        logger.error("Missing access token. Pass --token or set %s.", TOKEN_ENV)
+    token = resolve_access_token(args.token)
+    if not token:
+        logger.error(
+            "Missing access token. Pass --token, set %s, or set %s to a token file.",
+            TOKEN_ENV,
+            TOKEN_PATH_ENV,
+        )
         return 2
     try:
         download_category_monthly_data(
-            args.token,
+            token,
             limit=args.limit,
             asset_class=args.asset_class,
             sleep_s=args.sleep,

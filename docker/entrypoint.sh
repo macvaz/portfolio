@@ -17,13 +17,13 @@ case "$1" in
     shift
     if [ "${1:-}" = "categories" ]; then
       shift
-      exec python -m portfolio.batch.categories "$@"
+      exec python category.py "$@"
     fi
     exec python batch.py "$@"
     ;;
   categories)
     shift
-    exec python -m portfolio.batch.categories "$@"
+    exec python category.py "$@"
     ;;
   category_test)
     shift
