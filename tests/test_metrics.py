@@ -256,7 +256,7 @@ def test_compute_aligned_recent_daily_returns(tmp_path):
     assert result["benchmark"]["returns"] == [0.6, 0.2, 0.1, 0.4, -0.3]
 
 
-def test_update_all_fund_metrics_persists_to_database(tmp_path):
+def test_update_all_fund_metrics_persists_to_database(tmp_path, empty_fund_catalog):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     init_db(db_path)

@@ -10,7 +10,7 @@ from portfolio.storage.models import User
 from portfolio.storage.database import get_session
 
 
-def test_save_user_portfolio_persists_positions(tmp_path):
+def test_save_user_portfolio_persists_positions(tmp_path, empty_fund_catalog):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
     user = create_user("Growth", db_path)

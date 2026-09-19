@@ -16,7 +16,7 @@ def _create_user(db_path, name: str = "Growth") -> int:
     return create_user(name, db_path=db_path).id
 
 
-def test_list_and_delete_funds(tmp_path, monkeypatch):
+def test_list_and_delete_funds(tmp_path, monkeypatch, empty_fund_catalog):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
@@ -307,12 +307,13 @@ def test_save_partial_weights_skips_risk_report_warm(tmp_path, monkeypatch):
     assert list(reports_dir.glob("*.html")) == []
 
 
-def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch):
+def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch, empty_fund_catalog):
     db_path = tmp_path / "portfolio.db"
     funds_dir = tmp_path / "funds"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
     monkeypatch.setattr("portfolio.common.navs.DEFAULT_FUNDS_DIR", funds_dir)
+    init_db(db_path)
 
     def mock_download(*, fund_id, start, end, currency, timeout=30):
         import pandas as pd
@@ -407,7 +408,9 @@ def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):
     assert data["benchmark"] == []
 
 
-def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
+def test_metrics_portfolio_uses_real_user_weights(
+    tmp_path, monkeypatch, empty_fund_catalog
+):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
@@ -462,7 +465,9 @@ def test_metrics_portfolio_uses_real_user_weights(tmp_path, monkeypatch):
     assert data["favorites"] == []
 
 
-def test_metrics_favorites_use_real_db_funds_not_in_portfolio(tmp_path, monkeypatch):
+def test_metrics_favorites_use_real_db_funds_not_in_portfolio(
+    tmp_path, monkeypatch, empty_fund_catalog
+):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))
@@ -629,7 +634,7 @@ def test_save_portfolio_rejects_overweight_and_duplicate_isins(tmp_path, monkeyp
     assert "Duplicate ISIN" in duplicate.json()["detail"]
 
 
-def test_save_and_load_user_portfolio(tmp_path, monkeypatch):
+def test_save_and_load_user_portfolio(tmp_path, monkeypatch, empty_fund_catalog):
     db_path = tmp_path / "portfolio.db"
     monkeypatch.setattr("portfolio.storage.database.DEFAULT_DB_PATH", db_path)
     monkeypatch.setattr("portfolio.api.api.init_db", lambda: init_db(db_path))

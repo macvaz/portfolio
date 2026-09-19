@@ -1,6 +1,6 @@
 # Portfolio
 
-Python system (API + batch jobs) to download and process mutual fund prices from Morningstar and macroeconomic series from FRED. It allows creating different investment portfolios while computing returns and risk reports. Additionally, it evaluates low-frequency macro health checks to detect real worsening of economic and financial conditions.
+Python system (API + batch jobs) to download and process mutual fund prices from Morningstar and macroeconomic series from FRED. It supports multi-portfolio management with returns, risk reports, money allocation helpers, and a Morningstar **category ranking** screen. It also evaluates low-frequency macro health checks to detect real worsening of economic and financial conditions.
 
 ## Project structure
 
@@ -8,8 +8,10 @@ Python system (API + batch jobs) to download and process mutual fund prices from
 portfolio/
 ├── api.py                          # Wrapper to start the API server
 ├── batch.py                        # Batch pipeline entry point
+├── category.py                     # Download Morningstar category monthly averages
 ├── bin/
-│   └── batch.sh                    # Run batch pipeline in the portfolio container
+│   ├── batch.sh                    # Run batch pipeline in the portfolio container
+│   └── category.sh                 # Token + category download (cron-friendly)
 ├── docker/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
@@ -21,39 +23,48 @@ portfolio/
 │   ├── funds/                      # NAV CSV files ({ISIN}.csv)
 │   ├── series/                     # FRED macro series CSVs
 │   ├── indexes/                    # Market index CSVs (e.g. SP500)
-│   └── fixtures/                   # Metadata for master tables (funds and health-checks among others)
+│   └── fixtures/                   # Funds, categories, health-check catalogs
 ├── html/                           # Web UI (served by FastAPI)
+│   ├── index.html                  # Tabs: management, risk, macro, ranking
+│   ├── management.js               # Portfolio metrics, curve, daily returns
+│   ├── allocation.js               # Money allocation + dated return tools
+│   ├── asset-classes.js            # Category ranking table
+│   └── …
 ├── src/portfolio/
 │   ├── storage/                    # Shared persistence (models + DB)
 │   │   ├── models.py               # SQLModel tables
 │   │   ├── database.py             # Engine, schema 1.0 bootstrap, CRUD
 │   │   └── fixtures/
 │   │       ├── macro_health_checks.py  # Seed/sync macro health check catalog
-│   │       └── funds.py                # Sync funds catalog from fixture
+│   │       ├── funds.py                # Sync funds catalog from fixture
+│   │       └── categories.py           # Sync category catalog from fixture
 │   ├── api/                        # HTTP app only
 │   │   ├── api.py                  # FastAPI app shell
 │   │   └── services/
 │   │       ├── management/         # Funds, positions, curve, metrics
 │   │       ├── risk/               # QuantStats risk reports + cache
-│   │       └── macro/              # Macro health series + history
+│   │       ├── macro/              # Macro health series + history
+│   │       └── categories/         # Category ranking API
 │   ├── common/                     # Shared pure helpers (no api/batch/storage imports)
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
 │   │   ├── series.py               # FRED macro series CSV I/O
 │   │   ├── indexes.py              # Market index CSV I/O
 │   │   ├── market.py               # Shared SP500-aligned market frame + indicators
-│   │   ├── equity.py               # Buy-and-hold / benchmark returns
+│   │   ├── equity.py               # Buy-and-hold / constant-weight / benchmark returns
 │   │   ├── metrics.py              # Metric computation only
 │   │   ├── macro_constants.py      # Macro / series column names
 │   │   └── health_check_descriptions.py  # Fixture load + threshold helpers
 │   ├── datasource/                # External vendors (no DB)
 │   │   ├── fred.py
-│   │   └── morningstar.py
+│   │   ├── morningstar.py
+│   │   └── morningstar_category.py # Category monthly averages (SAL)
 │   └── batch/                      # Offline / batch pipeline
 │       ├── download.py             # Pipeline orchestration
 │       ├── macro.py                # FRED + SP500 download pipeline
 │       ├── sp500.py                # Long-term SP500 via Morningstar
 │       ├── navs.py                 # Bulk NAV download from DB funds
 │       ├── metrics.py              # Persist computed fund metrics
+│       ├── categories.py           # Persist category monthly series
 │       └── health_check_storage.py # Persist latest macro health data
 └── tests/
 ```
@@ -73,9 +84,10 @@ Rules:
 
 - **`datasource/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`batch`/`storage` imports.
 - **`common/`** — pure helpers and CSV I/O. May use `datasource`. Must **not** import `api`, `batch`, or `storage`.
-- **`storage/`** — SQLModel models (schema 1.0), SQLite access, and fixture sync for health-check and fund catalogs. Shared by `api` and `batch`. Must **not** import `api` or `batch`.
-- **`batch/`** — offline pipeline (download macro series, NAVs, refresh metrics, store health checks). May use `common`, `datasource`, and `storage`. Must **not** import `api`.
+- **`storage/`** — SQLModel models (schema 1.0), SQLite access, and fixture sync for health-check, fund, and category catalogs. Shared by `api` and `batch`. Must **not** import `api` or `batch`.
+- **`batch/`** — offline pipeline (download macro series, NAVs, refresh metrics, category averages, store health checks). May use `common`, `datasource`, and `storage`. Must **not** import `api`.
 - **`api/`** — FastAPI app and HTTP services. May use `common`, `datasource`, and `storage`. Must **not** import `batch`.
+
 
 The CLI entrypoint is `batch.py` / `bin/batch.sh`; they call into `portfolio.batch`.
 
@@ -120,8 +132,8 @@ Obtain a token first (writes `/tmp/morningstar.token` by default), then run:
 
 ```bash
 export MS_BEARER_TOKEN_PATH=/tmp/morningstar.token
-# from headless-browser, or:
-./bin/morningstar_token.sh
+# e.g. via headless-browser, or the cron helper:
+./bin/category.sh
 
 uv run python category.py
 # optional filters:
@@ -191,12 +203,13 @@ When the batch pipeline runs, the latest macro health values are printed to the 
 
 Fund ISINs and portfolios are stored in `data/portfolio.db` (SQLite).
 
-**`init_db()`** (schema **1.0**) runs only when the **API** or **batch** process starts:
+**`init_db()`** (schema **1.0**) runs when the **API** or **batch** process starts:
 
-1. Create tables from the SQLModel models if they do not exist yet (no legacy migration chain).
-2. Sync catalogs from fixtures: merge funds from `data/fixtures/fund.json`, and sync macro health-check descriptions from `data/fixtures/macro_health_check_description.json` (insert/update; health-check rows removed from the fixture are pruned).
+1. Create tables from the SQLModel models if they do not exist yet.
+2. Apply lightweight column ensures for tables that predate newer fields (e.g. `user.is_default`, category `fund_id` / `performance_id` / `asset_class`).
+3. Sync catalogs from fixtures: merge funds from `data/fixtures/fund.json`, categories from `data/fixtures/categories.json`, and macro health-check descriptions from `data/fixtures/macro_health_check_description.json` (insert/update; health-check rows removed from the fixture are pruned).
 
-CRUD helpers do not call `init_db()`. A pre-1.0 database is not upgraded in place — recreate it if needed.
+CRUD helpers do not call `init_db()`.
 
 **Start the API server:**
 
@@ -204,7 +217,26 @@ CRUD helpers do not call `init_db()`. A pre-1.0 database is not upgraded in plac
 uv run api.py
 ```
 
-Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, and macro health.
+Open http://localhost:8000. The UI has four sections:
+
+| Tab | Purpose |
+|-----|---------|
+| **Portfolio management** | Positions, equity curve, fund/portfolio metrics, recent daily returns; portrait-friendly layout |
+| **Risk report** | QuantStats HTML report (regenerated when saved weights sum to 100%) |
+| **Macro health** | Active health checks and monthly history cards |
+| **Ranking** | Morningstar category multi-horizon returns (MTD … 10y), sortable, filterable by asset class; hidden in portrait orientation |
+
+Portfolio tools (money allocation by weight, and compounded returns over a chosen date window) open from the management toolbar.
+
+### Portfolio metrics semantics
+
+Summary row figures are intentional mixes so the UI stays consistent with fund rows:
+
+- **Period returns** (`% 1w` … `% YTD`) — weight-average of each fund’s own period returns (same numbers as the fund table).
+- **Risk metrics** (vol / Sharpe / β / Cor) — computed on a **constant current-weight** daily return series.
+- **Equity curve** and **risk report** — true **buy-and-hold** (weights drift with NAV performance).
+
+TER on the summary is the weight-average of fund TERs (cash / unallocated weight contributes 0).
 
 ### API endpoints
 
@@ -215,15 +247,18 @@ Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, a
 | `DELETE` | `/api/portfolio/portfolios/{id}` | Delete a portfolio |
 | `PUT` | `/api/portfolio/portfolios/{id}/default` | Set default portfolio |
 | `GET` | `/api/portfolio/funds` | List stored funds |
-| `POST` | `/api/portfolio/funds` | Add a fund by ISIN |
+| `POST` | `/api/portfolio/funds/import` | Import a fund from Morningstar search JSON (+ optional TER) |
 | `DELETE` | `/api/portfolio/funds/{isin}` | Remove a fund |
 | `GET` | `/api/portfolio/positions?portfolio_id=` | Saved positions for a portfolio |
 | `PUT` | `/api/portfolio/positions?portfolio_id=` | Save portfolio positions |
 | `GET` | `/api/portfolio/curve?portfolio_id=` | Buy-and-hold equity curve |
-| `GET` | `/api/portfolio/metrics?portfolio_id=` | Portfolio metrics tables |
+| `GET` | `/api/portfolio/metrics?portfolio_id=` | Portfolio + favorites metrics tables |
+| `GET` | `/api/portfolio/recent_daily_returns?portfolio_id=` | Aligned recent daily returns per fund / portfolio |
 | `GET` | `/api/portfolio/risk_report?portfolio_id=` | QuantStats risk report (HTML) |
 | `POST` | `/api/portfolio/risk_report?portfolio_id=` | Save positions and generate risk report |
 | `GET` | `/api/macro` | Macro health series and monthly history |
+| `GET` | `/api/categories/ranking` | Category ranking (optional `limit`) |
+
 
 **Save portfolio body:**
 
@@ -311,6 +346,8 @@ MS_BEARER_TOKEN_PATH=/tmp/morningstar.token
 uv run pytest -q
 ```
 
+Isolation tests that expect a blank fund catalog use the `empty_fund_catalog` fixture in `tests/conftest.py` so `init_db()` does not seed production funds from `data/fixtures/fund.json`.
+
 ## Technologies
 
 - Python 3.12+
@@ -319,3 +356,4 @@ uv run pytest -q
 - fredapi — FRED API client (macroeconomic series)
 - quantstats — HTML performance reports
 - fastapi / uvicorn — REST API and web UI
+- Chart.js — equity curve in the browser

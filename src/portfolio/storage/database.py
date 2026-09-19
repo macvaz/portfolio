@@ -111,6 +111,26 @@ def _ensure_category_columns(engine) -> None:
             conn.commit()
 
 
+def _ensure_user_columns(engine) -> None:
+    """Add User columns introduced after the initial table create."""
+    with engine.connect() as conn:
+        rows = conn.execute(text("PRAGMA table_info(user)")).fetchall()
+        if not rows:
+            return
+        existing = {row[1] for row in rows}
+        if "is_default" in existing:
+            return
+        conn.execute(
+            text("ALTER TABLE user ADD COLUMN is_default BOOLEAN DEFAULT 0 NOT NULL")
+        )
+        conn.execute(
+            text(
+                "UPDATE user SET is_default = 1 WHERE name = 'Miguel_Agresiva'"
+            )
+        )
+        conn.commit()
+
+
 def init_db(db_path: Path | None = None) -> None:
     """Create schema 1.0 tables if needed, then sync fixture catalogs."""
     path = _resolve_db_path(db_path)
@@ -120,6 +140,7 @@ def init_db(db_path: Path | None = None) -> None:
         SQLModel.metadata.create_all(engine)
         _initialized_paths.add(key)
     _ensure_category_columns(engine)
+    _ensure_user_columns(engine)
 
     with get_session(db_path) as session:
         sync_health_check_catalog_from_fixture(session)
