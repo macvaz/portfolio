@@ -3,6 +3,7 @@ from datetime import date
 
 import pandas as pd
 
+from portfolio.common.atomic_io import atomic_to_csv
 from portfolio.datasource.morningstar import download_navs
 
 DEFAULT_FUNDS_DIR = Path("data/funds")
@@ -37,8 +38,7 @@ def save_fund_nav_csv(
     isin: str, nav_df: pd.DataFrame, funds_dir: Path | None = None
 ) -> Path:
     path = fund_nav_path(isin, funds_dir)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    nav_dataframe_to_csv(nav_df).to_csv(path, index=False)
+    atomic_to_csv(path, nav_dataframe_to_csv(nav_df))
     return path
 
 

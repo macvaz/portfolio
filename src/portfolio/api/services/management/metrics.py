@@ -3,11 +3,12 @@
 from portfolio.storage.database import get_fund_metrics, list_funds, list_user_portfolio
 from portfolio.datasource.morningstar import morningstar_quote_url
 from portfolio.common.metrics import (
+    PERIOD_RETURN_KEYS,
     compute_portfolio_correlation_matrix,
     compute_portfolio_metrics,
     compute_portfolio_ter,
 )
-from portfolio.common.navs import latest_nav_as_of
+from portfolio.common.navs import fund_nav_path, latest_nav_as_of
 
 
 def _fund_row(
@@ -58,14 +59,32 @@ def get_portfolio_metrics(user_id: int, db_path=None, funds_dir=None) -> dict:
     total_weight = round(sum(fund["weight"] for fund in portfolio), 2)
     as_of = latest_nav_as_of(portfolio_isins, funds_dir)
 
+    # Period totals must use the same DB figures shown in fund rows so a missing
+    # NAV CSV cannot silently drop a holding from the average.
+    fund_metrics_by_isin = {
+        str(row["isin"]).upper(): {key: row.get(key) for key in PERIOD_RETURN_KEYS}
+        for row in portfolio
+    }
+    missing_nav = sorted(
+        str(position["isin"]).upper()
+        for position in positions
+        if float(position["weighted_assets"]) > 0
+        and not fund_nav_path(str(position["isin"]), funds_dir).exists()
+    )
+
     return {
         "as_of": as_of.isoformat() if as_of else None,
+        "missing_nav": missing_nav,
         "portfolio": portfolio,
         "favorites": favorites,
         "portfolio_summary": {
             "weight": total_weight,
             "ter": compute_portfolio_ter(positions),
-            **compute_portfolio_metrics(positions, funds_dir),
+            **compute_portfolio_metrics(
+                positions,
+                funds_dir,
+                fund_metrics_by_isin=fund_metrics_by_isin,
+            ),
         },
         "correlation_matrix": compute_portfolio_correlation_matrix(
             positions, funds_dir

@@ -191,8 +191,14 @@ PERIOD_RETURN_KEYS = (
 def _weighted_fund_period_returns(
     positions: list[dict],
     funds_dir: Path | None = None,
+    *,
+    fund_metrics_by_isin: dict[str, dict[str, float | None]] | None = None,
 ) -> dict[str, float | None]:
     """Weight-average each fund's period returns (same figures as the fund rows).
+
+    Prefer ``fund_metrics_by_isin`` (typically DB / table-row values) so a missing
+    NAV file cannot drop a holding from the average. When omitted, metrics are
+    recomputed from NAV files (useful in unit tests).
 
     Cash (unallocated weight) contributes 0. A column is ``None`` only when no
     held fund has that period return.
@@ -204,7 +210,11 @@ def _weighted_fund_period_returns(
         weight = float(position["weighted_assets"])
         if weight <= 0:
             continue
-        fund_metrics = compute_fund_metrics(position["isin"], funds_dir)
+        isin = str(position["isin"]).upper()
+        if fund_metrics_by_isin is not None:
+            fund_metrics = fund_metrics_by_isin.get(isin) or {}
+        else:
+            fund_metrics = compute_fund_metrics(isin, funds_dir)
         for key in PERIOD_RETURN_KEYS:
             value = fund_metrics.get(key)
             if value is None:
@@ -221,15 +231,22 @@ def _weighted_fund_period_returns(
 def compute_portfolio_metrics(
     positions: list[dict],
     funds_dir: Path | None = None,
+    *,
+    fund_metrics_by_isin: dict[str, dict[str, float | None]] | None = None,
 ) -> dict[str, float | None]:
-    """Compute metrics for a weighted portfolio from stored NAV files.
+    """Compute metrics for a weighted portfolio.
 
     Period returns (``% 1w`` … ``% YTD``) are the weight-average of each fund's
-    own period returns — matching the figures shown in the fund rows. Risk
-    metrics (vol / Sharpe / β / Cor) use constant current-weight daily returns.
+    own period returns — matching the figures shown in the fund rows when
+    ``fund_metrics_by_isin`` is supplied (DB values). Risk metrics (vol /
+    Sharpe / β / Cor) use constant current-weight daily returns from NAV files.
     The equity curve / risk report keep true buy-and-hold.
     """
-    period_returns = _weighted_fund_period_returns(positions, funds_dir)
+    period_returns = _weighted_fund_period_returns(
+        positions,
+        funds_dir,
+        fund_metrics_by_isin=fund_metrics_by_isin,
+    )
 
     portfolio_returns = build_constant_weight_daily_returns(positions, funds_dir)
     if portfolio_returns is None or portfolio_returns.empty:

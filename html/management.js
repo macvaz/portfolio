@@ -554,6 +554,40 @@
     }
   }
 
+  function updateMissingNavMessage(metrics) {
+    const el = document.getElementById("management-missing-nav");
+    if (!el) {
+      return;
+    }
+    const missing = Array.isArray(metrics?.missing_nav) ? metrics.missing_nav : [];
+    if (!missing.length) {
+      el.hidden = true;
+      el.textContent = "";
+      return;
+    }
+
+    const nameByIsin = new Map(
+      (metrics.portfolio || []).map((fund) => [
+        String(fund.isin || "").toUpperCase(),
+        fund.name || "",
+      ])
+    );
+    const labels = missing.map((isin) => {
+      const key = String(isin).toUpperCase();
+      const name = nameByIsin.get(key);
+      return name ? `${name} (${key})` : key;
+    });
+
+    const list =
+      labels.length <= 3
+        ? labels.join(", ")
+        : `${labels.slice(0, 3).join(", ")} and ${labels.length - 3} more`;
+    el.textContent =
+      `Missing NAV data for ${list}. Period returns still use last stored metrics; ` +
+      `risk figures, the equity curve, and correlation may be incomplete until you re-run the batch download.`;
+    el.hidden = false;
+  }
+
   function updatePortfolioTableTitle(portfolios) {
     window.AppShell?.updateActivePortfolioName(portfolios);
   }
@@ -988,6 +1022,7 @@
 
     updatePortfolioTableTitle(portfolios);
     updatePortfolioTableMeta(metrics);
+    updateMissingNavMessage(metrics);
 
     document.getElementById("portfolio-legend").innerHTML = formatPortfolioLegendHtml(curve);
     document.getElementById("benchmark-legend").innerHTML = formatBenchmarkLegendHtml(curve);
@@ -1057,6 +1092,7 @@
     document.getElementById("portfolio-summary").innerHTML = "";
     document.getElementById("favorites-body").innerHTML = "";
     updatePortfolioTableMeta(null);
+    updateMissingNavMessage(null);
   }
 
   function getPortfolioAllocationFunds() {

@@ -492,6 +492,17 @@ button:disabled {
   border-radius: 8px;
 }
 
+.management-missing-nav {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1.15rem;
+  color: #5c4a32;
+  background: #fcf9eb;
+  border: 1px solid rgba(201, 162, 39, 0.45);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
 .risk-report-scroll {
   width: 100%;
   max-height: calc(100vh - 7.5rem);

@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from portfolio.common.atomic_io import atomic_to_csv
+
 DEFAULT_SERIES_DIR = Path("data/series")
 
 
@@ -43,8 +45,7 @@ def save_series_csv(
     series_dir: Path | None = None,
 ) -> Path:
     path = series_path(series_id, series_dir)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    series_dataframe_to_csv(df, column_name or series_id).to_csv(path, index=False)
+    atomic_to_csv(path, series_dataframe_to_csv(df, column_name or series_id))
     return path
 
 

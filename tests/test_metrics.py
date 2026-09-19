@@ -123,6 +123,82 @@ def test_portfolio_pct_6m_is_weight_average_of_fund_returns(tmp_path):
     )
 
 
+def test_portfolio_period_returns_use_provided_metrics_when_nav_missing(tmp_path):
+    """Summary % columns must follow provided (DB) metrics even if a NAV is gone."""
+    funds_dir = tmp_path / "funds"
+    save_fund_nav_csv(
+        "BBB",
+        _daily_navs("2024-01-01", [0.01, -0.005, 0.008, 0.002] * 40),
+        funds_dir=funds_dir,
+    )
+    # AAA has no NAV file — live recompute would drop it from the average.
+    positions = [
+        {"isin": "AAA", "weighted_assets": 0.4},
+        {"isin": "BBB", "weighted_assets": 0.6},
+    ]
+    provided: dict[str, dict[str, float | None]] = {
+        "AAA": {
+            "pct_1w": 1.0,
+            "pct_2w": 2.0,
+            "pct_1m": 3.0,
+            "pct_3m": 4.0,
+            "pct_6m": 10.0,
+            "pct_ytd": 5.0,
+        },
+        "BBB": compute_fund_metrics("BBB", funds_dir),
+    }
+    bbb_6m = provided["BBB"]["pct_6m"]
+    assert bbb_6m is not None
+
+    metrics = compute_portfolio_metrics(
+        positions,
+        funds_dir=funds_dir,
+        fund_metrics_by_isin=provided,
+    )
+    live_only = compute_portfolio_metrics(positions, funds_dir=funds_dir)
+
+    expected_6m = round(0.4 * 10.0 + 0.6 * bbb_6m, 2)
+    assert metrics["pct_6m"] == expected_6m
+    # Without provided metrics, AAA is skipped → lower / different total.
+    assert live_only["pct_6m"] != expected_6m
+
+
+def test_refresh_fund_metrics_skips_persist_when_nav_missing(
+    tmp_path, empty_fund_catalog
+):
+    from portfolio.batch.metrics import refresh_fund_metrics
+    from portfolio.storage.database import save_fund_metrics
+
+    db_path = tmp_path / "portfolio.db"
+    funds_dir = tmp_path / "funds"
+    init_db(db_path)
+    save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
+    save_fund_metrics(
+        "ES0182527038",
+        {
+            "pct_1w": 1.5,
+            "pct_6m": 9.0,
+            "vol_1y": 5.0,
+            "beta_6m": 0.2,
+            "cor_6m": 0.3,
+            "pct_2w": None,
+            "pct_1m": None,
+            "pct_3m": None,
+            "pct_ytd": None,
+            "sr_6m": None,
+            "sr_1y": None,
+        },
+        db_path,
+    )
+
+    refreshed = refresh_fund_metrics("ES0182527038", db_path, funds_dir)
+    stored = get_fund_metrics("ES0182527038", db_path)
+
+    assert all(value is None for value in refreshed.values())
+    assert stored["pct_6m"] == 9.0
+    assert stored["pct_1w"] == 1.5
+
+
 def test_compute_portfolio_ter_weighted_average():
     ter = compute_portfolio_ter(
         [

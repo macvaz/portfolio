@@ -232,11 +232,13 @@ Portfolio tools (money allocation by weight, and compounded returns over a chose
 
 Summary row figures are intentional mixes so the UI stays consistent with fund rows:
 
-- **Period returns** (`% 1w` … `% YTD`) — weight-average of each fund’s own period returns (same numbers as the fund table).
-- **Risk metrics** (vol / Sharpe / β / Cor) — computed on a **constant current-weight** daily return series.
+- **Period returns** (`% 1w` … `% YTD`) — weight-average of each fund’s **stored** period returns (same numbers as the fund table). A missing NAV CSV does not drop that fund from the average.
+- **Risk metrics** (vol / Sharpe / β / Cor) — computed on a **constant current-weight** daily return series from NAV files (missing holdings contribute 0 for that series).
 - **Equity curve** and **risk report** — true **buy-and-hold** (weights drift with NAV performance).
 
-TER on the summary is the weight-average of fund TERs (cash / unallocated weight contributes 0).
+The metrics payload may include `missing_nav`: ISINs held in the portfolio with no CSV under `data/funds/`. TER on the summary is the weight-average of fund TERs (cash / unallocated weight contributes 0).
+
+Batch `refresh_fund_metrics` does **not** overwrite good DB metrics with empties when a NAV file is missing.
 
 ### API endpoints
 

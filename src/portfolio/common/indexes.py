@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from portfolio.common.atomic_io import atomic_to_csv
+
 DEFAULT_INDEXES_DIR = Path("data/indexes")
 
 
@@ -44,8 +46,7 @@ def save_index_csv(
     indexes_dir: Path | None = None,
 ) -> Path:
     path = index_path(index_id, indexes_dir)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    index_dataframe_to_csv(df, column_name or index_id).to_csv(path, index=False)
+    atomic_to_csv(path, index_dataframe_to_csv(df, column_name or index_id))
     return path
 
 
