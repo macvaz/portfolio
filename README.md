@@ -238,7 +238,7 @@ Open http://localhost:8000 to manage portfolios, funds, metrics, risk reports, a
 
 ## Docker
 
-One image holds Python dependencies; **application code is mounted from the host** at runtime (`src/`, `html/`, `api.py`, `batch.py`, and `data/`). Rebuild the image only when dependencies change.
+One image holds Python dependencies; **application code is mounted from the host** at runtime (`src/`, `html/`, `api.py`, `batch.py`, `category.py`, and `data/`). Rebuild the image only when dependencies change.
 
 Pass `api` or `batch` as the command (default is `api`).
 
@@ -271,7 +271,9 @@ docker run -p 8000:8000 \
   -v "$(pwd)/html:/app/html:ro" \
   -v "$(pwd)/api.py:/app/api.py:ro" \
   -v "$(pwd)/batch.py:/app/batch.py:ro" \
+  -v "$(pwd)/category.py:/app/category.py:ro" \
   -v "$(pwd)/data:/app/data" \
+  -v /tmp:/tmp \
   portfolio api
 
 docker run \
@@ -279,7 +281,9 @@ docker run \
   -v "$(pwd)/html:/app/html:ro" \
   -v "$(pwd)/api.py:/app/api.py:ro" \
   -v "$(pwd)/batch.py:/app/batch.py:ro" \
+  -v "$(pwd)/category.py:/app/category.py:ro" \
   -v "$(pwd)/data:/app/data" \
+  -v /tmp:/tmp \
   --env-file .env \
   portfolio batch
 ```
