@@ -11,7 +11,7 @@ from portfolio.common.equity import (
     BENCHMARK_NAME,
     TRADING_DAYS_PER_YEAR,
     align_return_series,
-    build_portfolio_daily_returns,
+    build_constant_weight_daily_returns,
     load_benchmark_daily_returns,
 )
 from portfolio.common.navs import load_fund_nav_csv
@@ -164,21 +164,73 @@ def compute_fund_metrics(
     return compute_metrics(fund_returns, benchmark_returns)
 
 
+PERIOD_RETURN_KEYS = (
+    "pct_1w",
+    "pct_2w",
+    "pct_1m",
+    "pct_3m",
+    "pct_6m",
+    "pct_ytd",
+)
+
+
+def _weighted_fund_period_returns(
+    positions: list[dict],
+    funds_dir: Path | None = None,
+) -> dict[str, float | None]:
+    """Weight-average each fund's period returns (same figures as the fund rows).
+
+    Cash (unallocated weight) contributes 0. A column is ``None`` only when no
+    held fund has that period return.
+    """
+    totals = dict.fromkeys(PERIOD_RETURN_KEYS, 0.0)
+    seen = dict.fromkeys(PERIOD_RETURN_KEYS, False)
+
+    for position in positions:
+        weight = float(position["weighted_assets"])
+        if weight <= 0:
+            continue
+        fund_metrics = compute_fund_metrics(position["isin"], funds_dir)
+        for key in PERIOD_RETURN_KEYS:
+            value = fund_metrics.get(key)
+            if value is None:
+                continue
+            totals[key] += weight * float(value)
+            seen[key] = True
+
+    return {
+        key: _round_metric(totals[key]) if seen[key] else None
+        for key in PERIOD_RETURN_KEYS
+    }
+
+
 def compute_portfolio_metrics(
     positions: list[dict],
     funds_dir: Path | None = None,
 ) -> dict[str, float | None]:
-    """Compute metrics for a weighted portfolio from stored NAV files."""
-    portfolio_returns = build_portfolio_daily_returns(positions, funds_dir)
+    """Compute metrics for a weighted portfolio from stored NAV files.
+
+    Period returns (``% 1w`` … ``% YTD``) are the weight-average of each fund's
+    own period returns — matching the figures shown in the fund rows. Risk
+    metrics (vol / Sharpe / β / Cor) use constant current-weight daily returns.
+    The equity curve / risk report keep true buy-and-hold.
+    """
+    period_returns = _weighted_fund_period_returns(positions, funds_dir)
+
+    portfolio_returns = build_constant_weight_daily_returns(positions, funds_dir)
     if portfolio_returns is None or portfolio_returns.empty:
-        return _empty_metrics()
+        metrics = _empty_metrics()
+        metrics.update(period_returns)
+        return metrics
 
     benchmark_returns = load_benchmark_daily_returns(funds_dir)
     portfolio_returns, benchmark_returns = align_return_series(
         portfolio_returns,
         benchmark_returns,
     )
-    return compute_metrics(portfolio_returns, benchmark_returns)
+    metrics = compute_metrics(portfolio_returns, benchmark_returns)
+    metrics.update(period_returns)
+    return metrics
 
 
 def compute_portfolio_ter(positions: list[dict]) -> float | None:

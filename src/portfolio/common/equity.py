@@ -178,3 +178,30 @@ def build_portfolio_daily_returns(
 
     returns.name = "Portfolio"
     return returns
+
+
+def build_constant_weight_daily_returns(
+    positions: list[dict],
+    funds_dir: Path | None = None,
+) -> pd.Series | None:
+    """Daily portfolio returns with fixed current weights (no drift).
+
+    Used for management-table period metrics (1w / 1m / 6m / …) so the summary
+    row matches the weights shown for each fund. Uninvested cash earns 0.
+    """
+    weights, _cash_weight = _portfolio_weights(positions)
+    if not weights:
+        return None
+
+    navs_df = _load_portfolio_navs(weights, funds_dir).dropna()
+    available = [isin for isin in weights if isin in navs_df.columns]
+    if not available:
+        return None
+
+    returns_df = navs_df[available].pct_change().dropna()
+    if returns_df.empty:
+        return None
+
+    portfolio = sum(returns_df[isin] * weights[isin] for isin in available)
+    portfolio.name = "Portfolio"
+    return portfolio

@@ -91,6 +91,37 @@ def test_compute_portfolio_metrics_from_positions(tmp_path):
     assert metrics["beta_6m"] is not None
 
 
+def test_portfolio_pct_6m_is_weight_average_of_fund_returns(tmp_path):
+    """Portfolio % 6m must match Σ w_i × fund_i % 6m (same figures as fund rows).
+
+    Each fund's own trailing window can differ slightly by calendar; averaging
+    those displayed period returns is what the summary row must show.
+    """
+    funds_dir = tmp_path / "funds"
+    # Divergent paths so a shared-calendar compound would disagree with
+    # averaging each fund's own 6m window.
+    early = [0.02] * 24 + [0.0] * 126
+    late_b = [0.0] * 24 + [-0.01] * 126
+    save_fund_nav_csv("AAA", _daily_navs("2024-01-01", early), funds_dir=funds_dir)
+    save_fund_nav_csv("BBB", _daily_navs("2024-01-01", late_b), funds_dir=funds_dir)
+
+    positions = [
+        {"isin": "AAA", "weighted_assets": 0.5},
+        {"isin": "BBB", "weighted_assets": 0.5},
+    ]
+
+    metrics = compute_portfolio_metrics(positions, funds_dir=funds_dir)
+    fund_a = compute_fund_metrics("AAA", funds_dir=funds_dir)
+    fund_b = compute_fund_metrics("BBB", funds_dir=funds_dir)
+    expected_6m = round(0.5 * fund_a["pct_6m"] + 0.5 * fund_b["pct_6m"], 2)
+
+    assert fund_a["pct_6m"] is not None and fund_b["pct_6m"] is not None
+    assert metrics["pct_6m"] == expected_6m
+    assert metrics["pct_1m"] == round(
+        0.5 * fund_a["pct_1m"] + 0.5 * fund_b["pct_1m"], 2
+    )
+
+
 def test_compute_portfolio_ter_weighted_average():
     ter = compute_portfolio_ter(
         [
