@@ -4,7 +4,6 @@ x-app-volumes: &app-volumes
   - ../api.py:/app/api.py:ro
   - ../batch.py:/app/batch.py:ro
   - ../category.py:/app/category.py:ro
-  - ../category_test.py:/app/category_test.py:ro
   - ../data:/app/data
   - /tmp:/tmp
 
