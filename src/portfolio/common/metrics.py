@@ -299,7 +299,9 @@ def compute_aligned_recent_daily_returns(
         {timestamp for series in series_by_isin.values() for timestamp in series.index}
     )
     recent_dates = list(reversed(all_dates[-days:]))
-    date_labels = [pd.Timestamp(timestamp).strftime("%Y-%m-%d") for timestamp in recent_dates]
+    date_labels = [
+        pd.Timestamp(timestamp).strftime("%Y-%m-%d") for timestamp in recent_dates
+    ]
 
     def _aligned_pct_values(series: pd.Series | None) -> list[float | None]:
         if series is None or series.empty:

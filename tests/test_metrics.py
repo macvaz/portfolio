@@ -168,7 +168,9 @@ def test_compute_portfolio_correlation_matrix(tmp_path):
     )
     save_fund_nav_csv(
         "LU1234567890",
-        _daily_navs("2024-01-01", [-0.01, 0.012, -0.008, 0.015, -0.004, 0.009, -0.002, 0.003]),
+        _daily_navs(
+            "2024-01-01", [-0.01, 0.012, -0.008, 0.015, -0.004, 0.009, -0.002, 0.003]
+        ),
         funds_dir=funds_dir,
     )
 

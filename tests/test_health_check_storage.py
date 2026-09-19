@@ -5,7 +5,10 @@ from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db, upsert_health_checks
 from portfolio.storage.models import MacroHealthCheck
-from portfolio.batch.health_check_storage import extract_health_check_values, persist_latest_health_checks
+from portfolio.batch.health_check_storage import (
+    extract_health_check_values,
+    persist_latest_health_checks,
+)
 from portfolio.common.indexes import latest_index_date, save_index_csv
 from portfolio.common.macro_constants import SP500_DEATH_CROSS, YIELD_SPREAD_10Y3M
 
@@ -84,8 +87,7 @@ def test_persist_latest_health_checks_uses_index_file_date(tmp_path):
 
     with get_session(db_path) as session:
         stored = {
-            row.code: row.value
-            for row in session.exec(select(MacroHealthCheck)).all()
+            row.code: row.value for row in session.exec(select(MacroHealthCheck)).all()
         }
 
     assert stored["Breakeven_Inflation"] == 2.3
@@ -95,6 +97,8 @@ def test_persist_latest_health_checks_uses_index_file_date(tmp_path):
 
 def test_extract_health_check_values_skips_missing_columns():
     row = pd.Series({"Breakeven_Inflation": 2.25})
-    values = extract_health_check_values(row, ["Breakeven_Inflation", SP500_DEATH_CROSS])
+    values = extract_health_check_values(
+        row, ["Breakeven_Inflation", SP500_DEATH_CROSS]
+    )
 
     assert values == {"Breakeven_Inflation": 2.25}

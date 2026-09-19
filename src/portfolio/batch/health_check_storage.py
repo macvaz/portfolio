@@ -38,9 +38,7 @@ def persist_latest_health_checks(
         observation_date = timestamp.date()
 
     row = market_df.loc[timestamp]
-    codes = [
-        str(entry["code"]) for entry in load_health_check_description_fixture()
-    ]
+    codes = [str(entry["code"]) for entry in load_health_check_description_fixture()]
     values = extract_health_check_values(row, codes)
     if not values:
         return None

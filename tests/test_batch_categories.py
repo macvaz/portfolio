@@ -1,6 +1,3 @@
-import datetime
-from pathlib import Path
-
 from portfolio.batch.categories import (
     download_category_monthly_data,
     resolve_access_token,
@@ -60,7 +57,9 @@ def test_download_category_monthly_data_persists_rows(tmp_path, monkeypatch):
     # Discover which category was processed (first with fund_id in catalog order).
     from portfolio.storage.database import list_categories
 
-    category_id = next(c["category_id"] for c in list_categories(db_path) if c["fund_id"])
+    category_id = next(
+        c["category_id"] for c in list_categories(db_path) if c["fund_id"]
+    )
     rows = list_category_monthly_data(category_id, db_path=db_path)
     assert len(rows) == 3
     assert rows[0]["return_pct"] is None
@@ -83,7 +82,9 @@ def test_download_category_monthly_data_aborts_on_unauthorized(tmp_path, monkeyp
     init_db(db_path)
 
     def boom(*_args, **_kwargs):
-        raise DownloadError("Morningstar SAL chart unauthorized — refresh the access token")
+        raise DownloadError(
+            "Morningstar SAL chart unauthorized — refresh the access token"
+        )
 
     monkeypatch.setattr(
         "portfolio.batch.categories.fetch_performance_chart",

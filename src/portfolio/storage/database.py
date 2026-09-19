@@ -124,9 +124,7 @@ def _ensure_user_columns(engine) -> None:
             text("ALTER TABLE user ADD COLUMN is_default BOOLEAN DEFAULT 0 NOT NULL")
         )
         conn.execute(
-            text(
-                "UPDATE user SET is_default = 1 WHERE name = 'Miguel_Agresiva'"
-            )
+            text("UPDATE user SET is_default = 1 WHERE name = 'Miguel_Agresiva'")
         )
         conn.commit()
 
@@ -350,9 +348,7 @@ def _series_item_from_description(
         if description.source == "fred" and identifier
         else None
     )
-    active = is_health_check_active(
-        value, description.threshold, description.operator
-    )
+    active = is_health_check_active(value, description.threshold, description.operator)
     return {
         "code": description.code,
         "label": health_check_label(description.code),
@@ -363,9 +359,7 @@ def _series_item_from_description(
         "identifier": identifier,
         "source_url": source_url,
         "series_start": (
-            description.series_start.isoformat()
-            if description.series_start
-            else None
+            description.series_start.isoformat() if description.series_start else None
         ),
         "domain": description.domain,
     }

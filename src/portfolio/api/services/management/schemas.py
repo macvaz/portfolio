@@ -68,10 +68,7 @@ def normalize_portfolio_positions(positions: list[PortfolioPosition]) -> list[di
     if total_weight > 1.0 + 0.01:
         raise HTTPException(
             status_code=400,
-            detail=(
-                "Portfolio weights cannot exceed 1.0 "
-                f"(got {total_weight:.4f})"
-            ),
+            detail=(f"Portfolio weights cannot exceed 1.0 (got {total_weight:.4f})"),
         )
     return normalized
 

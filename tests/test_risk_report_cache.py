@@ -14,7 +14,12 @@ from portfolio.api.services.risk.risk_report_cache import (
     write_cached_risk_report,
 )
 from portfolio.common.navs import save_fund_nav_csv
-from portfolio.storage.database import create_user, init_db, save_fund, save_user_portfolio
+from portfolio.storage.database import (
+    create_user,
+    init_db,
+    save_fund,
+    save_user_portfolio,
+)
 
 
 def _seed(tmp_path, monkeypatch):
@@ -40,10 +45,19 @@ def _seed(tmp_path, monkeypatch):
 
 
 def test_positions_fingerprint_is_order_independent():
-    a = [{"isin": "AAA", "weighted_assets": 0.4}, {"isin": "BBB", "weighted_assets": 0.6}]
-    b = [{"isin": "BBB", "weighted_assets": 0.6}, {"isin": "AAA", "weighted_assets": 0.4}]
+    a = [
+        {"isin": "AAA", "weighted_assets": 0.4},
+        {"isin": "BBB", "weighted_assets": 0.6},
+    ]
+    b = [
+        {"isin": "BBB", "weighted_assets": 0.6},
+        {"isin": "AAA", "weighted_assets": 0.4},
+    ]
     assert positions_fingerprint(a) == positions_fingerprint(b)
-    c = [{"isin": "AAA", "weighted_assets": 0.5}, {"isin": "BBB", "weighted_assets": 0.5}]
+    c = [
+        {"isin": "AAA", "weighted_assets": 0.5},
+        {"isin": "BBB", "weighted_assets": 0.5},
+    ]
     assert positions_fingerprint(a) != positions_fingerprint(c)
 
 

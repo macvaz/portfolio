@@ -24,7 +24,6 @@ def test_list_and_delete_funds(tmp_path, monkeypatch, empty_fund_catalog):
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
 
     client = TestClient(app)
-    user_id = _create_user(db_path)
 
     response = client.get("/api/portfolio/funds")
     assert response.status_code == 200

@@ -2,9 +2,15 @@ import datetime
 
 from sqlmodel import select
 
-from portfolio.storage.database import get_session, init_db, reset_health_check_tables_from_fixture
+from portfolio.storage.database import (
+    get_session,
+    init_db,
+    reset_health_check_tables_from_fixture,
+)
 from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
-from portfolio.common.health_check_descriptions import load_health_check_description_fixture
+from portfolio.common.health_check_descriptions import (
+    load_health_check_description_fixture,
+)
 
 
 def test_reset_health_check_tables_from_fixture_reloads_catalog(tmp_path):

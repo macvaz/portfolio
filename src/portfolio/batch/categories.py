@@ -70,7 +70,9 @@ def download_category_monthly_data(
     if asset_class:
         wanted = asset_class.strip().lower()
         categories = [
-            row for row in categories if (row.get("asset_class") or "").lower() == wanted
+            row
+            for row in categories
+            if (row.get("asset_class") or "").lower() == wanted
         ]
     categories = [row for row in categories if row.get("fund_id")]
     if limit is not None:

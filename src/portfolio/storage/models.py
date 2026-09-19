@@ -62,9 +62,7 @@ class MacroHealthCheck(SQLModel, table=True):
     __table_args__ = (UniqueConstraint("code", "date"),)
 
     id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(
-        foreign_key="macro_health_check_description.code", index=True
-    )
+    code: str = Field(foreign_key="macro_health_check_description.code", index=True)
     date: datetime.date = Field(index=True)
     value: float
 

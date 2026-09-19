@@ -53,8 +53,7 @@ def sync_health_check_catalog_from_fixture(
     fixture_path: Path | None = None,
 ) -> None:
     fixture_codes = {
-        str(row["code"])
-        for row in load_health_check_description_fixture(fixture_path)
+        str(row["code"]) for row in load_health_check_description_fixture(fixture_path)
     }
     for description in session.exec(select(MacroHealthCheckDescription)).all():
         if description.code in fixture_codes:

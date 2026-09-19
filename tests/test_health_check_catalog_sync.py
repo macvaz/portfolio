@@ -4,7 +4,9 @@ from sqlmodel import select
 
 from portfolio.storage.database import get_session, init_db
 from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
-from portfolio.common.health_check_descriptions import load_health_check_description_fixture
+from portfolio.common.health_check_descriptions import (
+    load_health_check_description_fixture,
+)
 
 
 def test_init_db_prunes_removed_health_check_descriptions(tmp_path):
@@ -40,4 +42,6 @@ def test_init_db_prunes_removed_health_check_descriptions(tmp_path):
 
     assert {description.code for description in descriptions} == fixture_codes
     assert all(check.code in fixture_codes for check in checks)
-    assert "MACRO_CRISIS_VOTES" not in {description.code for description in descriptions}
+    assert "MACRO_CRISIS_VOTES" not in {
+        description.code for description in descriptions
+    }

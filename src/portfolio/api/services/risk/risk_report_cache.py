@@ -106,9 +106,7 @@ def write_cached_risk_report(
     root.mkdir(parents=True, exist_ok=True)
     fingerprint = positions_fingerprint(positions)
     stamp = nav_stamp(positions, funds_dir)
-    path = risk_report_cache_path(
-        portfolio_id, fingerprint, stamp, reports_dir=root
-    )
+    path = risk_report_cache_path(portfolio_id, fingerprint, stamp, reports_dir=root)
     tmp_path = path.with_suffix(".html.tmp")
     tmp_path.write_text(html, encoding="utf-8")
     tmp_path.replace(path)

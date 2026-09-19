@@ -19,7 +19,9 @@ def _write_monthly_index(indexes_dir, index_id: str, values: dict[str, float]) -
     save_index_csv(index_id, frame, column_name="value", indexes_dir=indexes_dir)
 
 
-def test_build_monthly_macro_history_pivots_health_checks_by_month(tmp_path, monkeypatch):
+def test_build_monthly_macro_history_pivots_health_checks_by_month(
+    tmp_path, monkeypatch
+):
     monkeypatch.setattr(
         "portfolio.api.services.macro.history.HISTORY_START_DATE",
         pd.Timestamp("2024-01-01"),
@@ -87,7 +89,9 @@ def test_build_monthly_macro_history_pivots_health_checks_by_month(tmp_path, mon
     assert death_cross_col["source_url"] is None
     assert death_cross_col["threshold"] == 1.0
     assert death_cross_col["domain"] == "equity_market"
-    sp500_col = next(column for column in history["columns"] if column["code"] == "SP500")
+    sp500_col = next(
+        column for column in history["columns"] if column["code"] == "SP500"
+    )
     assert sp500_col["source_url"] is None
     assert sp500_col["threshold"] is None
     assert sp500_col["domain"] == "equity_market"
@@ -116,7 +120,9 @@ def test_build_monthly_macro_history_pivots_health_checks_by_month(tmp_path, mon
     assert history["rows"][0]["eligible_count"] == 7
 
 
-def test_build_monthly_macro_history_fills_missing_months_from_1995(tmp_path, monkeypatch):
+def test_build_monthly_macro_history_fills_missing_months_from_1995(
+    tmp_path, monkeypatch
+):
     monkeypatch.setattr(
         "portfolio.api.services.macro.history.HISTORY_START_DATE",
         pd.Timestamp("1995-01-01"),

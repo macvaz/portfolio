@@ -57,8 +57,7 @@ def fetch_performance_chart(
         )
     if not response.ok:
         raise DownloadError(
-            f"Morningstar SAL chart HTTP {response.status_code}: "
-            f"{response.text[:200]}"
+            f"Morningstar SAL chart HTTP {response.status_code}: {response.text[:200]}"
         )
 
     payload = response.json()

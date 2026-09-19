@@ -37,3 +37,9 @@ dev = [
     "pytest>=7.0",
     "httpx>=0.28.0",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# MPLCONFIGDIR must be set before imports that pull in Matplotlib.
+"batch.py" = ["E402"]
+"category.py" = ["E402"]
+"src/portfolio/api/api.py" = ["E402"]

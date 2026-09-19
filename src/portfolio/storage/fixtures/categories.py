@@ -32,9 +32,7 @@ def _category_from_row(row: dict) -> Category:
         name=str(row["name"]).strip(),
         fund_id=None if fund_id in (None, "") else str(fund_id).strip(),
         performance_id=(
-            None
-            if performance_id in (None, "")
-            else str(performance_id).strip()
+            None if performance_id in (None, "") else str(performance_id).strip()
         ),
         asset_class=(
             None if asset_class in (None, "") else str(asset_class).strip().lower()

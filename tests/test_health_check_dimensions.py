@@ -58,7 +58,9 @@ def test_init_db_seeds_health_check_descriptions_from_fixture(tmp_path):
     fixture_rows = load_health_check_description_fixture()
     with get_session(db_path) as session:
         stored = session.exec(
-            select(MacroHealthCheckDescription).order_by(MacroHealthCheckDescription.code)
+            select(MacroHealthCheckDescription).order_by(
+                MacroHealthCheckDescription.code
+            )
         ).all()
 
     assert len(stored) == len(fixture_rows)

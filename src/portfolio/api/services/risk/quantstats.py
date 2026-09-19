@@ -52,7 +52,6 @@ def generate_performance_report(
     logger.info("Performance report successfully saved to: %s", output_file)
 
 
-
 def generate_performance_report_html(
     returns: pd.Series,
     benchmark: pd.Series,

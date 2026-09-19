@@ -17,9 +17,7 @@ def test_download_sp500_downloads_from_morningstar(monkeypatch):
         assert kwargs["end"] == "2000-01-10"
         return fake_history
 
-    monkeypatch.setattr(
-        "portfolio.batch.sp500.download_navs", fake_download_navs
-    )
+    monkeypatch.setattr("portfolio.batch.sp500.download_navs", fake_download_navs)
 
     history = download_sp500(start_date="2000-01-01", end_date="2000-01-10")
     assert len(history) == 2

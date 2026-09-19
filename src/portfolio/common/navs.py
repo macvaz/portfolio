@@ -51,9 +51,7 @@ def load_fund_nav_csv(isin: str, funds_dir: Path | None = None) -> pd.DataFrame:
     return df.set_index("date").sort_index()
 
 
-def latest_fund_nav_date(
-    isin: str, funds_dir: Path | None = None
-) -> date | None:
+def latest_fund_nav_date(isin: str, funds_dir: Path | None = None) -> date | None:
     """Return the last NAV observation date for one fund CSV."""
     nav_df = load_fund_nav_csv(isin, funds_dir)
     if nav_df.empty:

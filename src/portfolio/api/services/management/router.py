@@ -39,7 +39,10 @@ from portfolio.datasource.morningstar import (
     parse_morningstar_search,
 )
 from portfolio.datasource.errors import DownloadError
-from portfolio.common.metrics import compute_fund_metrics, compute_aligned_recent_daily_returns
+from portfolio.common.metrics import (
+    compute_fund_metrics,
+    compute_aligned_recent_daily_returns,
+)
 from portfolio.common.navs import delete_fund_nav_csv, download_and_store_fund_nav
 
 router = APIRouter(prefix="/api/portfolio", tags=["management"])
@@ -96,9 +99,7 @@ def _parse_optional_ter(raw) -> float | None:
     try:
         ter = float(raw)
     except (TypeError, ValueError) as exc:
-        raise HTTPException(
-            status_code=400, detail="TER must be a number"
-        ) from exc
+        raise HTTPException(status_code=400, detail="TER must be a number") from exc
     if ter < 0:
         raise HTTPException(status_code=400, detail="TER cannot be negative")
     return ter

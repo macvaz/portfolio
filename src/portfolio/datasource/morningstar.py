@@ -15,14 +15,13 @@ import requests
 
 from portfolio.datasource.errors import DownloadError
 
-MORNINGSTAR_QUOTE_URL = (
-    "https://global.morningstar.com/es/inversiones/{universe}/{performance_id}/cotizacion"
-)
+MORNINGSTAR_QUOTE_URL = "https://global.morningstar.com/es/inversiones/{universe}/{performance_id}/cotizacion"
 # tools.morningstar.es now redirects to global.morningstar.com (403/empty).
 BASE_URL = "https://lt.morningstar.com/api/rest.svc/timeseries_price/t92wz0sj7c"
 MS_SERIES_SUFFIX = "]2]1]"
 
 __all__ = ["download_navs", "morningstar_quote_url", "parse_morningstar_search"]
+
 
 def _is_isin(identifier: str) -> bool:
     return len(identifier) == 12 and identifier.isalnum()
@@ -56,8 +55,7 @@ def parse_morningstar_search(payload: dict) -> dict:
     ]
     if missing:
         raise ValueError(
-            "Morningstar response is missing required fields: "
-            + ", ".join(missing)
+            "Morningstar response is missing required fields: " + ", ".join(missing)
         )
 
     return {
@@ -112,6 +110,7 @@ def _extract_records(data: object) -> list[dict[str, float | int]]:
         raise DownloadError(
             "Morningstar response rows are not [timestamp, value] pairs"
         ) from exc
+
 
 def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Normalize dates and index on the first recognized date column."""

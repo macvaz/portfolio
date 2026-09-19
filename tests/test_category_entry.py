@@ -57,9 +57,7 @@ def test_category_entry_downloads_with_token_file(monkeypatch, tmp_path):
         called["kwargs"] = kwargs
         return {"ok": 1, "skipped": 0, "failed": 0}
 
-    monkeypatch.setattr(
-        category_entry, "download_category_monthly_data", fake_download
-    )
+    monkeypatch.setattr(category_entry, "download_category_monthly_data", fake_download)
     assert category_entry.main() == 0
     assert called["token"] == "tok-from-file"
     assert called["kwargs"]["limit"] == 1

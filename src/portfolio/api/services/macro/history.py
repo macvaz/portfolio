@@ -42,7 +42,9 @@ HISTORY_DISPLAY_ONLY_COLUMNS: dict[str, dict[str, str | None]] = {
 
 
 def _is_thresholded_series(description: dict) -> bool:
-    return is_health_check_role(description) and description.get("threshold") is not None
+    return (
+        is_health_check_role(description) and description.get("threshold") is not None
+    )
 
 
 def _count_monthly_actives(

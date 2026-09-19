@@ -21,7 +21,9 @@ FRED_SERIES = fred_series_from_fixture()
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Download portfolio data and macro health.")
+    parser = argparse.ArgumentParser(
+        description="Download portfolio data and macro health."
+    )
     parser.add_argument(
         "--start-date",
         type=str,

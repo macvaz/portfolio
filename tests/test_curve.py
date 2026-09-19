@@ -2,8 +2,6 @@ import pandas as pd
 from datetime import date
 
 from portfolio.api.services.management.curve import (
-    BENCHMARK_NAME,
-    align_return_series,
     annualized_return_pct,
     annualized_volatility_pct,
     build_equity_curve,
@@ -152,7 +150,9 @@ def test_annualized_volatility_pct_matches_quantstats():
     import quantstats as qs
 
     returns = pd.Series([0.01, -0.005, 0.002, 0.003, -0.001] * 50)
-    expected = float(qs.stats.volatility(returns, periods=252, prepare_returns=False) * 100)
+    expected = float(
+        qs.stats.volatility(returns, periods=252, prepare_returns=False) * 100
+    )
     assert annualized_volatility_pct(returns) == round(expected, 2)
 
 
@@ -224,4 +224,6 @@ def test_curve_total_matches_quantstats_cumulative_return():
     _, curve = returns_to_cumulative_curve(returns)
     expected = float(qs.stats.comp(returns) * 100)
     assert curve[-1] == round(expected, 2)
-    assert annualized_return_pct(returns) == round(float(qs.stats.cagr(returns) * 100), 2)
+    assert annualized_return_pct(returns) == round(
+        float(qs.stats.cagr(returns) * 100), 2
+    )
