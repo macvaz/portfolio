@@ -25,11 +25,17 @@ def load_category_fixture(fixture_path: Path | None = None) -> list[dict]:
 
 def _category_from_row(row: dict) -> Category:
     fund_id = row.get("fund_id")
+    performance_id = row.get("performance_id")
     asset_class = row.get("asset_class")
     return Category(
         category_id=str(row["category_id"]).strip(),
         name=str(row["name"]).strip(),
         fund_id=None if fund_id in (None, "") else str(fund_id).strip(),
+        performance_id=(
+            None
+            if performance_id in (None, "")
+            else str(performance_id).strip()
+        ),
         asset_class=(
             None if asset_class in (None, "") else str(asset_class).strip().lower()
         ),

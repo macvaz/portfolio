@@ -14,6 +14,9 @@ def test_init_db_syncs_categories_from_fixture(tmp_path):
     assert flexible["name"] == "EUR Flexible Allocation"
     assert flexible["fund_id"]
     assert flexible["asset_class"] == "mixed"
+    africa = by_id["EUCA000698"]
+    assert africa["fund_id"] == "F00000MKF1"
+    assert africa["performance_id"] == "0P0000TJ7F"
     europe = by_id["EUCA000511"]
     assert europe["name"] == "Europe Large-Cap Blend Equity"
     assert europe["asset_class"] == "equity"
@@ -50,3 +53,7 @@ def test_category_model_fields(tmp_path):
     assert row.name == "EUR Flexible Allocation"
     assert row.fund_id
     assert row.asset_class == "mixed"
+    africa = session.exec(
+        select(Category).where(Category.category_id == "EUCA000698")
+    ).one()
+    assert africa.performance_id == "0P0000TJ7F"

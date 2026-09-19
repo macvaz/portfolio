@@ -115,6 +115,8 @@ def fetch_top_categories(session: Session, *, limit: int | None = None) -> dict:
             {
                 "category_id": category.category_id,
                 "name": category.name,
+                "fund_id": category.fund_id,
+                "performance_id": category.performance_id,
                 "asset_class": category.asset_class,
                 "asset_class_name": asset_class_label(category.asset_class),
                 "as_of": latest_date.isoformat(),

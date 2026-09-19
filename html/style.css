@@ -2899,7 +2899,12 @@ body.is-allocation-open {
 
 .asset-classes-table .col-asset-class {
   width: 9rem;
+  text-align: left;
   color: #555;
+}
+
+.asset-classes-table td.col-name {
+  color: #0088cc;
 }
 
 .asset-classes-table .col-return {

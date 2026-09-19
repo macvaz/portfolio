@@ -101,6 +101,9 @@ def _ensure_category_columns(engine) -> None:
         if "fund_id" not in existing:
             conn.execute(text("ALTER TABLE category ADD COLUMN fund_id VARCHAR"))
             altered = True
+        if "performance_id" not in existing:
+            conn.execute(text("ALTER TABLE category ADD COLUMN performance_id VARCHAR"))
+            altered = True
         if "asset_class" not in existing:
             conn.execute(text("ALTER TABLE category ADD COLUMN asset_class VARCHAR"))
             altered = True
@@ -453,6 +456,7 @@ def list_categories(db_path: Path | None = None) -> list[dict]:
             "category_id": row.category_id,
             "name": row.name,
             "fund_id": row.fund_id,
+            "performance_id": row.performance_id,
             "asset_class": row.asset_class,
         }
         for row in rows

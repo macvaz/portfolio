@@ -3,3072 +3,3584 @@
     "category_id": "INCA000008",
     "name": "10 yr Government Bond",
     "fund_id": "F00001MN1V",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000698",
     "name": "Africa & Middle East Equity",
     "fund_id": "F00000MKF1",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000TJ7F"
   },
   {
     "category_id": "EUCA000697",
     "name": "Africa Equity",
     "fund_id": "F00000WX2E",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000802",
     "name": "Alt - Fund of Funds - Multistrategy",
     "fund_id": null,
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000805",
     "name": "Alt - Long/Short Credit",
     "fund_id": null,
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000005",
     "name": "Alternative - Other",
     "fund_id": "F000013L0L",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000075",
     "name": "Alternative - Private Debt",
     "fund_id": "F000025R1I",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "CACA000172",
     "name": "Alternative Credit Focused",
     "fund_id": "F00002JTXN",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "CACA000188",
     "name": "Alternative Digital Asset",
     "fund_id": "F000016X78",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "CACA000171",
     "name": "Alternative Equity Focused",
     "fund_id": "F000013M2N",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "CACA000174",
     "name": "Alternative Market Neutral",
     "fund_id": "F000014963",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "CACA000173",
     "name": "Alternative Multi - Strategy",
     "fund_id": "F000016EP0",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "CACA000175",
     "name": "Alternative Other",
     "fund_id": "F00000LNES",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000881",
     "name": "Alternative Other",
     "fund_id": "F000013Z0Q",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "CACA000176",
     "name": "Alternative Private Equity",
     "fund_id": "F000014SX0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000669",
     "name": "ASEAN Equity",
     "fund_id": "F00000O7EN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000W2YQ"
   },
   {
     "category_id": "EUCA000559",
     "name": "Asia Allocation",
     "fund_id": "F0000026VV",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0000I3NU"
   },
   {
     "category_id": "EUCA000570",
     "name": "Asia Bond",
     "fund_id": "F00000XVJG",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00018TW7"
   },
   {
     "category_id": "EUCA000897",
     "name": "Asia Bond - Local Currency",
     "fund_id": "F0000000I9",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "MXCA000039",
     "name": "Asia Equity",
     "fund_id": "F00000NB8G",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000779",
     "name": "Asia ex-Japan Equity",
     "fund_id": "F00001ELIL",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000907",
     "name": "Asia ex-Japan Small/Mid-Cap Equity",
     "fund_id": "F00001DBJJ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001O94S"
   },
   {
     "category_id": "EUCA000877",
     "name": "Asia High Yield Bond",
     "fund_id": "F00001D303",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001NYB7"
   },
   {
     "category_id": "CACA000005",
     "name": "Asia Pacific Equity",
     "fund_id": "F00000TVGC",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000502",
     "name": "Asia-Pacific Equity",
     "fund_id": "F00001F83N",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000501",
     "name": "Asia-Pacific ex-Japan Equity",
     "fund_id": "F00001GZO7",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000918",
     "name": "Asia-Pacific ex-Japan Equity Income",
     "fund_id": "F00000WQQC",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P000179W1"
   },
   {
     "category_id": "JPCA000032",
     "name": "Australia & New Zealand Bond",
     "fund_id": "F00001DEYA",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000503",
     "name": "Australia & New Zealand Equity",
     "fund_id": "F00000IS5Q",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000076",
     "name": "Australia Equity Income",
     "fund_id": "F00000PAHE",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000043",
     "name": "Australian Cash",
     "fund_id": "F00000NYTL",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000044",
     "name": "Australian Short Term Fixed Interest",
     "fund_id": "F00001HX95",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000630",
     "name": "Austria Equity",
     "fund_id": "F0GBR067L4",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000012",
     "name": "Balanced Allocation",
     "fund_id": "F00002JW5H",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000631",
     "name": "Belgium Equity",
     "fund_id": "F0GBR06IS3",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000007",
     "name": "Bonds - Australia",
     "fund_id": "F00001DFXJ",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000060",
     "name": "Bonds - Emerging Market Debt",
     "fund_id": "F00002JWG8",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000033",
     "name": "Bonds - Global",
     "fund_id": "F00001S78S",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000048",
     "name": "Bonds - Global / Australia",
     "fund_id": "F00001I1S8",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000055",
     "name": "Bonds - Inflation-linked",
     "fund_id": "F00001GTNO",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000699",
     "name": "Brazil Equity",
     "fund_id": "F000013D6A",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000075",
     "name": "Brazil Equity",
     "fund_id": "F00000221A",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000632",
     "name": "Canada Equity",
     "fund_id": "F00000M181",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000182",
     "name": "Canadian Core Plus Fixed Income",
     "fund_id": "F000015XEF",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000168",
     "name": "Canadian Corporate Fixed Income",
     "fund_id": "F0000102KY",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000116",
     "name": "Canadian Dividend & Income Equity",
     "fund_id": "F00000YJQA",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000013",
     "name": "Canadian Equity",
     "fund_id": "F00000NAI0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000114",
     "name": "Canadian Equity Balanced",
     "fund_id": "F00000H5OS",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "CACA000009",
     "name": "Canadian Fixed Income",
     "fund_id": "F000005PNR",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000115",
     "name": "Canadian Fixed Income Balanced",
     "fund_id": "F00001SVKL",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "CACA000015",
     "name": "Canadian Focused Equity",
     "fund_id": "F000026KHI",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000117",
     "name": "Canadian Inflation Protected Fixed Income",
     "fund_id": "F00000IR68",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000118",
     "name": "Canadian Long Term Fixed Income",
     "fund_id": "F000005PNX",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000019",
     "name": "Canadian Money Market",
     "fund_id": "F000016AQG",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": null
   },
   {
     "category_id": "CACA000119",
     "name": "Canadian Neutral Balanced",
     "fund_id": "F00001S7V7",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "CACA000025",
     "name": "Canadian Short Term Fixed Income",
     "fund_id": "F000005FG5",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000120",
     "name": "Canadian Small/Mid Cap Equity",
     "fund_id": "FOUSA06AZ5",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000615",
     "name": "Capital Protected",
     "fund_id": "F00001749Q",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": "0P0001MJZH"
   },
   {
     "category_id": "EUCA000618",
     "name": "CHF Aggressive Allocation",
     "fund_id": "F00001GTCH",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001RM7O"
   },
   {
     "category_id": "EUCA000573",
     "name": "CHF Bond",
     "fund_id": "F00000SFO1",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000747",
     "name": "CHF Bond - Short Term",
     "fund_id": "F000003WOU",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000619",
     "name": "CHF Cautious Allocation",
     "fund_id": "F00000VPPW",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P00015W0B"
   },
   {
     "category_id": "EUCA000738",
     "name": "CHF Moderate Allocation",
     "fund_id": "F00001GIMR",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001RBA9"
   },
   {
     "category_id": "EUCA000575",
     "name": "CHF Money Market",
     "fund_id": "F00001OFBO",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000856",
     "name": "China Bond",
     "fund_id": "F00001CQP6",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001NGEC"
   },
   {
     "category_id": "EUCA000504",
     "name": "China Equity",
     "fund_id": "F000010J2O",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001DDF3"
   },
   {
     "category_id": "EUCA000896",
     "name": "China Equity - A Shares",
     "fund_id": "F00000ZMWN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001BTU3"
   },
   {
     "category_id": "AUCA000057",
     "name": "Commodities & Precious Metals",
     "fund_id": "F00000NDID",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000785",
     "name": "Commodities - Broad Basket",
     "fund_id": "F00000SVWB",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": "0P00012BE9"
   },
   {
     "category_id": "EUCA000786",
     "name": "Commodities - Energy",
     "fund_id": "F00000Z0HZ",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000788",
     "name": "Commodities - Industrial & Broad Metals",
     "fund_id": "F00000YZWO",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000790",
     "name": "Commodities - Other",
     "fund_id": "F00001SPWV",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000791",
     "name": "Commodities - Precious Metals",
     "fund_id": "F000013P96",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "CACA000155",
     "name": "Commodity",
     "fund_id": "F00001TH3R",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000044",
     "name": "Commodity",
     "fund_id": "F00001SGUS",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000748",
     "name": "Convertible Bond - Europe",
     "fund_id": "F00000NOT8",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": "0P0000VAH0"
   },
   {
     "category_id": "EUCA000749",
     "name": "Convertible Bond - Global",
     "fund_id": "F000001VRC",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": "0P0000FWWI"
   },
   {
     "category_id": "EUCA000821",
     "name": "Convertible Bond - Global, CHF Hedged",
     "fund_id": "F00000QHBT",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": "0P0000ZMXH"
   },
   {
     "category_id": "EUCA000750",
     "name": "Convertible Bond - Global, EUR Hedged",
     "fund_id": "F00000QTK0",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": "0P000102JV"
   },
   {
     "category_id": "EUCA000822",
     "name": "Convertible Bond - Global, GBP Hedged",
     "fund_id": "F00000MCLY",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": "0P0000SWH6"
   },
   {
     "category_id": "EUCA000823",
     "name": "Convertible Bond - Global, USD Hedged",
     "fund_id": "F00000UMAZ",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": "0P00014IFW"
   },
   {
     "category_id": "EUCA000751",
     "name": "Convertible Bond - Other",
     "fund_id": "F00000WDOR",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": "0P00016RMD"
   },
   {
     "category_id": "JPCA000114",
     "name": "Country/Region Specific Bond",
     "fund_id": "F00001HUWH",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000021",
     "name": "Country/Region Specific Equity",
     "fund_id": "F00002K5VA",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000091",
     "name": "Country/Region Specific REIT",
     "fund_id": "F00000Z2BQ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000797",
     "name": "Currency",
     "fund_id": "F00000MJI6",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0000THPA"
   },
   {
     "category_id": "EUCA001030",
     "name": "Digital Assets",
     "fund_id": "F000015ITT",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000051",
     "name": "Diversified Credit",
     "fund_id": "F00001QE5U",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "INCA000058",
     "name": "Dividend Yield",
     "fund_id": "F00002JZSX",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000576",
     "name": "DKK Bond",
     "fund_id": "F000005OCN",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000N3CS"
   },
   {
     "category_id": "EUCA000911",
     "name": "DKK Domestic Bond",
     "fund_id": "F00000YV8G",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001AAWB"
   },
   {
     "category_id": "EUCA000623",
     "name": "Emerging Europe Bond",
     "fund_id": "F0GBR04HTM",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00000HQW"
   },
   {
     "category_id": "EUCA000508",
     "name": "Emerging Europe Equity",
     "fund_id": null,
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000633",
     "name": "Emerging Europe ex-Russia Equity",
     "fund_id": "F000013D6B",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000029",
     "name": "Emerging Markets Equity",
     "fund_id": "F00000X7JR",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000170",
     "name": "Emerging Markets Fixed Income",
     "fund_id": "F00000IR61",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000161",
     "name": "Energy Equity",
     "fund_id": "F00001TIEZ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000072",
     "name": "Equity - Consumption",
     "fund_id": "F00001CKFG",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000076",
     "name": "Equity - ESG",
     "fund_id": "F000015WM0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000051",
     "name": "Equity - Infrastructure",
     "fund_id": "F00001EC5X",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000187",
     "name": "Equity - Other",
     "fund_id": "F00001MX0Z",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000031",
     "name": "Equity - Other",
     "fund_id": "F00002JI8Q",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000009",
     "name": "Equity Asia Pacific w/o Japan",
     "fund_id": "F00001EJS9",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000011",
     "name": "Equity Australia Large Blend",
     "fund_id": "F000016XJP",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000012",
     "name": "Equity Australia Large Geared",
     "fund_id": "F00000TEM4",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000013",
     "name": "Equity Australia Large Growth",
     "fund_id": "F00001F9OI",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000014",
     "name": "Equity Australia Large Value",
     "fund_id": "F00000Q5TG",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000072",
     "name": "Equity Australia Long Short",
     "fund_id": "F00001UHN5",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000015",
     "name": "Equity Australia Mid/Small Blend",
     "fund_id": "F00000YWQT",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000016",
     "name": "Equity Australia Mid/Small Growth",
     "fund_id": "F00001T7X7",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000017",
     "name": "Equity Australia Mid/Small Value",
     "fund_id": "F00001D3J6",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000010",
     "name": "Equity Australia Other",
     "fund_id": "F00000LNUL",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000022",
     "name": "Equity Australia Real Estate",
     "fund_id": "FOUSA05XPP",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000008",
     "name": "Equity Emerging Markets",
     "fund_id": "F00001SGVV",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000018",
     "name": "Equity Europe",
     "fund_id": "F00000XBJ8",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000050",
     "name": "Equity Global Infrastructure",
     "fund_id": "F00001QDNJ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000071",
     "name": "Equity Global Infrastructure - Currency Hedged",
     "fund_id": "F00001SVI3",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000023",
     "name": "Equity Global Real Estate",
     "fund_id": "F00001G0PE",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000058",
     "name": "Equity Global Resources",
     "fund_id": "F00001EKWG",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000024",
     "name": "Equity Global Technology",
     "fund_id": "F000016KGO",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000056",
     "name": "Equity Greater China",
     "fund_id": "F00001QB90",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000019",
     "name": "Equity Japan",
     "fund_id": "F00000XBJ9",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000046",
     "name": "Equity Market Neutral",
     "fund_id": "F00000ZUOK",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000811",
     "name": "Equity Market Neutral EUR",
     "fund_id": "F00000T6OO",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P00012QGJ"
   },
   {
     "category_id": "EUCA001020",
     "name": "Equity Market Neutral GBP",
     "fund_id": "F000002O6U",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0000JNOX"
   },
   {
     "category_id": "EUCA001005",
     "name": "Equity Market Neutral Other",
     "fund_id": "F00000NYD9",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0000VOHL"
   },
   {
     "category_id": "EUCA001004",
     "name": "Equity Market Neutral USD",
     "fund_id": "F0000139L2",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001GYBP"
   },
   {
     "category_id": "AUCA000020",
     "name": "Equity North America",
     "fund_id": "F000015I4G",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000054",
     "name": "Equity World - Currency Hedged",
     "fund_id": "F00001H6DW",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000027",
     "name": "Equity World Large Blend",
     "fund_id": "F00001F0DB",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000028",
     "name": "Equity World Large Growth",
     "fund_id": "F000016MSG",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000029",
     "name": "Equity World Large Value",
     "fund_id": "F000011S4I",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000073",
     "name": "Equity World Long Short",
     "fund_id": "F000015DNI",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000030",
     "name": "Equity World Mid/Small",
     "fund_id": "F00001T0KT",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000026",
     "name": "Equity World Other",
     "fund_id": "F0000119AP",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000862",
     "name": "EUR Aggressive Allocation",
     "fund_id": "F000014YZL",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001JI9Z"
   },
   {
     "category_id": "EUCA000563",
     "name": "EUR Aggressive Allocation - Global",
     "fund_id": "F000015O6V",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001KO88"
   },
   {
     "category_id": "EUCA000622",
     "name": "EUR Bond - Long Term",
     "fund_id": "F0GBR06XJR",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00006A1A"
   },
   {
     "category_id": "EUCA000863",
     "name": "EUR Cautious Allocation",
     "fund_id": "F0GBR06O86",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P00002AFX"
   },
   {
     "category_id": "EUCA000564",
     "name": "EUR Cautious Allocation - Global",
     "fund_id": "F000014ZAD",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001JIQ4"
   },
   {
     "category_id": "EUCA000690",
     "name": "EUR Corporate Bond",
     "fund_id": "F00001LT4U",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001T87L"
   },
   {
     "category_id": "EUCA000819",
     "name": "EUR Corporate Bond - Short Term",
     "fund_id": "F0GBR06XGY",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P000069TZ"
   },
   {
     "category_id": "EUCA000587",
     "name": "EUR Diversified Bond",
     "fund_id": "F000015UI0",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001KWH9"
   },
   {
     "category_id": "EUCA000593",
     "name": "EUR Diversified Bond - Short Term",
     "fund_id": "F00000TO7A",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00013CCV"
   },
   {
     "category_id": "EUCA000864",
     "name": "EUR Flexible Allocation",
     "fund_id": "F0GBR05RX0",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0000174L"
   },
   {
     "category_id": "EUCA000739",
     "name": "EUR Flexible Allocation - Global",
     "fund_id": "F000010UKS",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001E1YR"
   },
   {
     "category_id": "EUCA000754",
     "name": "EUR Flexible Bond",
     "fund_id": "FOGBR05KST",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00006ESM"
   },
   {
     "category_id": "EUCA000589",
     "name": "EUR Government Bond",
     "fund_id": "F000014R20",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000837",
     "name": "EUR Government Bond - Short Term",
     "fund_id": "F00001NA9Y",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000590",
     "name": "EUR High Yield Bond",
     "fund_id": "F00000H3UD",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000NO8S"
   },
   {
     "category_id": "EUCA000625",
     "name": "EUR Inflation-Linked Bond",
     "fund_id": "FOGBR05KMF",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00006DAT"
   },
   {
     "category_id": "EUCA000865",
     "name": "EUR Moderate Allocation",
     "fund_id": "F000010YG3",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001ECJM"
   },
   {
     "category_id": "EUCA000565",
     "name": "EUR Moderate Allocation - Global",
     "fund_id": "F000010842",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000591",
     "name": "EUR Money Market",
     "fund_id": "F00001PYVP",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000830",
     "name": "EUR Money Market - Short Term",
     "fund_id": "F0GBR04BKW",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": "0P00000BQU"
   },
   {
     "category_id": "EUCA000922",
     "name": "EUR Subordinated Bond",
     "fund_id": "F0000154W8",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001JT7V"
   },
   {
     "category_id": "EUCA000592",
     "name": "EUR Ultra Short-Term Bond",
     "fund_id": "F000015W2T",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000594",
     "name": "Europe Bond",
     "fund_id": "F00000MPG4",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000TQ8F"
   },
   {
     "category_id": "JPCA000016",
     "name": "Europe Equity",
     "fund_id": "F00001T2OW",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000077",
     "name": "Europe Equity - JPY Hedged",
     "fund_id": "F00001EC1E",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000875",
     "name": "Europe Equity Income",
     "fund_id": "F00001JK0H",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000509",
     "name": "Europe ex-UK Equity",
     "fund_id": "F00001GGLN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001R9A6"
   },
   {
     "category_id": "EUCA000510",
     "name": "Europe ex-UK Small/Mid-Cap Equity",
     "fund_id": "F0000177G7",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001MNXU"
   },
   {
     "category_id": "EUCA000514",
     "name": "Europe Flex-Cap Equity",
     "fund_id": "F00000JRPL",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000PVYU"
   },
   {
     "category_id": "EUCA000511",
     "name": "Europe Large-Cap Blend Equity",
     "fund_id": "F0GBR052U8",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00000WM0"
   },
   {
     "category_id": "EUCA000512",
     "name": "Europe Large-Cap Growth Equity",
     "fund_id": "F00001JB1N",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001SCOK"
   },
   {
     "category_id": "EUCA000513",
     "name": "Europe Large-Cap Value Equity",
     "fund_id": "F00000Q20H",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000YZW1"
   },
   {
     "category_id": "EUCA001028",
     "name": "Europe Loan",
     "fund_id": "F00000UP1D",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00014M4O"
   },
   {
     "category_id": "EUCA000850",
     "name": "Europe Mid-Cap Equity",
     "fund_id": "F00000V95O",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P000159GS"
   },
   {
     "category_id": "EUCA000515",
     "name": "Europe Small-Cap Equity",
     "fund_id": "F00001F9QT",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000031",
     "name": "European Equity",
     "fund_id": "F00000W8WW",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000517",
     "name": "Eurozone Flex-Cap Equity",
     "fund_id": "F00002K42X",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000516",
     "name": "Eurozone Large-Cap Equity",
     "fund_id": "F0GBR04I7X",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00000I3M"
   },
   {
     "category_id": "EUCA000851",
     "name": "Eurozone Mid-Cap Equity",
     "fund_id": "F00000MJWQ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000TIK4"
   },
   {
     "category_id": "EUCA000518",
     "name": "Eurozone Small-Cap Equity",
     "fund_id": "F00001JK0G",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000800",
     "name": "Event Driven",
     "fund_id": "F00001EU65",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001Q7TH"
   },
   {
     "category_id": "CACA000035",
     "name": "Financial Services Equity",
     "fund_id": "F00001L6TC",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000635",
     "name": "Finland Equity",
     "fund_id": null,
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000888",
     "name": "Fixed Term Bond",
     "fund_id": "F00001E3C6",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001PBBN"
   },
   {
     "category_id": "CACA000162",
     "name": "Floating Rate Loans",
     "fund_id": "F00000SJAX",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000636",
     "name": "France Equity",
     "fund_id": "F000011WW0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000637",
     "name": "France Small/Mid-Cap Equity",
     "fund_id": "F00002KCYD",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000857",
     "name": "French PEA ESTR SWAP",
     "fund_id": "F000011SF5",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000621",
     "name": "GBP Allocation 0-20% Equity",
     "fund_id": "F00000JYZI",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0000Q75G"
   },
   {
     "category_id": "EUCA000917",
     "name": "GBP Allocation 20-40% Equity",
     "fund_id": "F00001I7OH",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001S0MD"
   },
   {
     "category_id": "EUCA000796",
     "name": "GBP Allocation 40-60% Equity",
     "fund_id": "F000001EZX",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0000CRAU"
   },
   {
     "category_id": "EUCA000916",
     "name": "GBP Allocation 60-80% Equity",
     "fund_id": "F000015O6T",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001KO86"
   },
   {
     "category_id": "EUCA000620",
     "name": "GBP Allocation 80%+ Equity",
     "fund_id": "F000001EZR",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0000CRAO"
   },
   {
     "category_id": "EUCA000692",
     "name": "GBP Corporate Bond",
     "fund_id": null,
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001001",
     "name": "GBP Corporate Bond - Short Term",
     "fund_id": "F00001QU9W",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001VQPC"
   },
   {
     "category_id": "EUCA000604",
     "name": "GBP Diversified Bond",
     "fund_id": "F000014I6E",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001ITXY"
   },
   {
     "category_id": "EUCA000756",
     "name": "GBP Diversified Bond - Short Term",
     "fund_id": "F00000XIG7",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00018DEY"
   },
   {
     "category_id": "EUCA000740",
     "name": "GBP Flexible Allocation",
     "fund_id": "F00000NMM2",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0000V47O"
   },
   {
     "category_id": "EUCA000757",
     "name": "GBP Flexible Bond",
     "fund_id": "F000000EOU",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000606",
     "name": "GBP Government Bond",
     "fund_id": "F00001P5TR",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001UEKA"
   },
   {
     "category_id": "EUCA000607",
     "name": "GBP High Yield Bond",
     "fund_id": null,
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000758",
     "name": "GBP Inflation-Linked Bond",
     "fund_id": "F00000Y0LM",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000608",
     "name": "GBP Money Market",
     "fund_id": "F0000000XZ",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": "0P00006U03"
   },
   {
     "category_id": "EUCA000831",
     "name": "GBP Money Market - Short Term",
     "fund_id": "F00001L20L",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": "0P0001SXQE"
   },
   {
     "category_id": "CACA000154",
     "name": "Geographic Equity",
     "fund_id": "F00001DBXL",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000638",
     "name": "Germany Equity",
     "fund_id": "F00000OY8C",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000X891"
   },
   {
     "category_id": "EUCA000639",
     "name": "Germany Small/Mid-Cap Equity",
     "fund_id": "F00001I9P6",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000037",
     "name": "Global - Other",
     "fund_id": "F000016TFX",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000588",
     "name": "Global Bond - EUR Biased",
     "fund_id": null,
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000605",
     "name": "Global Bond - GBP Biased",
     "fund_id": null,
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000183",
     "name": "Global Core Plus Fixed Income",
     "fund_id": "F0000155OX",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000889",
     "name": "Global Corporate Bond",
     "fund_id": "F00002555Q",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000890",
     "name": "Global Corporate Bond - CHF Hedged",
     "fund_id": "F00000PHHO",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000Y0AB"
   },
   {
     "category_id": "EUCA000891",
     "name": "Global Corporate Bond - EUR Hedged",
     "fund_id": "F000013OM5",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001HOKR"
   },
   {
     "category_id": "EUCA000892",
     "name": "Global Corporate Bond - GBP Hedged",
     "fund_id": "F00002529N",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0002CETL"
   },
   {
     "category_id": "EUCA000893",
     "name": "Global Corporate Bond - USD Hedged",
     "fund_id": "F00000NICU",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000UWP7"
   },
   {
     "category_id": "CACA000169",
     "name": "Global Corporate Fixed Income",
     "fund_id": "F000014JS2",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000759",
     "name": "Global Diversified Bond",
     "fund_id": "F0000105SB",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001CRAL"
   },
   {
     "category_id": "EUCA000760",
     "name": "Global Diversified Bond - CHF Hedged",
     "fund_id": "F00000ZYJ5",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001CHER"
   },
   {
     "category_id": "EUCA000624",
     "name": "Global Diversified Bond - EUR Hedged",
     "fund_id": "F00000VDR1",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00015FFG"
   },
   {
     "category_id": "EUCA000761",
     "name": "Global Diversified Bond - GBP Hedged",
     "fund_id": "F00000NXS3",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000VNRB"
   },
   {
     "category_id": "EUCA000882",
     "name": "Global Diversified Bond - NOK Hedged",
     "fund_id": "F00000YHW2",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00019PJ3"
   },
   {
     "category_id": "EUCA000763",
     "name": "Global Diversified Bond - USD Hedged",
     "fund_id": "F0GBR04I7H",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00000I37"
   },
   {
     "category_id": "CACA000180",
     "name": "Global Dividend & Income Equity",
     "fund_id": "F00001TH3X",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000741",
     "name": "Global Emerging Markets Allocation",
     "fund_id": "F00001ED1H",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001PMZ3"
   },
   {
     "category_id": "EUCA000586",
     "name": "Global Emerging Markets Bond",
     "fund_id": "F00001DTOL",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001OZ16"
   },
   {
     "category_id": "JPCA000115",
     "name": "Global Emerging Markets Bond",
     "fund_id": "F000010PWD",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001034",
     "name": "Global Emerging Markets Bond - CHF Hedged",
     "fund_id": "F00000PBR3",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000XTOL"
   },
   {
     "category_id": "EUCA000764",
     "name": "Global Emerging Markets Bond - EUR Hedged",
     "fund_id": "F00000JPKI",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000PT19"
   },
   {
     "category_id": "EUCA001026",
     "name": "Global Emerging Markets Bond - GBP Hedged",
     "fund_id": "F00000JPKK",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000PT1B"
   },
   {
     "category_id": "JPCA000062",
     "name": "Global Emerging Markets Bond - JPY Hedged",
     "fund_id": "F000015SMY",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000765",
     "name": "Global Emerging Markets Bond - Local Currency",
     "fund_id": "F00000NS69",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000VHHQ"
   },
   {
     "category_id": "JPCA000116",
     "name": "Global Emerging Markets Bond - Local Currency",
     "fund_id": "F00000NN35",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000878",
     "name": "Global Emerging Markets Corporate Bond",
     "fund_id": "F00000PLSV",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000Y65W"
   },
   {
     "category_id": "EUCA001035",
     "name": "Global Emerging Markets Corporate Bond - CHF Hedged",
     "fund_id": "F00001I27F",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001RZ7T"
   },
   {
     "category_id": "EUCA000879",
     "name": "Global Emerging Markets Corporate Bond - EUR Hedged",
     "fund_id": "F00000OT6W",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000X1PL"
   },
   {
     "category_id": "EUCA001027",
     "name": "Global Emerging Markets Corporate Bond - GBP Hedged",
     "fund_id": "F00000OT6S",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000X1PH"
   },
   {
     "category_id": "EUCA000507",
     "name": "Global Emerging Markets Equity",
     "fund_id": "F00001L1C4",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001SXGJ"
   },
   {
     "category_id": "JPCA000022",
     "name": "Global Emerging Markets Equity",
     "fund_id": "F00000ZI4Y",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001033",
     "name": "Global Emerging Markets ex-China Equity",
     "fund_id": "F00000Z6X7",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001B8ZL"
   },
   {
     "category_id": "EUCA000910",
     "name": "Global Emerging Markets Small/Mid-Cap Equity",
     "fund_id": "F000000DUY",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00008WA4"
   },
   {
     "category_id": "CACA000039",
     "name": "Global Equity",
     "fund_id": "F00001TC7H",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000132",
     "name": "Global Equity Balanced",
     "fund_id": "F000011UYN",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000876",
     "name": "Global Equity Income",
     "fund_id": "F00001065F",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000133",
     "name": "Global Fixed Income",
     "fund_id": "F000016AQ7",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000134",
     "name": "Global Fixed Income Balanced",
     "fund_id": "F000011UYM",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000558",
     "name": "Global Flex-Cap Equity",
     "fund_id": "F0000144J5",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001ID02"
   },
   {
     "category_id": "EUCA000899",
     "name": "Global Flexible Bond",
     "fund_id": "F00000J8RH",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000P8MG"
   },
   {
     "category_id": "EUCA000900",
     "name": "Global Flexible Bond - CHF Hedged",
     "fund_id": "F00001KKSE",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001SQSJ"
   },
   {
     "category_id": "EUCA000901",
     "name": "Global Flexible Bond - EUR Hedged",
     "fund_id": "F000017H9X",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001MPAC"
   },
   {
     "category_id": "EUCA000903",
     "name": "Global Flexible Bond - GBP Hedged",
     "fund_id": "F00000TGY1",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001347B"
   },
   {
     "category_id": "EUCA000902",
     "name": "Global Flexible Bond - USD Hedged",
     "fund_id": "F00001QCKJ",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001V4W0"
   },
   {
     "category_id": "EUCA000845",
     "name": "Global Frontier Markets Equity",
     "fund_id": "F00000LN8Y",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001021",
     "name": "Global Government Bond",
     "fund_id": "F000010928",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001022",
     "name": "Global Government Bond - CHF Hedged",
     "fund_id": "F00001IGRQ",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001S32W"
   },
   {
     "category_id": "EUCA001023",
     "name": "Global Government Bond - EUR Hedged",
     "fund_id": "F00001HPRR",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001RU6K"
   },
   {
     "category_id": "EUCA001024",
     "name": "Global Government Bond - GBP Hedged",
     "fund_id": "F00001R0JI",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001025",
     "name": "Global Government Bond - USD Hedged",
     "fund_id": "F00001HF6Z",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001RRU7"
   },
   {
     "category_id": "EUCA000766",
     "name": "Global High Yield Bond",
     "fund_id": "F00001L5LN",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000894",
     "name": "Global High Yield Bond - CHF Hedged",
     "fund_id": "F00000P9KT",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000XQH8"
   },
   {
     "category_id": "EUCA000854",
     "name": "Global High Yield Bond - EUR Hedged",
     "fund_id": "F000005NN9",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000N01X"
   },
   {
     "category_id": "EUCA000855",
     "name": "Global High Yield Bond - GBP Hedged",
     "fund_id": "F000014BZG",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001IM0O"
   },
   {
     "category_id": "EUCA001044",
     "name": "Global High Yield Bond - USD Hedged",
     "fund_id": "F0GBR04I7B",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00000I31"
   },
   {
     "category_id": "EUCA000858",
     "name": "Global Inflation-Linked Bond",
     "fund_id": "F00000WW03",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00017IK9"
   },
   {
     "category_id": "EUCA000859",
     "name": "Global Inflation-Linked Bond - EUR Hedged",
     "fund_id": "F000000C74",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00008TGE"
   },
   {
     "category_id": "EUCA000860",
     "name": "Global Inflation-Linked Bond - GBP Hedged",
     "fund_id": "F000002XUP",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000K8D3"
   },
   {
     "category_id": "EUCA000861",
     "name": "Global Inflation-Linked Bond - USD Hedged",
     "fund_id": "F00000XAOZ",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P000184F3"
   },
   {
     "category_id": "CACA000167",
     "name": "Global Infrastructure Equity",
     "fund_id": "F000005PNU",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000555",
     "name": "Global Large-Cap Blend Equity",
     "fund_id": "F0000175Z9",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000556",
     "name": "Global Large-Cap Growth Equity",
     "fund_id": "F00000YC70",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00019HKL"
   },
   {
     "category_id": "EUCA000557",
     "name": "Global Large-Cap Value Equity",
     "fund_id": "F00001D6Y1",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001O31Q"
   },
   {
     "category_id": "CACA000136",
     "name": "Global Neutral Balanced",
     "fund_id": "F000014JSA",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "CACA000137",
     "name": "Global Small/Mid Cap Equity",
     "fund_id": "F000016AQE",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000836",
     "name": "Global Small/Mid-Cap Equity",
     "fund_id": "F00001O61E",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001029",
     "name": "Global/US Loan",
     "fund_id": null,
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "INCA000009",
     "name": "Government Bond",
     "fund_id": "F00001LXFM",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "MXCA000050",
     "name": "Government Debt - Medium Term",
     "fund_id": "F0000043RX",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000919",
     "name": "Greater China Allocation",
     "fund_id": "F00000XYQT",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P00018YK1"
   },
   {
     "category_id": "CACA000150",
     "name": "Greater China Equity",
     "fund_id": "F000005PNS",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000500",
     "name": "Greater China Equity",
     "fund_id": "F00000TWQM",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00013NTG"
   },
   {
     "category_id": "JPCA000017",
     "name": "Greater China Equity",
     "fund_id": "F000016FF6",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001002",
     "name": "Greater China High Yield Bond",
     "fund_id": "F00000WLDW",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P000172WM"
   },
   {
     "category_id": "EUCA000611",
     "name": "Guaranteed Funds",
     "fund_id": "F00001Q0H6",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": "0P0001URLL"
   },
   {
     "category_id": "CACA000181",
     "name": "Healthcare Equity",
     "fund_id": "F00001EVOZ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000043",
     "name": "High Yield Fixed Income",
     "fund_id": "F00000ZLOP",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000768",
     "name": "HKD Bond",
     "fund_id": "F0000000IA",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000519",
     "name": "Hong Kong Equity",
     "fund_id": "F00000JUKD",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000Q1SI"
   },
   {
     "category_id": "INCA000060",
     "name": "Index Funds",
     "fund_id": "F00002JV6X",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000078",
     "name": "Index Funds - Fixed Income",
     "fund_id": "F00002JVGT",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000520",
     "name": "India Equity",
     "fund_id": "F0GBR05XF2",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P000019WH"
   },
   {
     "category_id": "JPCA000018",
     "name": "India Equity",
     "fund_id": "F00001L1NV",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000780",
     "name": "Indonesia Equity",
     "fund_id": "F000013D6D",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001014",
     "name": "Infrastructure Direct",
     "fund_id": "F000000EOV",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "CACA000045",
     "name": "International Equity",
     "fund_id": "F00000W8X0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000681",
     "name": "Islamic Allocation - Other",
     "fund_id": "F00000W5F3",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P00016HPU"
   },
   {
     "category_id": "EUCA000673",
     "name": "Islamic Equity - Other",
     "fund_id": "F00000MZEG",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000U50G"
   },
   {
     "category_id": "EUCA000840",
     "name": "Islamic Global Equity",
     "fund_id": "F00001SRTG",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000680",
     "name": "Islamic Global Sukuk",
     "fund_id": "F00000YD1J",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00019IXC"
   },
   {
     "category_id": "EUCA000640",
     "name": "Italy Equity",
     "fund_id": "F00000ZOBR",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001BVGZ"
   },
   {
     "category_id": "JPCA000023",
     "name": "Japan Bond - Long/Intermediate",
     "fund_id": "F000027QCE",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000024",
     "name": "Japan Bond - Short Term",
     "fund_id": "F00001TC3R",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000915",
     "name": "Japan Flex-Cap Equity",
     "fund_id": "F000014ENL",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001IPFI"
   },
   {
     "category_id": "EUCA000521",
     "name": "Japan Large-Cap Blend Equity",
     "fund_id": "F00000VMNU",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00015QOV"
   },
   {
     "category_id": "JPCA000002",
     "name": "Japan Large-Cap Blend Equity",
     "fund_id": "F000000MDI",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001031",
     "name": "Japan Large-Cap Growth Equity",
     "fund_id": "F000000EAN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00008X3D"
   },
   {
     "category_id": "JPCA000003",
     "name": "Japan Large-Cap Growth Equity",
     "fund_id": "F000000NIZ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001032",
     "name": "Japan Large-Cap Value Equity",
     "fund_id": "F00001QO2Q",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001VJY0"
   },
   {
     "category_id": "JPCA000001",
     "name": "Japan Large-Cap Value Equity",
     "fund_id": "F00001MP5D",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000040",
     "name": "Japan REIT",
     "fund_id": "F00001E1GH",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000080",
     "name": "Japan Small/Mid-Cap Blend Equity",
     "fund_id": "F00000YYFH",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000522",
     "name": "Japan Small/Mid-Cap Equity",
     "fund_id": "F000000EAM",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00008X3C"
   },
   {
     "category_id": "JPCA000081",
     "name": "Japan Small/Mid-Cap Growth Equity",
     "fund_id": "F00001D361",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000082",
     "name": "Japan Small/Mid-Cap Value Equity",
     "fund_id": "F000015LD0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000083",
     "name": "Japan Specialty Equity",
     "fund_id": "F00001TBQO",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000595",
     "name": "JPY Bond",
     "fund_id": "F00002JYKR",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00036OAV"
   },
   {
     "category_id": "EUCA000523",
     "name": "Korea Equity",
     "fund_id": "F00001256H",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000055",
     "name": "Large & Mid-Cap",
     "fund_id": "F00001Q0T6",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000001",
     "name": "Large-Cap",
     "fund_id": "F00000MV4S",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000524",
     "name": "Latin America Equity",
     "fund_id": "F000013MC7",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000011",
     "name": "Liquid",
     "fund_id": "F00001K1C6",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": null
   },
   {
     "category_id": "INCA000042",
     "name": "Long Duration",
     "fund_id": "F00001D3WJ",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000807",
     "name": "Long/Short Equity - Europe",
     "fund_id": "F00000LYE7",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000SCVY"
   },
   {
     "category_id": "EUCA000808",
     "name": "Long/Short Equity - Global",
     "fund_id": "F000010Q56",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001DW5R"
   },
   {
     "category_id": "EUCA000880",
     "name": "Long/Short Equity - Other",
     "fund_id": "F00001CSRY",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001NIZJ"
   },
   {
     "category_id": "EUCA000809",
     "name": "Long/Short Equity - UK",
     "fund_id": "F0GBR05XTB",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00001A83"
   },
   {
     "category_id": "EUCA000810",
     "name": "Long/Short Equity - US",
     "fund_id": "F00000ZACT",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001BCTH"
   },
   {
     "category_id": "EUCA000804",
     "name": "Macro Trading EUR",
     "fund_id": "F0000149QO",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001IJAB"
   },
   {
     "category_id": "EUCA001006",
     "name": "Macro Trading GBP",
     "fund_id": "F0000149QV",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001IJAI"
   },
   {
     "category_id": "EUCA001008",
     "name": "Macro Trading Other",
     "fund_id": "F00001QKNU",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001VFQH"
   },
   {
     "category_id": "EUCA001007",
     "name": "Macro Trading USD",
     "fund_id": "F000013YOO",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001I5WU"
   },
   {
     "category_id": "INCA000034",
     "name": "Medium to Long Duration",
     "fund_id": "F000014KK7",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "MXCA000001",
     "name": "Mexico Equity",
     "fund_id": "F0000167SU",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000002",
     "name": "Mid-Cap",
     "fund_id": "F00001T2L1",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000035",
     "name": "Miscellaneous",
     "fund_id": "F00001PYV5",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "CACA000152",
     "name": "Miscellaneous - Income and Real Property",
     "fund_id": "F00002K0XA",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000063",
     "name": "Miscellaneous - Other",
     "fund_id": "F000014JSD",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000833",
     "name": "Money Market - Other",
     "fund_id": "F00001SXSL",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": null
   },
   {
     "category_id": "INCA000048",
     "name": "Multi-Cap",
     "fund_id": "F00001EZOA",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000178",
     "name": "Multi-Sector Fixed Income",
     "fund_id": "F00001M7E3",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000037",
     "name": "Multisector Aggressive",
     "fund_id": "F000014JEI",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000038",
     "name": "Multisector Balanced",
     "fund_id": "F00002K182",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000070",
     "name": "Multisector Flexible",
     "fund_id": "F00000XM4N",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000040",
     "name": "Multisector Growth",
     "fund_id": "F00002K180",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "AUCA000041",
     "name": "Multisector Moderate",
     "fund_id": "F00000ZS2G",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000047",
     "name": "Multistrategy",
     "fund_id": "F00000YNG2",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000812",
     "name": "Multistrategy EUR",
     "fund_id": "F00001HL7E",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001RT7D"
   },
   {
     "category_id": "EUCA001009",
     "name": "Multistrategy GBP",
     "fund_id": "F00001DQO4",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001OU9G"
   },
   {
     "category_id": "EUCA001011",
     "name": "Multistrategy Other",
     "fund_id": "F00001DVDI",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001P1O6"
   },
   {
     "category_id": "EUCA001010",
     "name": "Multistrategy USD",
     "fund_id": "F00001QB9L",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001V3D5"
   },
   {
     "category_id": "MXCA000053",
     "name": "MXN Short-Term Debt",
     "fund_id": "F00000ZZPG",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000053",
     "name": "Natural Resources Equity",
     "fund_id": "F000005FGI",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000641",
     "name": "Netherlands Equity",
     "fund_id": "F0000104FO",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001CPEQ"
   },
   {
     "category_id": "EUCA000596",
     "name": "NOK Bond",
     "fund_id": "F00000LKID",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000RUOU"
   },
   {
     "category_id": "EUCA000599",
     "name": "NOK Bond - Short Term",
     "fund_id": "F00000VDJP",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00015EZF"
   },
   {
     "category_id": "EUCA000913",
     "name": "NOK High Yield Bond",
     "fund_id": "F00000LLCV",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000RVP5"
   },
   {
     "category_id": "AUCA000045",
     "name": "Non Investment Grade Debt",
     "fund_id": "F00001E5AO",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000525",
     "name": "Nordic Equity",
     "fund_id": "F0000100RV",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000920",
     "name": "Nordic Small/Mid-Cap Equity",
     "fund_id": "F00000PWXJ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000YRWM"
   },
   {
     "category_id": "CACA000121",
     "name": "North American Equity",
     "fund_id": "F000011F15",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000531",
     "name": "Norway Equity",
     "fund_id": "F00000LOWI",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000S1O6"
   },
   {
     "category_id": "EUCA000814",
     "name": "Options Trading",
     "fund_id": "F0000286LP",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000999",
     "name": "Other",
     "fund_id": "F00001DS0W",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "MXCA000038",
     "name": "Other",
     "fund_id": "F00000V2D2",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000743",
     "name": "Other Allocation",
     "fund_id": "F00001D90K",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001O5PC"
   },
   {
     "category_id": "JPCA000069",
     "name": "Other Allocation",
     "fund_id": "F00001TL8F",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000771",
     "name": "Other Bond",
     "fund_id": "F00000TPE6",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000060",
     "name": "Other Bond",
     "fund_id": "F00001TJF6",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000539",
     "name": "Other Equity",
     "fund_id": "F00000YC74",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00019HKP"
   },
   {
     "category_id": "JPCA000089",
     "name": "Other Equity",
     "fund_id": "F0000289MC",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000067",
     "name": "Overnight",
     "fund_id": "F00001F69O",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000921",
     "name": "Pacific ex-Japan Equity",
     "fund_id": "F00001Q80Y",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001UZGY"
   },
   {
     "category_id": "CACA000156",
     "name": "Passive Inverse/Leveraged",
     "fund_id": "F00001QJW6",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "CACA000057",
     "name": "Precious Metals Equity",
     "fund_id": "F00000P78W",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000160",
     "name": "Preferred Share Fixed Income",
     "fund_id": "F00000P78X",
-    "asset_class": "hybrid"
+    "asset_class": "hybrid",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001041",
     "name": "Private Debt",
     "fund_id": "F00001Q80T",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001UZGS"
   },
   {
     "category_id": "EUCA001040",
     "name": "Private Equity",
     "fund_id": "E0GBR00IH4",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001042",
     "name": "Private Multi-Asset",
     "fund_id": "F00001D19F",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001NTIX"
   },
   {
     "category_id": "EUCA000793",
     "name": "Property - Direct Europe",
     "fund_id": "F00000ZUFD",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000794",
     "name": "Property - Direct Global",
     "fund_id": "F0GBR0610F",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": "0P00001BWX"
   },
   {
     "category_id": "EUCA000540",
     "name": "Property - Direct Other",
     "fund_id": "F000000GVW",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000795",
     "name": "Property - Direct UK",
     "fund_id": "F000000HGP",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000687",
     "name": "Property - Indirect Asia",
     "fund_id": "F00000YPZI",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000688",
     "name": "Property - Indirect Europe",
     "fund_id": "F00000TPN4",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000847",
     "name": "Property - Indirect Eurozone",
     "fund_id": "F00000Q9UK",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000541",
     "name": "Property - Indirect Global",
     "fund_id": "F00000Y7GB",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000781",
     "name": "Property - Indirect North America",
     "fund_id": "F00001SDYN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001XEF7"
   },
   {
     "category_id": "EUCA000825",
     "name": "Property - Indirect Other",
     "fund_id": "F00000TJ79",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00013722"
   },
   {
     "category_id": "EUCA000716",
     "name": "Property - Indirect South Africa",
     "fund_id": "F00000N9IY",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000826",
     "name": "Property - Indirect Switzerland",
     "fund_id": "F00000MAU2",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000059",
     "name": "Real Estate Equity",
     "fund_id": "F00000IR62",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000798",
     "name": "Relative Value Arbitrage",
     "fund_id": "F000013BGI",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001H0M5"
   },
   {
     "category_id": "EUCA000906",
     "name": "RMB Bond - Onshore",
     "fund_id": "F000010LZT",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001DGHJ"
   },
   {
     "category_id": "INCA000029",
     "name": "Sector - Energy",
     "fund_id": "F00001RVQT",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000030",
     "name": "Sector - Financial Services",
     "fund_id": "F00001TIYL",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000028",
     "name": "Sector - FMCG",
     "fund_id": "F0000289SN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000003",
     "name": "Sector - Healthcare",
     "fund_id": "F00001CRU9",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "INCA000032",
     "name": "Sector - Precious Metals",
     "fund_id": "F00001PZNG",
-    "asset_class": "real_assets"
+    "asset_class": "real_assets",
+    "performance_id": null
   },
   {
     "category_id": "INCA000004",
     "name": "Sector - Technology",
     "fund_id": "F00001CUMR",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "CACA000153",
     "name": "Sector Equity",
     "fund_id": "F0000103OQ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000827",
     "name": "Sector Equity Agriculture",
     "fund_id": "F000002IRE",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000J1C4"
   },
   {
     "category_id": "EUCA000705",
     "name": "Sector Equity Alternative Energy",
     "fund_id": "F0000175DX",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000532",
     "name": "Sector Equity Biotechnology",
     "fund_id": "F0GBR053PF",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000533",
     "name": "Sector Equity Communications",
     "fund_id": "F00001EK01",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000534",
     "name": "Sector Equity Consumer Goods & Services",
     "fund_id": "F00001OUIT",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000706",
     "name": "Sector Equity Ecology",
     "fund_id": "F0000139KC",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001GYAZ"
   },
   {
     "category_id": "EUCA000535",
     "name": "Sector Equity Energy",
     "fund_id": "F00001EK07",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000536",
     "name": "Sector Equity Financial Services",
     "fund_id": "F00000JUN6",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000537",
     "name": "Sector Equity Healthcare",
     "fund_id": "F0GBR05X9Z",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P000019RH"
   },
   {
     "category_id": "JPCA000122",
     "name": "Sector Equity Healthcare",
     "fund_id": "F0000178J3",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000538",
     "name": "Sector Equity Industrial Materials",
     "fund_id": "F00001EK0D",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000707",
     "name": "Sector Equity Infrastructure",
     "fund_id": "F00001P0A3",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001UCDE"
   },
   {
     "category_id": "EUCA000708",
     "name": "Sector Equity Listed Private Equity",
     "fund_id": "F00001TCRD",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000704",
     "name": "Sector Equity Natural Resources",
     "fund_id": "F00001K52X",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000646",
     "name": "Sector Equity Precious Metals",
     "fund_id": "F00001I9P4",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000542",
     "name": "Sector Equity Technology",
     "fund_id": "F00001092A",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000121",
     "name": "Sector Equity Technology",
     "fund_id": "F00001JXBC",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000543",
     "name": "Sector Equity Utilities",
     "fund_id": "F00001EK0J",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000828",
     "name": "Sector Equity Water",
     "fund_id": "F0000173OL",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000603",
     "name": "SEK Bond - Short Term",
     "fund_id": "F00000W83V",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00016KVJ"
   },
   {
     "category_id": "EUCA000905",
     "name": "SEK Corporate Bond",
     "fund_id": "F00000Z4L8",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001B2SC"
   },
   {
     "category_id": "EUCA000600",
     "name": "SEK Diversified Bond",
     "fund_id": "F00000W841",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00016KVP"
   },
   {
     "category_id": "EUCA000745",
     "name": "SEK Flexible Allocation",
     "fund_id": "F00000NMS2",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0000V5CJ"
   },
   {
     "category_id": "EUCA001003",
     "name": "SEK Flexible High Yield Bond",
     "fund_id": "F00000W4ZL",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00016H0O"
   },
   {
     "category_id": "EUCA000898",
     "name": "SEK Moderate Allocation",
     "fund_id": "F00001G6K3",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001R3IU"
   },
   {
     "category_id": "EUCA000602",
     "name": "SEK Ultra Short-Term Bond",
     "fund_id": null,
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000774",
     "name": "SGD Bond",
     "fund_id": "F0HKG070AD",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000544",
     "name": "Singapore Equity",
     "fund_id": "F00001QNKN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001VJ30"
   },
   {
     "category_id": "INCA000054",
     "name": "Small-Cap",
     "fund_id": "F00001T2L0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000715",
     "name": "South Africa Equity",
     "fund_id": "F00000X8TF",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000782",
     "name": "South Africa Small/Mid-Cap Equity",
     "fund_id": "F00001FORF",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000643",
     "name": "Spain Equity",
     "fund_id": "F0GBR06XIN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000545",
     "name": "Sweden Equity",
     "fund_id": "F00000YBPJ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000546",
     "name": "Sweden Small/Mid-Cap Equity",
     "fund_id": "F00000WSTN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000548",
     "name": "Switzerland Equity",
     "fund_id": "F0GBR04BB5",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P00000BIZ"
   },
   {
     "category_id": "EUCA000644",
     "name": "Switzerland Small/Mid-Cap Equity",
     "fund_id": "F0000021YV",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000GD8E"
   },
   {
     "category_id": "EUCA000813",
     "name": "Systematic Trend EUR",
     "fund_id": "F00000Y6D0",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P000197V1"
   },
   {
     "category_id": "EUCA001013",
     "name": "Systematic Trend Other",
     "fund_id": "F000010QI3",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0001DWOV"
   },
   {
     "category_id": "EUCA001012",
     "name": "Systematic Trend USD",
     "fund_id": "F00000NMT2",
-    "asset_class": "alternatives"
+    "asset_class": "alternatives",
+    "performance_id": "0P0000V5DY"
   },
   {
     "category_id": "CACA000148",
     "name": "Tactical Balanced",
     "fund_id": "F000011KPW",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000670",
     "name": "Taiwan Large-Cap Equity",
     "fund_id": "F00001DLY4",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000868",
     "name": "Target Date 2016 - 2020",
     "fund_id": "F00000X4G7",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P00017UWM"
   },
   {
     "category_id": "EUCA000869",
     "name": "Target Date 2021 - 2025",
     "fund_id": "F00001IFCP",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001S2NU"
   },
   {
     "category_id": "EUCA000870",
     "name": "Target Date 2026 - 2030",
     "fund_id": "F00001PVGF",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000871",
     "name": "Target Date 2031 - 2035",
     "fund_id": "F00001PVGG",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000872",
     "name": "Target Date 2036 - 2040",
     "fund_id": "F00001PVGH",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000873",
     "name": "Target Date 2041 - 2045",
     "fund_id": "F00001IFCZ",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001S2O4"
   },
   {
     "category_id": "EUCA000874",
     "name": "Target Date 2046+",
     "fund_id": "F00001IFCN",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001S2NS"
   },
   {
     "category_id": "JPCA000054",
     "name": "Trading - Leveraged/Inverse",
     "fund_id": "F00000P7YR",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000815",
     "name": "Trading - Leveraged/Inverse Commodities",
     "fund_id": "F000015ED8",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000816",
     "name": "Trading - Leveraged/Inverse Equity",
     "fund_id": "F000003WJX",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000817",
     "name": "Trading - Leveraged/Inverse Fixed Income",
     "fund_id": "F00000MG4G",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000818",
     "name": "Trading - Leveraged/Inverse Other",
     "fund_id": "F00001MEQS",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "CACA000179",
     "name": "U.S. Dividend & Income Equity",
     "fund_id": "F00000PRGE",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000846",
     "name": "UK Equity Income",
     "fund_id": null,
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000553",
     "name": "UK Flex-Cap Equity",
     "fund_id": "F00001E0GW",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001P7JT"
   },
   {
     "category_id": "EUCA000550",
     "name": "UK Large-Cap Equity",
     "fund_id": "F000016EL5",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001LL7X"
   },
   {
     "category_id": "EUCA000551",
     "name": "UK Large-Cap Growth Equity",
     "fund_id": null,
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000552",
     "name": "UK Large-Cap Value Equity",
     "fund_id": null,
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000852",
     "name": "UK Mid-Cap Equity",
     "fund_id": "F000015HUQ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000554",
     "name": "UK Small-Cap Equity",
     "fund_id": "F00000P7MT",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0000XNC1"
   },
   {
     "category_id": "AUCA000053",
     "name": "Unconstrained Fixed Income",
     "fund_id": "F00001QE5S",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000030",
     "name": "US Bond",
     "fund_id": "F00001KALH",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000099",
     "name": "US Bond - JPY Hedged",
     "fund_id": "F00001KALG",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "CACA000065",
     "name": "US Equity",
     "fund_id": "F00001TC7F",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000015",
     "name": "US Equity",
     "fund_id": "F00001GGUN",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "MXCA000004",
     "name": "US Equity",
     "fund_id": "F000016PYB",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000084",
     "name": "US Equity - JPY Hedged",
     "fund_id": "F00001HCHD",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001017",
     "name": "US Equity Income",
     "fund_id": "F000026X1T",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0002ECPM"
   },
   {
     "category_id": "EUCA000529",
     "name": "US Flex-Cap Equity",
     "fund_id": "F00001I1VB",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001RZ4K"
   },
   {
     "category_id": "JPCA000103",
     "name": "US High Yield Bond",
     "fund_id": "F00001HUWJ",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000104",
     "name": "US High Yield Bond - JPY Hedged",
     "fund_id": "F00000ZDVZ",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000526",
     "name": "US Large-Cap Blend Equity",
     "fund_id": "F00000Y7GA",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000527",
     "name": "US Large-Cap Growth Equity",
     "fund_id": "F0000146V3",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001IFU6"
   },
   {
     "category_id": "EUCA000528",
     "name": "US Large-Cap Value Equity",
     "fund_id": "F000015X3B",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001KZJF"
   },
   {
     "category_id": "EUCA000853",
     "name": "US Mid-Cap Equity",
     "fund_id": "F00001GQ8L",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001RKZR"
   },
   {
     "category_id": "CACA000067",
     "name": "US Money Market",
     "fund_id": "F00001GOH7",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000085",
     "name": "US REIT",
     "fund_id": "F00001ISX6",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000530",
     "name": "US Small-Cap Equity",
     "fund_id": "F00001DIZY",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": "0P0001OKC6"
   },
   {
     "category_id": "CACA000069",
     "name": "US Small/Mid Cap Equity",
     "fund_id": "F000014JS8",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000693",
     "name": "USD Aggressive Allocation",
     "fund_id": "F000015O6U",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001KO87"
   },
   {
     "category_id": "EUCA000695",
     "name": "USD Cautious Allocation",
     "fund_id": "F00000T1HN",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P00012I63"
   },
   {
     "category_id": "EUCA000691",
     "name": "USD Corporate Bond",
     "fund_id": "F00002555T",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001016",
     "name": "USD Corporate Bond - Short Term",
     "fund_id": "F00001LI60",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001T4C8"
   },
   {
     "category_id": "EUCA000580",
     "name": "USD Diversified Bond",
     "fund_id": "F000013SMO",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0001HV4I"
   },
   {
     "category_id": "EUCA000585",
     "name": "USD Diversified Bond - Short Term",
     "fund_id": "F0GBR053GS",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00000X6N"
   },
   {
     "category_id": "EUCA000746",
     "name": "USD Flexible Allocation",
     "fund_id": "F000010UEX",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001E1JG"
   },
   {
     "category_id": "EUCA000775",
     "name": "USD Flexible Bond",
     "fund_id": "F00000UIMR",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P00014DNC"
   },
   {
     "category_id": "EUCA000582",
     "name": "USD Government Bond",
     "fund_id": "F00000XX1D",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001018",
     "name": "USD Government Bond - Short Term",
     "fund_id": "F000016389",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000583",
     "name": "USD High Yield Bond",
     "fund_id": "F00000O4XB",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": "0P0000VWK4"
   },
   {
     "category_id": "EUCA000767",
     "name": "USD Inflation-Linked Bond",
     "fund_id": "F000014G1X",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000694",
     "name": "USD Moderate Allocation",
     "fund_id": "F00000V558",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": "0P0001544P"
   },
   {
     "category_id": "EUCA000584",
     "name": "USD Money Market",
     "fund_id": "F00000MMS2",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": "0P0000TM6C"
   },
   {
     "category_id": "EUCA000832",
     "name": "USD Money Market - Short Term",
     "fund_id": "F0GBR04BKU",
-    "asset_class": "other"
+    "asset_class": "other",
+    "performance_id": "0P00000BQT"
   },
   {
     "category_id": "EUCA001019",
     "name": "USD Ultra Short-Term Bond",
     "fund_id": "F00001ELIM",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "INCA000056",
     "name": "Value",
     "fund_id": "F00001Q3HY",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001015",
     "name": "Venture Capital",
     "fund_id": "F00001PVJJ",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000829",
     "name": "Vietnam Equity",
     "fund_id": "F00001HUJC",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000013",
     "name": "World Equity",
     "fund_id": "F000014MW0",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000029",
     "name": "World ex-Japan Bond",
     "fund_id": "F0000044EP",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000059",
     "name": "World ex-Japan Bond - JPY Hedged",
     "fund_id": "F00001DVH8",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000014",
     "name": "World ex-Japan Equity",
     "fund_id": "F000026J51",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000088",
     "name": "World ex-Japan Equity - JPY Hedged",
     "fund_id": "F00000ZUHB",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000109",
     "name": "World Hybrid Security",
     "fund_id": "F00001EGDR",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000041",
     "name": "World REIT",
     "fund_id": "F00001EGDS",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000117",
     "name": "World Specialty Equity",
     "fund_id": "F0000289M7",
-    "asset_class": "equity"
+    "asset_class": "equity",
+    "performance_id": null
   },
   {
     "category_id": "JPCA000038",
     "name": "World ST Bond/Money",
     "fund_id": "F00002JWXC",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000719",
     "name": "ZAR Aggressive Allocation",
     "fund_id": "F00001TD8X",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001043",
     "name": "ZAR Aggressive Allocation - Global",
     "fund_id": "F00001UIRG",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000722",
     "name": "ZAR Bond - Short Term",
     "fund_id": "F000015G11",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000717",
     "name": "ZAR Cautious Allocation",
     "fund_id": "F00001TD8U",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000723",
     "name": "ZAR Diversified Bond",
     "fund_id": "F00001GNOF",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001038",
     "name": "ZAR Flexible Allocation - Global",
     "fund_id": "F00001IIK4",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000838",
     "name": "ZAR Flexible Bond",
     "fund_id": "F00001H96P",
-    "asset_class": "bond"
+    "asset_class": "bond",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000718",
     "name": "ZAR Moderate Allocation",
     "fund_id": "F00001TD8V",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA001037",
     "name": "ZAR Moderate Allocation - Global",
     "fund_id": "F00001N5XH",
-    "asset_class": "mixed"
+    "asset_class": "mixed",
+    "performance_id": null
   },
   {
     "category_id": "EUCA000725",
     "name": "ZAR Money Market",
     "fund_id": "F00002KCPP",
-    "asset_class": "capital_preservation"
+    "asset_class": "capital_preservation",
+    "performance_id": null
   }
 ]

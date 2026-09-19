@@ -77,6 +77,7 @@ class Category(SQLModel, table=True):
     category_id: str = Field(primary_key=True, max_length=32)
     name: str = Field(index=True)
     fund_id: str | None = Field(default=None, index=True)
+    performance_id: str | None = Field(default=None, index=True)
     asset_class: str | None = Field(default=None, index=True)
 
 

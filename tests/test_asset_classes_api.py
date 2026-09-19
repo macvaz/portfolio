@@ -99,6 +99,7 @@ def test_ranking_endpoint_returns_multi_horizon_columns(tmp_path, monkeypatch):
                 category_id="TESTEQ1",
                 name="Test Equity A",
                 fund_id="F00000AAAA",
+                performance_id="0P0000AAAA",
                 asset_class="equity",
             )
         )
@@ -107,6 +108,7 @@ def test_ranking_endpoint_returns_multi_horizon_columns(tmp_path, monkeypatch):
                 category_id="TESTBD1",
                 name="Test Bond A",
                 fund_id="F00000CCCC",
+                performance_id="0P0000CCCC",
                 asset_class="bond",
             )
         )
@@ -136,6 +138,8 @@ def test_ranking_endpoint_returns_multi_horizon_columns(tmp_path, monkeypatch):
     assert body["as_of"] == "2026-09-15"
     assert len(body["categories"]) == 2
     assert body["categories"][0]["name"] == "Test Equity A"
+    assert body["categories"][0]["fund_id"] == "F00000AAAA"
+    assert body["categories"][0]["performance_id"] == "0P0000AAAA"
     returns = body["categories"][0]["returns"]
     assert abs(returns["intramonth"] - 2.0) < 1e-6
     assert abs(returns["1m"] - 10.0) < 1e-9
