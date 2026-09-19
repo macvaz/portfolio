@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from datetime import date
 
@@ -5,6 +6,8 @@ import pandas as pd
 
 from portfolio.common.atomic_io import atomic_to_csv
 from portfolio.datasource.morningstar import download_navs
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_FUNDS_DIR = Path("data/funds")
 
@@ -76,6 +79,7 @@ def delete_fund_nav_csv(isin: str, funds_dir: Path | None = None) -> bool:
     path = fund_nav_path(isin, funds_dir)
     if not path.exists():
         return False
+    logger.warning("Deleting fund NAV CSV %s", path.resolve())
     path.unlink()
     return True
 

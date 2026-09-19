@@ -42,9 +42,11 @@ portfolio/
 │   │   ├── api.py                  # FastAPI app shell
 │   │   └── services/
 │   │       ├── management/         # Funds, positions, curve, metrics
-│   │       ├── risk/               # QuantStats risk reports + cache
+│   │       ├── risk/               # Risk report HTTP routes
 │   │       ├── macro/              # Macro health series + history
 │   │       └── categories/         # Category ranking API
+│   ├── risk/                       # Shared risk reports (api + batch)
+│   │   └── report.py               # User tearsheets + cache warm
 │   ├── common/                     # Shared pure helpers (no api/batch/storage imports)
 │   │   ├── navs.py                 # NAV CSV I/O + single-fund download
 │   │   ├── series.py               # FRED macro series CSV I/O
@@ -52,6 +54,9 @@ portfolio/
 │   │   ├── market.py               # Shared SP500-aligned market frame + indicators
 │   │   ├── equity.py               # Buy-and-hold / constant-weight / benchmark returns
 │   │   ├── metrics.py              # Metric computation only
+│   │   ├── risk_report.py          # Tearsheet from positions (no DB)
+│   │   ├── risk_report_cache.py    # Filesystem HTML cache
+│   │   ├── quantstats_report.py    # QuantStats HTML generation
 │   │   ├── macro_constants.py      # Macro / series column names
 │   │   └── health_check_descriptions.py  # Fixture load + threshold helpers
 │   ├── datasource/                # External vendors (no DB)
@@ -74,19 +79,20 @@ portfolio/
 Package dependencies flow **inward** toward shared code. Arrows mean “imports / depends on”:
 
 ```
-datasource   ←  common  ←  batch
-                 ↑          ↑
-                api      storage
+datasource   ←  common  ←  risk  ←  batch
+                 ↑          ↑        ↑
+                api      storage ----+
                  ↑__________/
 ```
 
 Rules:
 
 - **`datasource/`** — vendor HTTP clients only (FRED, Morningstar). No DB, no `api`/`batch`/`storage` imports.
-- **`common/`** — pure helpers and CSV I/O. May use `datasource`. Must **not** import `api`, `batch`, or `storage`.
-- **`storage/`** — SQLModel models (schema 1.0), SQLite access, and fixture sync for health-check, fund, and category catalogs. Shared by `api` and `batch`. Must **not** import `api` or `batch`.
-- **`batch/`** — offline pipeline (download macro series, NAVs, refresh metrics, category averages, store health checks). May use `common`, `datasource`, and `storage`. Must **not** import `api`.
-- **`api/`** — FastAPI app and HTTP services. May use `common`, `datasource`, and `storage`. Must **not** import `batch`.
+- **`common/`** — pure helpers and CSV I/O. May use `datasource`. Must **not** import `api`, `batch`, `risk`, or `storage`.
+- **`storage/`** — SQLModel models (schema 1.0), SQLite access, and fixture sync for health-check, fund, and category catalogs. Shared by `api`, `batch`, and `risk`. Must **not** import `api`, `batch`, or `risk`.
+- **`risk/`** — QuantStats user reports and cache warm. May use `common` and `storage`. Must **not** import `api` or `batch`.
+- **`batch/`** — offline pipeline (download macro series, NAVs, refresh metrics, category averages, store health checks). May use `common`, `datasource`, `storage`, and `risk`. Must **not** import `api`.
+- **`api/`** — FastAPI app and HTTP services. May use `common`, `datasource`, `storage`, and `risk`. Must **not** import `batch`.
 
 
 The CLI entrypoint is `batch.py` / `bin/batch.sh`; they call into `portfolio.batch`.

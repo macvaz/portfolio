@@ -29,11 +29,11 @@ from portfolio.api.services.management.schemas import (
     normalize_portfolio_positions,
     require_portfolio,
 )
-from portfolio.api.services.risk.risk_report import warm_user_risk_report_cache
-from portfolio.api.services.risk.risk_report_cache import (
+from portfolio.common.risk_report_cache import (
     invalidate_all_risk_reports,
     invalidate_portfolio_risk_reports,
 )
+from portfolio.risk.report import warm_user_risk_report_cache
 from portfolio.datasource.morningstar import (
     morningstar_quote_url,
     parse_morningstar_search,

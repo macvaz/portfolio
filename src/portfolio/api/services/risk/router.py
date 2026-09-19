@@ -8,11 +8,9 @@ from portfolio.api.services.management.schemas import (
     require_portfolio,
     validate_positions,
 )
-from portfolio.api.services.risk.risk_report import (
-    build_risk_report_html,
-    build_user_risk_report_html,
-)
-from portfolio.api.services.risk.risk_report_cache import write_cached_risk_report
+from portfolio.common.risk_report import build_risk_report_html
+from portfolio.common.risk_report_cache import write_cached_risk_report
+from portfolio.risk.report import build_user_risk_report_html
 from portfolio.api.services.risk.schemas import RiskReportRequest
 from portfolio.storage.database import save_user_portfolio
 
