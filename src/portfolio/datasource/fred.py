@@ -31,7 +31,10 @@ def _fred_http_error_detail(exc: HTTPError, body: bytes) -> str:
 
 def _fetch_fred_data(self: Fred, url: str):
     """Like fredapi.Fred.__fetch_data, but keep HTTP status/body on failure."""
-    url += "&api_key=" + self.api_key
+    api_key = getattr(self, "api_key", None)
+    if not isinstance(api_key, str) or not api_key:
+        raise ValueError("FRED api_key is missing")
+    url += "&api_key=" + api_key
     try:
         response = urlopen(url)
         return ET.fromstring(response.read())
@@ -50,7 +53,7 @@ def _format_fred_exception(exc: BaseException) -> str:
 def init_client(api_key: str) -> Fred:
     client = Fred(api_key=api_key)
     # fredapi uses __fetch_data (name-mangled); replace so errors keep HTTP detail.
-    client._Fred__fetch_data = types.MethodType(_fetch_fred_data, client)
+    setattr(client, "_Fred__fetch_data", types.MethodType(_fetch_fred_data, client))
     return client
 
 

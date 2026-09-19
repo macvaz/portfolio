@@ -13,7 +13,9 @@ from portfolio.storage.database import (
 
 def _create_user(db_path, name: str = "Growth") -> int:
     init_db(db_path)
-    return create_user(name, db_path=db_path).id
+    user = create_user(name, db_path=db_path)
+    assert user.id is not None
+    return user.id
 
 
 def test_list_and_delete_funds(tmp_path, monkeypatch, empty_fund_catalog):
@@ -362,7 +364,9 @@ def test_create_fund_downloads_nav_to_data(tmp_path, monkeypatch, empty_fund_cat
     assert nav_path.read_text(encoding="utf-8").startswith("date,nav\n")
     metrics = get_fund_metrics("ES0182527038", db_path)
     assert metrics["pct_1w"] == 1.0
-    assert get_fund("ES0182527038", db_path)["ter"] == 0.42
+    fund = get_fund("ES0182527038", db_path)
+    assert fund is not None
+    assert fund["ter"] == 0.42
 
 
 def test_curve_endpoint_returns_real_equity_curve(tmp_path, monkeypatch):

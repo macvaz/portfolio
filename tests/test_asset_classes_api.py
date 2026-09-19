@@ -45,8 +45,10 @@ def test_category_period_returns_splits_intramonth_and_windows():
     ]
     returns = category_period_returns(points)
     assert returns["intramonth"] == 2.0
-    assert abs(returns["1m"] - 10.0) < 1e-9
-    assert abs(returns["2m"] - 21.0) < 1e-9
+    one_m = returns["1m"]
+    two_m = returns["2m"]
+    assert one_m is not None and abs(one_m - 10.0) < 1e-9
+    assert two_m is not None and abs(two_m - 21.0) < 1e-9
     assert returns["3m"] is None
     assert returns["2y"] is None
     assert returns["10y"] is None
@@ -83,7 +85,8 @@ def test_category_period_returns_multi_year_windows():
         )
     returns = category_period_returns(points)
     expected_2y = ((1.01**24) - 1.0) * 100.0
-    assert abs(returns["2y"] - expected_2y) < 1e-9
+    two_y = returns["2y"]
+    assert two_y is not None and abs(two_y - expected_2y) < 1e-9
     assert returns["3y"] is None
 
 

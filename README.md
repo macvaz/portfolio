@@ -340,10 +340,18 @@ FRED_API_KEY=your_key_here
 MS_BEARER_TOKEN_PATH=/tmp/morningstar.token
 ```
 
-## Tests
+## Tests and checks
+
+Dev tools (`pytest`, `ruff`, `ty`) come from the `dev` dependency group:
 
 ```bash
-uv run pytest -q
+uv sync --group dev
+```
+
+```bash
+uv run pytest -q          # unit / API tests
+uv run ruff check .       # lint
+uv run ty check           # static types (src + tests)
 ```
 
 Isolation tests that expect a blank fund catalog use the `empty_fund_catalog` fixture in `tests/conftest.py` so `init_db()` does not seed production funds from `data/fixtures/fund.json`.
@@ -357,3 +365,4 @@ Isolation tests that expect a blank fund catalog use the `empty_fund_catalog` fi
 - quantstats — HTML performance reports
 - fastapi / uvicorn — REST API and web UI
 - Chart.js — equity curve in the browser
+- ruff — lint; ty — type checker (Astral)

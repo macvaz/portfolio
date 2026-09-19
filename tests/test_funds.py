@@ -47,6 +47,7 @@ def test_init_db_merges_fixture_over_existing_funds(tmp_path):
         row for row in load_fund_fixture() if row["isin"] == "ES0182527038"
     )
     fund = get_fund("ES0182527038", db_path)
+    assert fund is not None
     assert fund["name"] == fixture_row["name"]
     assert fund["security_id"] == fixture_row["fund_id"]
     assert len(list_funds(db_path)) == len(load_fund_fixture())

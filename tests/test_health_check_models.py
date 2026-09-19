@@ -44,6 +44,8 @@ def test_health_check_description_and_check_persist(tmp_path):
         description = session.get(MacroHealthCheckDescription, "Breakeven_Inflation")
         check = session.exec(select(MacroHealthCheck)).first()
 
+    assert description is not None
+    assert check is not None
     assert description.operator == "gte"
     assert description.threshold == 2.5
     assert check.code == "Breakeven_Inflation"

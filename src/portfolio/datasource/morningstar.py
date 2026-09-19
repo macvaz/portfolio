@@ -13,6 +13,8 @@ import json
 import pandas as pd
 import requests
 
+from typing import Any, cast
+
 from portfolio.datasource.errors import DownloadError
 
 MORNINGSTAR_QUOTE_URL = "https://global.morningstar.com/es/inversiones/{universe}/{performance_id}/cotizacion"
@@ -102,14 +104,23 @@ def _extract_records(data: object) -> list[dict[str, float | int]]:
         )
     if not data:
         raise DownloadError("Morningstar response contained no price rows")
+    records: list[dict[str, float | int]] = []
     try:
-        return [
-            {"timestamp": int(timestamp), "value": value} for timestamp, value in data
-        ]
+        for row in data:
+            if not isinstance(row, (list, tuple)) or len(row) != 2:
+                raise TypeError("row is not a pair")
+            timestamp, value = row[0], row[1]
+            records.append(
+                {
+                    "timestamp": int(cast(Any, timestamp)),
+                    "value": cast(Any, value),
+                }
+            )
     except (TypeError, ValueError) as exc:
         raise DownloadError(
             "Morningstar response rows are not [timestamp, value] pairs"
         ) from exc
+    return records
 
 
 def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:

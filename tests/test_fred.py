@@ -1,9 +1,12 @@
 from io import BytesIO
+from typing import cast
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError
+from email.message import Message
 
 import pandas as pd
 import pytest
+from fredapi import Fred
 
 from portfolio.datasource.errors import DownloadError
 from portfolio.datasource.fred import (
@@ -15,8 +18,9 @@ from portfolio.datasource.fred import (
 
 def test_download_fred_data_rejects_deprecated_sp500():
     with pytest.raises(ValueError, match="SP500.*deprecated"):
-        download_fred_data(None, "SP500", "SP500", "2000-01-01", "2024-01-01")
-
+        download_fred_data(
+            cast(Fred, None), "SP500", "SP500", "2000-01-01", "2024-01-01"
+        )
 
 def test_download_fred_data_raises_on_client_error():
     client = MagicMock()
@@ -51,7 +55,11 @@ def test_download_fred_data_avoids_masked_none_message():
 def test_fred_http_error_detail_includes_status_when_message_missing():
     body = b'<error code="429"></error>'
     exc = HTTPError(
-        "https://api.stlouisfed.org/fred", 429, "Too Many Requests", hdrs=None, fp=None
+        "https://api.stlouisfed.org/fred",
+        429,
+        "Too Many Requests",
+        hdrs=Message(),
+        fp=None,
     )
     detail = _fred_http_error_detail(exc, body)
     assert "HTTP 429" in detail
@@ -65,11 +73,10 @@ def test_init_client_fetch_preserves_http_detail():
         "https://api.stlouisfed.org/fred",
         429,
         "Too Many Requests",
-        hdrs=None,
+        hdrs=Message(),
         fp=BytesIO(body),
     )
+    fetch = getattr(client, "_Fred__fetch_data")
     with patch("portfolio.datasource.fred.urlopen", side_effect=http_exc):
         with pytest.raises(ValueError, match="HTTP 429.*Rate limit exceeded"):
-            client._Fred__fetch_data(
-                "https://api.stlouisfed.org/fred/series?series_id=DFII10"
-            )
+            fetch("https://api.stlouisfed.org/fred/series?series_id=DFII10")

@@ -38,7 +38,9 @@ def _seed(tmp_path, monkeypatch):
     )
     save_fund_nav_csv("ES0182527038", df, funds_dir=funds_dir)
     save_fund_nav_csv("IE00BYX5MX67", df, funds_dir=funds_dir)
-    user_id = create_user("Growth", db_path=db_path).id
+    user = create_user("Growth", db_path=db_path)
+    assert user.id is not None
+    user_id = user.id
     positions = [{"isin": "ES0182527038", "weighted_assets": 1.0}]
     save_user_portfolio(user_id, positions, db_path=db_path)
     return db_path, funds_dir, reports_dir, user_id, positions

@@ -4,7 +4,7 @@ import html
 from pathlib import Path
 
 from sqlalchemy import event, func, text
-from sqlmodel import Session, SQLModel, create_engine, delete, select
+from sqlmodel import Session, SQLModel, col, create_engine, delete, select
 
 from portfolio.storage.models import (
     Category,
@@ -153,6 +153,8 @@ def create_user(name: str, db_path: Path | None = None) -> User:
         session.add(user)
         session.commit()
         session.refresh(user)
+        if user.id is None:
+            raise RuntimeError("failed to assign user id")
         return user
 
 
@@ -163,7 +165,7 @@ def get_user(user_id: int, db_path: Path | None = None) -> User | None:
 
 def list_users(db_path: Path | None = None) -> list[dict]:
     with get_session(db_path) as session:
-        users = session.exec(select(User).order_by(User.name)).all()
+        users = session.exec(select(User).order_by(col(User.name))).all()
     return [
         {"id": user.id, "name": user.name, "is_default": user.is_default}
         for user in users
@@ -175,7 +177,7 @@ def delete_user(user_id: int, db_path: Path | None = None) -> bool:
         user = session.get(User, user_id)
         if user is None:
             return False
-        session.exec(delete(Portfolio).where(Portfolio.user_id == user_id))
+        session.exec(delete(Portfolio).where(col(Portfolio.user_id) == user_id))
         session.delete(user)
         session.commit()
         return True
@@ -430,7 +432,7 @@ def delete_fund(isin: str, db_path: Path | None = None) -> bool:
         fund = session.get(Fund, isin)
         if fund is None:
             return False
-        session.exec(delete(Portfolio).where(Portfolio.isin == isin))
+        session.exec(delete(Portfolio).where(col(Portfolio.isin) == isin))
         metric = session.get(Metric, isin)
         if metric is not None:
             session.delete(metric)
@@ -443,9 +445,9 @@ def list_user_portfolio(user_id: int, db_path: Path | None = None) -> list[dict]
     with get_session(db_path) as session:
         rows = session.exec(
             select(Portfolio, Fund)
-            .join(Fund, Portfolio.isin == Fund.isin)
-            .where(Portfolio.user_id == user_id)
-            .order_by(Fund.name)
+            .join(Fund, col(Portfolio.isin) == col(Fund.isin))
+            .where(col(Portfolio.user_id) == user_id)
+            .order_by(col(Fund.name))
         ).all()
     return [
         {
@@ -562,8 +564,8 @@ def list_category_monthly_data(
     with get_session(db_path) as session:
         rows = session.exec(
             select(CategoryMonthlyData)
-            .where(CategoryMonthlyData.category_id == category_id)
-            .order_by(CategoryMonthlyData.date)
+            .where(col(CategoryMonthlyData.category_id) == category_id)
+            .order_by(col(CategoryMonthlyData.date))
         ).all()
     return [
         {
@@ -581,7 +583,7 @@ def save_user_portfolio(
     user_id: int, positions: list[dict[str, float | str]], db_path: Path | None = None
 ) -> list[dict]:
     with get_session(db_path) as session:
-        session.exec(delete(Portfolio).where(Portfolio.user_id == user_id))
+        session.exec(delete(Portfolio).where(col(Portfolio.user_id) == user_id))
         for position in positions:
             session.add(
                 Portfolio(

@@ -123,9 +123,9 @@ def _column_payload(
     }
 
 
-def _macro_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
+def _macro_history_columns(fixture: list[dict]) -> list[dict]:
     fixture_by_code = {str(row["code"]): row for row in fixture}
-    columns: list[dict[str, str]] = []
+    columns: list[dict] = []
     for code in MACRO_HISTORY_COLUMN_ORDER:
         row = fixture_by_code.get(code)
         if row is None:
@@ -147,19 +147,31 @@ def _macro_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
                     code=code,
                     description=str(row["description"]),
                     series_start=row.get("series_start"),
-                    series_id=row.get("series_id"),
-                    source=row.get("source"),
-                    threshold=row.get("threshold"),
-                    operator=row.get("operator"),
+                    series_id=(
+                        None
+                        if row.get("series_id") is None
+                        else str(row["series_id"])
+                    ),
+                    source=(
+                        None if row.get("source") is None else str(row["source"])
+                    ),
+                    threshold=(
+                        None
+                        if row.get("threshold") is None
+                        else float(row["threshold"])
+                    ),
+                    operator=(
+                        None if row.get("operator") is None else str(row["operator"])
+                    ),
                     domain=row.get("domain"),
                 )
             )
     return columns
 
 
-def _context_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
+def _context_history_columns(fixture: list[dict]) -> list[dict]:
     fixture_by_code = {str(row["code"]): row for row in fixture}
-    columns: list[dict[str, str]] = []
+    columns: list[dict] = []
     for code in CONTEXT_HISTORY_COLUMN_ORDER:
         row = fixture_by_code.get(code)
         if row is None or not is_context_role(row):
@@ -169,10 +181,16 @@ def _context_history_columns(fixture: list[dict]) -> list[dict[str, str]]:
                 code=code,
                 description=str(row["description"]),
                 series_start=row.get("series_start"),
-                series_id=row.get("series_id"),
-                source=row.get("source"),
-                threshold=row.get("threshold"),
-                operator=row.get("operator"),
+                series_id=(
+                    None if row.get("series_id") is None else str(row["series_id"])
+                ),
+                source=None if row.get("source") is None else str(row["source"]),
+                threshold=(
+                    None if row.get("threshold") is None else float(row["threshold"])
+                ),
+                operator=(
+                    None if row.get("operator") is None else str(row["operator"])
+                ),
                 domain=row.get("domain"),
             )
         )
@@ -191,10 +209,12 @@ def _month_cell_value(
     if raw is None or pd.isna(raw):
         return {"value": None, "active": None}
     value = float(raw)
+    threshold = description.get("threshold")
+    operator = description.get("operator")
     active = is_health_check_active(
         value,
-        description.get("threshold"),
-        description.get("operator"),
+        None if threshold is None else float(threshold),
+        None if operator is None else str(operator),
     )
     return {"value": value, "active": active}
 
@@ -214,7 +234,9 @@ def build_monthly_macro_history(
             "rows": [],
         }
 
-    descriptions_by_code = {str(row["code"]): row for row in fixture}
+    descriptions_by_code: dict[str, dict] = {
+        str(row["code"]): row for row in fixture
+    }
     for code, meta in HISTORY_DISPLAY_ONLY_COLUMNS.items():
         descriptions_by_code[code] = {
             "threshold": None,
@@ -222,16 +244,25 @@ def build_monthly_macro_history(
             "series_start": meta.get("series_start"),
         }
     monthly = market_df.resample("ME").last()
-    month_ends = _history_month_ends(monthly.index.max())
+    last_index = monthly.index.max()
+    if not isinstance(last_index, pd.Timestamp) or pd.isna(last_index):
+        return {
+            "columns": columns,
+            "context_columns": context_columns,
+            "rows": [],
+        }
+    month_ends = _history_month_ends(last_index)
     rows: list[dict] = []
 
     for timestamp in reversed(month_ends):
         row = monthly.loc[timestamp] if timestamp in monthly.index else None
+        if row is not None and not isinstance(row, pd.Series):
+            row = None
         values = [
             _month_cell_value(
                 row,
-                column["code"],
-                descriptions_by_code[column["code"]],
+                str(column["code"]),
+                descriptions_by_code[str(column["code"])],
                 timestamp,
             )
             for column in columns
@@ -239,8 +270,8 @@ def build_monthly_macro_history(
         context_values = [
             _month_cell_value(
                 row,
-                column["code"],
-                descriptions_by_code[column["code"]],
+                str(column["code"]),
+                descriptions_by_code[str(column["code"])],
                 timestamp,
             )
             for column in context_columns

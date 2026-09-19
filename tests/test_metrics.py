@@ -113,9 +113,10 @@ def test_portfolio_pct_6m_is_weight_average_of_fund_returns(tmp_path):
     metrics = compute_portfolio_metrics(positions, funds_dir=funds_dir)
     fund_a = compute_fund_metrics("AAA", funds_dir=funds_dir)
     fund_b = compute_fund_metrics("BBB", funds_dir=funds_dir)
+    assert fund_a["pct_6m"] is not None and fund_b["pct_6m"] is not None
+    assert fund_a["pct_1m"] is not None and fund_b["pct_1m"] is not None
     expected_6m = round(0.5 * fund_a["pct_6m"] + 0.5 * fund_b["pct_6m"], 2)
 
-    assert fund_a["pct_6m"] is not None and fund_b["pct_6m"] is not None
     assert metrics["pct_6m"] == expected_6m
     assert metrics["pct_1m"] == round(
         0.5 * fund_a["pct_1m"] + 0.5 * fund_b["pct_1m"], 2

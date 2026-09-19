@@ -2,6 +2,7 @@
 
 from datetime import date
 from pathlib import Path
+from typing import Any, cast
 
 import pandas as pd
 import quantstats as qs
@@ -48,6 +49,19 @@ def _round_metric(value: float | None) -> float | None:
     if value is None or pd.isna(value):
         return None
     return round(float(value), 2)
+
+
+def _as_float(value: object) -> float:
+    """Coerce quantstats / pandas scalars that ty types too loosely."""
+    return float(cast(Any, value))
+
+
+def _window_frame(frame: pd.DataFrame, days: int) -> pd.DataFrame:
+    if frame.empty:
+        return frame
+    if len(frame) >= days:
+        return frame.iloc[-days:]
+    return frame
 
 
 def load_fund_daily_returns(
@@ -125,17 +139,17 @@ def compute_metrics(
             periods=TRADING_DAYS_PER_YEAR,
             prepare_returns=False,
         )
-        metrics["vol_1y"] = _round_metric(float(vol) * 100)
+        metrics["vol_1y"] = _round_metric(_as_float(vol) * 100)
 
     window_6m = _window_returns(fund_returns, WINDOW_DAYS["6m"])
     if len(window_6m) >= 2:
         metrics["sr_6m"] = _round_metric(
-            float(qs.stats.sharpe(window_6m, periods=TRADING_DAYS_PER_YEAR))
+            _as_float(qs.stats.sharpe(window_6m, periods=TRADING_DAYS_PER_YEAR))
         )
 
     if len(window_1y) >= 2:
         metrics["sr_1y"] = _round_metric(
-            float(qs.stats.sharpe(window_1y, periods=TRADING_DAYS_PER_YEAR))
+            _as_float(qs.stats.sharpe(window_1y, periods=TRADING_DAYS_PER_YEAR))
         )
 
     if benchmark_returns is not None and not benchmark_returns.empty:
@@ -145,8 +159,8 @@ def compute_metrics(
         )
         if fund_6m is not None and len(fund_6m) >= 2 and benchmark_6m is not None:
             greeks = qs.stats.greeks(fund_6m, benchmark_6m, prepare_returns=False)
-            metrics["beta_6m"] = _round_metric(float(greeks["beta"]))
-            metrics["cor_6m"] = _round_metric(float(fund_6m.corr(benchmark_6m)))
+            metrics["beta_6m"] = _round_metric(_as_float(greeks["beta"]))
+            metrics["cor_6m"] = _round_metric(_as_float(fund_6m.corr(benchmark_6m)))
 
     return metrics
 
@@ -370,7 +384,7 @@ def compute_portfolio_correlation_matrix(
     if returns_df.shape[1] < 2 or len(returns_df) < 2:
         return None
 
-    returns_df = _window_returns(returns_df, window_days)
+    returns_df = _window_frame(returns_df, window_days)
     if len(returns_df) < 2:
         return None
 
@@ -383,9 +397,9 @@ def compute_portfolio_correlation_matrix(
     ordered_labels = [
         label_by_isin[isin] for isin in returns_df.columns if isin in label_by_isin
     ]
-    corr = returns_df.corr()
+    corr = returns_df.corr(numeric_only=True)
     matrix = [
-        [_round_metric(float(corr.iloc[i, j])) for j in range(len(corr.columns))]
+        [_round_metric(_as_float(corr.iloc[i, j])) for j in range(len(corr.columns))]
         for i in range(len(corr.columns))
     ]
 

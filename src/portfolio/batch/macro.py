@@ -110,7 +110,11 @@ def log_current_macro_health(df: pd.DataFrame):
         value = float(row[code])
         threshold = entry.get("threshold")
         operator = entry.get("operator")
-        active = is_health_check_active(value, threshold, operator)
+        active = is_health_check_active(
+            value,
+            None if threshold is None else float(threshold),
+            None if operator is None else str(operator),
+        )
         role = entry.get("role") or HEALTH_CHECK_ROLE
         if active is None:
             logger.info("%s: %.2f (%s)", code, value, role)

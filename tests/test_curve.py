@@ -130,6 +130,7 @@ def test_curve_matches_compounded_portfolio_returns(tmp_path):
     positions = [{"isin": "ES0182527038", "weighted_assets": 1.0}]
 
     portfolio_returns = build_portfolio_daily_returns(positions, funds_dir=funds_dir)
+    assert portfolio_returns is not None
     labels, portfolio_curve = returns_to_cumulative_curve(portfolio_returns)
     curve = build_equity_curve(positions, funds_dir=funds_dir)
 

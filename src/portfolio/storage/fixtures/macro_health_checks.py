@@ -3,7 +3,7 @@
 import datetime
 from pathlib import Path
 
-from sqlmodel import delete, select
+from sqlmodel import col, delete, select
 
 from portfolio.storage.models import MacroHealthCheck, MacroHealthCheckDescription
 from portfolio.common.health_check_descriptions import (
@@ -59,7 +59,9 @@ def sync_health_check_catalog_from_fixture(
         if description.code in fixture_codes:
             continue
         session.exec(
-            delete(MacroHealthCheck).where(MacroHealthCheck.code == description.code)
+            delete(MacroHealthCheck).where(
+                col(MacroHealthCheck.code) == description.code
+            )
         )
         session.delete(description)
     seed_health_check_descriptions(session, fixture_path)

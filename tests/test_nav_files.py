@@ -60,6 +60,8 @@ def test_latest_nav_as_of_uses_newest_fund_date(tmp_path):
         funds_dir=funds_dir,
     )
 
-    assert latest_fund_nav_date("AAA", funds_dir).isoformat() == "2024-01-10"
-    assert latest_nav_as_of(["AAA", "BBB"], funds_dir).isoformat() == "2024-01-15"
+    as_of_aaa = latest_fund_nav_date("AAA", funds_dir)
+    as_of_both = latest_nav_as_of(["AAA", "BBB"], funds_dir)
+    assert as_of_aaa is not None and as_of_aaa.isoformat() == "2024-01-10"
+    assert as_of_both is not None and as_of_both.isoformat() == "2024-01-15"
     assert latest_nav_as_of(["MISSING"], funds_dir) is None

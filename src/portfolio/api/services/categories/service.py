@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, col
 
 from portfolio.storage.models import Category, CategoryMonthlyData
 
@@ -88,9 +88,12 @@ def fetch_top_categories(session: Session, *, limit: int | None = None) -> dict:
     """Rank categories with multi-horizon monthly return columns."""
     rows = session.exec(
         select(CategoryMonthlyData, Category)
-        .join(Category, Category.category_id == CategoryMonthlyData.category_id)
-        .where(CategoryMonthlyData.return_pct.is_not(None))
-        .order_by(CategoryMonthlyData.category_id, CategoryMonthlyData.date)
+        .join(
+            Category,
+            col(Category.category_id) == col(CategoryMonthlyData.category_id),
+        )
+        .where(col(CategoryMonthlyData.return_pct).is_not(None))
+        .order_by(col(CategoryMonthlyData.category_id), col(CategoryMonthlyData.date))
     ).all()
 
     by_category: dict[str, list[CategoryMonthlyData]] = defaultdict(list)

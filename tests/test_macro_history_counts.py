@@ -1,10 +1,11 @@
 import pandas as pd
+from typing import cast
 
 from portfolio.api.services.macro.history import _count_monthly_actives
 
 
 def test_count_monthly_actives_uses_series_start_for_eligible_total():
-    timestamp = pd.Timestamp("2003-06-30")
+    timestamp = cast("pd.Timestamp", pd.Timestamp("2003-06-30"))
     columns = [
         {"code": "Unemployment_Rate"},
         {"code": "Real_Interest_Rates"},

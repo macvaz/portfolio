@@ -14,6 +14,7 @@ def test_save_user_portfolio_persists_positions(tmp_path, empty_fund_catalog):
     db_path = tmp_path / "portfolio.db"
     init_db(db_path)
     user = create_user("Growth", db_path)
+    assert user.id is not None
 
     save_fund("ES0182527038", "Test Fund", "F0GBR04KHC", db_path=db_path)
     save_fund("IE00BYX5NX33", "World Fund", "F00001019E", db_path=db_path)
@@ -55,9 +56,11 @@ def test_list_users_includes_default_flag(tmp_path):
     init_db(db_path)
     miguel = create_user("Miguel_Agresiva", db_path)
     other = create_user("Other", db_path)
+    assert miguel.id is not None and other.id is not None
 
     with get_session(db_path) as session:
         miguel_user = session.get(User, miguel.id)
+        assert miguel_user is not None
         miguel_user.is_default = True
         session.add(miguel_user)
         session.commit()
