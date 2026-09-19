@@ -2883,7 +2883,7 @@ body.is-allocation-open {
 
 .table-scroll--ranking {
   --delete-tooltip-gutter: 0;
-  max-height: calc(100vh - 9.5rem);
+  max-height: calc(100vh - 7rem);
   overflow-x: auto;
   overflow-y: auto;
   scrollbar-width: none;
@@ -2899,6 +2899,14 @@ body.is-allocation-open {
   top: 0;
   z-index: 3;
   background: #fcf9eb;
+}
+
+#asset-classes-panel .table-panel {
+  margin-bottom: 0;
+}
+
+body:has(#asset-classes-panel:not([hidden])) main {
+  padding-bottom: 0.5rem;
 }
 
 .table-title--ranking {
