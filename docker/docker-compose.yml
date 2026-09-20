@@ -25,6 +25,7 @@ services:
       - ../.env
     environment:
       MS_BEARER_TOKEN_PATH: ${MS_BEARER_TOKEN_PATH:-/tmp/morningstar.token}
+      TZ: ${TZ:-Europe/Madrid}
 
   batch:
     build:
@@ -36,6 +37,7 @@ services:
       - ../.env
     environment:
       MS_BEARER_TOKEN_PATH: ${MS_BEARER_TOKEN_PATH:-/tmp/morningstar.token}
+      TZ: ${TZ:-Europe/Madrid}
     profiles:
       - batch
     restart: "no"

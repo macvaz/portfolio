@@ -28,7 +28,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
     MPLCONFIGDIR="/tmp/matplotlib"
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libgomp1 \
+    && apt-get install -y --no-install-recommends libgomp1 tzdata \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p data \
     && chmod +x /app/docker/entrypoint.sh
